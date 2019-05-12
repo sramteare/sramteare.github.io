@@ -14,6 +14,14 @@ body {
     background-image: url(/images/tree_1218x864.jpg);
   }
 }
+
+/** content styling */
+@media screen and (max-width: 375px) {
+  footer {
+    letter-spacing: 4px;
+  }
+}
+
 @media screen and (max-width: 320px) {
   /* small screen mobile devices */
   body {
@@ -23,13 +31,6 @@ body {
   /** content styling */
   footer {
     letter-spacing: unset;
-  }
-}
-
-/** content styling */
-@media screen and (max-width: 375px) {
-  footer {
-    letter-spacing: 4px;
   }
 }
 
