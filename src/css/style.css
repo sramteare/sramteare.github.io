@@ -1,18 +1,28 @@
+body {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
 @media screen and (min-width: 737px) {
   body {
-    background: url(/images/tree_1920x1081.jpg) no-repeat fixed center;
+    background-image: url(/images/tree_1218x864.jpg);
   }
 }
 @media screen and (max-width: 736px) and (min-width: 321px) {
   /* mobile devices */
   body {
-    background: url(/images/tree_1218x864.jpg) no-repeat center center fixed;
+    background-image: url(/images/tree_1218x864.jpg);
   }
 }
 @media screen and (max-width: 320px) {
   /* small screen mobile devices */
   body {
-    background: url(/images/tree_640x456.jpg) no-repeat center center fixed;
+    background-image: url(/images/tree_640x456.jpg);
+  }
+
+  /** content styling */
+  footer {
+    letter-spacing: unset;
   }
 }
 
@@ -22,6 +32,7 @@
     letter-spacing: 4px;
   }
 }
+
 .term_cursor {
   font-size: 2em;
   /** keeping cusror aligned */

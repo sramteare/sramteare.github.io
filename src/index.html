@@ -4,18 +4,18 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
+      rel="preload"
       href="https://fonts.googleapis.com/css?family=Varela"
-      rel="stylesheet"
-      type="text/css"
+      as="style"
+      onload="this.rel='stylesheet'"
     />
     <style>
-      html {
+      html,
+      body {
         height: 100%;
       }
       body {
-        height: 100%;
         font-family: "Varela", sans-serif;
-        font-display: auto;
         display: grid;
         margin: 0;
         padding: 0;
