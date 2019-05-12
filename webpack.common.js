@@ -20,6 +20,14 @@ module.exports = {
       {
         from: "./src/images",
         to: path.resolve(__dirname, "public/images")
+      },
+      {
+        from: "./src/manifest.json",
+        to: path.resolve(__dirname, "public")
+      },
+      {
+        from: "./src/favicon.ico",
+        to: path.resolve(__dirname, "public")
       }
     ]),
     new HtmlWebpackPlugin({

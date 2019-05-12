@@ -3,12 +3,7 @@
   <head>
     <title><%= htmlWebpackPlugin.options.title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="preload"
-      href="https://fonts.googleapis.com/css?family=Varela"
-      as="style"
-      onload="this.rel='stylesheet'"
-    />
+
     <style>
       html,
       body {
@@ -24,7 +19,7 @@
         grid-template-areas:
           ". . ."
           ". . ."
-          ". content .";
+          ". content nav";
         justify-content: center;
         grid-gap: 10px;
       }
@@ -36,33 +31,73 @@
         bottom: 0;
         height: 100%;
         width: 100%;
+        position: relative;
+        z-index: 0;
       }
-      footer {
+      section.content {
         grid-area: content;
         white-space: nowrap;
         display: flex;
         color: #fff;
         letter-spacing: 8px;
         text-shadow: 0 0 5px rgba(22, 19, 173, 0.75);
+        justify-content: center;
       }
-      footer h1 {
+      section.content h1 {
         text-align: center;
         /*Create overlap*/
         margin: 0;
         line-height: 0;
       }
+      nav {
+        text-align: end;
+        align-self: end;
+        grid-area: nav;
+        padding: 20px;
+      }
+      nav a {
+        font-weight: 300;
+        text-decoration: none;
+        color: #fff;
+      }
+      @media screen and (max-width: 736px) {
+        body {
+          grid-template-areas:
+            ". . ."
+            ". content ."
+            ". nav .";
+        }
+        section.content {
+          align-self: end;
+        }
+        nav {
+          text-align: center;
+          padding: 0 10px 10px 0;
+        }
+      }
     </style>
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css?family=Varela"
+      as="style"
+      onload="this.rel='stylesheet'"
+    />
+    <link rel="shortcut icon" href="/favicon.ico?v1" type="image/x-icon" />
   </head>
   <body>
     <div class="mask"></div>
-    <footer>
+
+    <section class="content">
       <div>
         <h1>PERSPECTIVE</h1>
-        <h1>PERSPECTIVE</h1>
-        <h1>PERSPECTIVE</h1>
+        <h1 aria-hidden="true">PERSPECTIVE</h1>
+        <h1 aria-hidden="true">PERSPECTIVE</h1>
       </div>
       <div class="term_cursor">&#95;</div>
-    </footer>
+    </section>
+    <nav>
+      <a href="https://github.com/sramteare/satishramteare.me">view source</a>
+    </nav>
     <% if (htmlWebpackPlugin.options.devServer) { %>
     <script src="<%= htmlWebpackPlugin.options.devServer%>/webpack-dev-server.js"></script>
     <% } %>
