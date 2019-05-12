@@ -1,16 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Satish Ramteare</title>
+    <title><%= htmlWebpackPlugin.options.title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       href="https://fonts.googleapis.com/css?family=Varela"
       rel="stylesheet"
       type="text/css"
     />
-    <link rel="stylesheet" type="text/css" href="css/style.css" />
-    <style></style>
-    <script src="bundle.js"></script>
+    <style>
+      html {
+        height: 100%;
+      }
+      body {
+        height: 100%;
+        font-family: "Varela", sans-serif;
+        font-display: auto;
+        display: grid;
+        margin: 0;
+        padding: 0;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto;
+        grid-template-areas:
+          ". . ."
+          ". . ."
+          ". content .";
+        justify-content: center;
+        grid-gap: 10px;
+      }
+      .mask {
+        opacity: 0.1;
+        color: yellow;
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+      }
+      footer {
+        grid-area: content;
+        white-space: nowrap;
+        display: flex;
+        color: #fff;
+        letter-spacing: 8px;
+        text-shadow: 0 0 5px rgba(22, 19, 173, 0.75);
+      }
+      footer h1 {
+        text-align: center;
+        /*Create overlap*/
+        margin: 0;
+        line-height: 0;
+      }
+    </style>
   </head>
   <body>
     <div class="mask"></div>
@@ -22,5 +63,8 @@
       </div>
       <div class="term_cursor">&#95;</div>
     </footer>
+    <% if (htmlWebpackPlugin.options.devServer) { %>
+    <script src="<%= htmlWebpackPlugin.options.devServer%>/webpack-dev-server.js"></script>
+    <% } %>
   </body>
 </html>
