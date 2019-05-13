@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "This is my website accessed on satishramteare.me",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "npm": "^6.9.0"
+  },
   "devDependencies": {
     "clean-webpack-plugin": "^2.0.2",
     "copy-webpack-plugin": "^5.0.3",
@@ -13,6 +15,7 @@
     "mini-css-extract-plugin": "^0.6.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "path": "^0.12.7",
+    "serviceworker-webpack-plugin": "^1.0.1",
     "style-loader": "^0.23.1",
     "terser-webpack-plugin": "^1.2.3",
     "webpack": "^4.31.0",

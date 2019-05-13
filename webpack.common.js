@@ -8,7 +8,7 @@ const webpack = require("webpack");
 const devMode = process.env.NODE_ENV !== "production";
 
 module.exports = {
-  entry: { init: "./src/js/init.js" },
+  entry: { app: "./src/js/app.js" },
   output: {
     path: path.resolve(__dirname, "public"),
     filename: "[name].bundle.js"
@@ -27,6 +27,10 @@ module.exports = {
       },
       {
         from: "./src/favicon.ico",
+        to: path.resolve(__dirname, "public")
+      },
+      {
+        from: "./src/serviceworker.js",
         to: path.resolve(__dirname, "public")
       }
     ]),

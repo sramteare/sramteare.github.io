@@ -82,6 +82,7 @@
       as="style"
       onload="this.rel='stylesheet'"
     />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="shortcut icon" href="/favicon.ico?v1" type="image/x-icon" />
   </head>
   <body>
@@ -98,6 +99,16 @@
     <nav>
       <a href="https://github.com/sramteare/satishramteare.me">view source</a>
     </nav>
+    <script>
+      // initialize service worker
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/serviceworker.js").then(reg => {
+            console.log("Service worker registered.", reg);
+          });
+        });
+      }
+    </script>
     <% if (htmlWebpackPlugin.options.devServer) { %>
     <script src="<%= htmlWebpackPlugin.options.devServer%>/webpack-dev-server.js"></script>
     <% } %>
