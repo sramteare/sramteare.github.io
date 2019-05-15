@@ -1,11 +1,8 @@
 "use strict";
 const CACHE_NAME = "static-cache-v1";
-const FILES_TO_CACHE = ["/index.html", "/app.bundle.js", "/app.css"];
 
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
-  );
+  console.log("[ServiceWorker] Installed");
 });
 
 self.addEventListener("activate", evt => {
@@ -26,16 +23,22 @@ self.addEventListener("activate", evt => {
 
 self.addEventListener("fetch", evt => {
   console.log("[ServiceWorker] Fetch", evt.request.url);
-  // CODELAB: Add fetch event handler here.
-  if (evt.request.mode !== "navigate") {
-    // Not a page navigation, bail.
-    return;
-  }
   evt.respondWith(
-    fetch(evt.request).catch(() => {
-      return caches.open(CACHE_NAME).then(cache => {
-        return cache.match("index.html");
-      });
-    })
+    fetch(evt.request)
+      .then(resp => {
+        let respClone = resp.clone();
+        if (resp.status === 200) {
+          console.log("[ServiceWorker] Updating cache");
+          caches
+            .open(CACHE_NAME)
+            .then(cache => cache.put(evt.request.url, respClone));
+        }
+        return resp;
+      })
+      .catch(err => {
+        console.log(`[ServiceWorker] Error - ${err}`);
+        console.log("[ServiceWorker] loading from cache if available.");
+        return caches.match(evt.request).then(resp => resp);
+      })
   );
 });

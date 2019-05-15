@@ -10,7 +10,7 @@ const devMode = process.env.NODE_ENV !== "production";
 module.exports = {
   entry: { app: "./src/js/app.js" },
   output: {
-    path: path.resolve(__dirname, "public"),
+    path: path.resolve(__dirname, "docs"),
     filename: "[name].bundle.js"
   },
   plugins: [
@@ -19,19 +19,19 @@ module.exports = {
     new CopyWebpackPlugin([
       {
         from: "./src/images",
-        to: path.resolve(__dirname, "public/images")
+        to: path.resolve(__dirname, "docs/images")
       },
       {
         from: "./src/manifest.json",
-        to: path.resolve(__dirname, "public")
+        to: path.resolve(__dirname, "docs")
       },
       {
         from: "./src/favicon.ico",
-        to: path.resolve(__dirname, "public")
+        to: path.resolve(__dirname, "docs")
       },
       {
         from: "./src/serviceworker.js",
-        to: path.resolve(__dirname, "public")
+        to: path.resolve(__dirname, "docs")
       }
     ]),
     new HtmlWebpackPlugin({
