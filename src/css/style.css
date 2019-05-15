@@ -5,13 +5,13 @@ body {
 }
 @media screen and (min-width: 737px) {
   body {
-    background-image: url(/images/tree_1218x864.jpg);
+    background-image: url(./images/tree_1218x864.jpg);
   }
 }
 @media screen and (max-width: 736px) and (min-width: 321px) {
   /* mobile devices */
   body {
-    background-image: url(/images/tree_1218x864.jpg);
+    background-image: url(./images/tree_1218x864.jpg);
   }
 }
 
@@ -25,7 +25,7 @@ body {
 @media screen and (max-width: 320px) {
   /* small screen mobile devices */
   body {
-    background-image: url(/images/tree_640x456.jpg);
+    background-image: url(./images/tree_640x456.jpg);
   }
 
   /** content styling */
