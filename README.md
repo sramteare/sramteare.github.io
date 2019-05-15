@@ -1,2 +1,2 @@
-# satishramteare.me
-My website, accessible at satishramteare.me
+# sramteare.github.io
+Access at sramteare.github.io
