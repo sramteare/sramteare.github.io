@@ -1,7 +1,7 @@
 {
   "name": "Satishramteare.me",
   "short_name": "Satishramteare.me",
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
   "icons": [
     {
