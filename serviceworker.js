@@ -64,5 +64,5 @@ function doFetch(evt) {
       cache.put(evt.request, respClone);
     });
     return resp;
-  });
+  }).catch(err => console.log(err));
 }
