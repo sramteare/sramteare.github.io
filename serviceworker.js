@@ -1,7 +1,7 @@
 "use strict";
-const APP_SHELL_CACHE_NAME = "static-cache-v0.2";
-const DYNAMIC_RES_CAHCE_NAME = "dynamic-cache-v.0q2";
-const appShellResourceList = ["/index.html", "/app.css"];
+const APP_SHELL_CACHE_NAME = "static-cache-v0.a2";
+const DYNAMIC_RES_CAHCE_NAME = "dynamic-cache-v.0r2";
+const appShellResourceList = ["/index.html"];
 
 self.addEventListener("install", event => {
   console.log("[ServiceWorker] Installed");

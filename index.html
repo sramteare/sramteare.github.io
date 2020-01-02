@@ -5,7 +5,6 @@
   <title>PERSPECTIVE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="Description" content="Building with a PERSPECTIVE!!" />
-  <meta name="theme-color" content="#f16f6f" />
   <style>
     /* varela-regular - latin */
     @font-face {
@@ -14,7 +13,7 @@
       font-weight: 400;
       font-display: swap;
       src: local("Varela"),
-        url("./fonts/varela-v9-latin-regular.woff2") format("woff2");
+        url(./fonts/varela-v9-latin-regular.woff2) format("woff2");
     }
 
     html,
@@ -22,31 +21,28 @@
       height: 100%;
     }
 
+    *,
+    *::after,
+    *::before {
+      padding: 0;
+      margin: 0;
+    }
+
+    a,
+    a:visited {
+      text-decoration: none;
+    }
+
     body {
       font-family: "Varela", sans-serif;
       display: grid;
-      margin: 0;
-      padding: 0;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: auto;
       grid-template-areas:
         ". . ."
         ". . ."
         ". content nav";
       justify-content: center;
       grid-gap: 10px;
-    }
-
-    .mask {
-      opacity: 0.1;
-      color: #317efb;
-      position: fixed;
-      right: 0;
-      bottom: 0;
-      height: 100%;
-      width: 100%;
-      position: relative;
-      z-index: 0;
     }
 
     section.content {
@@ -74,18 +70,20 @@
       position: relative;
     }
 
-    nav a {
-      font-size: 1.5em;
-      text-decoration: none;
+    nav a,
+    nav a:visited {
+      font-size: 1.5rem;
       color: #fff;
+      text-shadow: 3px 3px 15px grey;
     }
 
     @media screen and (max-width: 736px) {
       body {
+        grid-template-columns: 1fr;
         grid-template-areas:
-          ". . ."
-          ". content ."
-          ". nav .";
+          "."
+          "content"
+          "nav";
       }
 
       section.content {
@@ -109,11 +107,9 @@
       });
     }
   </script>
-<link href="app.css" rel="stylesheet"></head>
+<link href="app.2bd0ce7c24342517f4bc.css" rel="stylesheet"></head>
 
 <body>
-  <div class="mask"></div>
-
   <section class="content">
     <div>
       <h1>PERSPECTIVE</h1>
