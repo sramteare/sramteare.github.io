@@ -78,7 +78,7 @@ export function CardShuffle () {
                 </div>
                 <button className="clear icon-before refresh" onClick={reShuffle}>Shuffle</button>
             </section>
-            <section className="card cards-draw-plane">{cardsDrawn.map( 
+            <section aria-label="Open cards view" className="card cards-draw-plane">{cardsDrawn.map( 
                     (num, i)=>{
                         return <Card identifier={num}></Card>
                     })}</section>
