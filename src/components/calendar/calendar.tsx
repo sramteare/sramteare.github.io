@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react"
+import './css/calendar.css'
+
 const WEEK_DAYS = ["Sun","Mon","Tue","Wed","Thus","Fri","Sat"];
 const TODAY_PROPS = {className: "today", 'aria-label':"Today"}
 export const Calendar = () => {
@@ -8,10 +10,16 @@ export const Calendar = () => {
     useEffect(()=>setToday(new Date()), [])
     useEffect(()=>setTodayDate(today.getDate()), [today])
     /** actions */
-    const goBack =()=>{
+    const goBackDay =()=>{
         setToday(new Date(today.getFullYear(), today.getMonth(), today.getDate()-1))
     }
-    const goForward = ()=>setToday(new Date(today.getFullYear(), today.getMonth(), today.getDate()+1))
+    const goForwardDay = ()=>setToday(new Date(today.getFullYear(), today.getMonth(), today.getDate()+1))
+
+    const goBackMonth =()=>{
+        setToday(new Date(today.getFullYear(), today.getMonth() -1, today.getDate()))
+    }
+    const goForwardMonth = ()=>setToday(new Date(today.getFullYear(), today.getMonth()+1, today.getDate()))
+
     const getKey = (idx:number) => `${today.getFullYear()}-${today.getMonth()}-${idx}`;
 
     /** view data */
@@ -53,9 +61,11 @@ export const Calendar = () => {
     
     return (<div className="card calendar">
         <header className="calendar-header">
-            <button className="clear" onClick={goBack}>&lt;</button>
-            <span>{today.toLocaleString('default', { year: 'numeric', month: 'short', day:"numeric" })}</span>
-            <button className="clear" onClick={goForward}>&gt;</button>
+            <button aria-label="navigate to previous month view" className="clear" onClick={goBackMonth}>&lt;&lt;</button>
+                <button aria-label="select previous day" className="clear" onClick={goBackDay}>&lt;</button>
+                    <span className="selected-date">{today.toLocaleString('default', { year: 'numeric', month: 'short', day:"numeric" })}</span>
+                <button aria-label="select next day" className="clear" onClick={goForwardDay}>&gt;</button>
+            <button aria-label="navigate to next month view" className="clear" onClick={goForwardMonth}>&gt;&gt;</button>
         </header>
         <table className="calendar-table">
             <thead><tr>{WEEK_DAYS.map( (day)=><th key={day}>{day}</th>)}</tr></thead>
