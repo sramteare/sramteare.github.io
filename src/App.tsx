@@ -7,6 +7,11 @@ function App() {
   return (
     <div className="App">
       <h2>Examples</h2>
+      <section><h3>Python - console on web</h3>
+        <p>A tool to learn coding on web</p>
+        <hr aria-hidden="true"/>
+        <a href="https://github.com/sramteare/learn-coding" target="_blank" rel="noreferrer">Code</a>
+      </section>
       <section><h3>React - Simple calendar</h3>
         <p>Using React functional component for developing calendar widget. A simple calendar shows today's date and calendar view of the dates month. Right and left arrow buttons take user to previous or future dates.</p>
         <hr aria-hidden="true"/>
