@@ -1,7 +1,29 @@
+@import "tailwindcss";
+
 .App{
     display: flex;
     flex-direction: column;
     gap: .5rem;
+    min-height: calc(100vh - (2rem + 2rem + 1.5rem));
+}
+.main-content{
+    padding:0 var(--content-padding) 0;
+    z-index: var(--z-over-mask);
+}
+.standard-page {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  min-height: 100%;
+  gap: 1rem;
+}
+.standard-page > .header-content {
+  /* The header will take its natural height */
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.python-editor-wrapper { /* Assuming you add this wrapper in LearnCodingPage.tsx */
+  
 }
 .examples{
     display: flex;

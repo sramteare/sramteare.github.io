@@ -14,11 +14,6 @@
     <link rel="manifest" href="/manifest.json" />
     <title>Perspective!!</title>
     <style>
-      *, *::after, *::before{
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
       :root{
         --family-condensed: 'Open Sans Condensed', sans-serif;
         --root-font-size: 15px;
@@ -29,7 +24,7 @@
         --overlap-margin: -2rem;
         --z-over-mask: 2;
         --content-padding: 1.5rem;
-        --header-content-margin: var(--content-padding);
+        --standard-content-space: var(--content-padding);
         --icon-size: 24px;
         --gradient-start-color: rgba(31,31,31,0);
         --gradient-end-color: #1f1f1f;
@@ -146,7 +141,7 @@
       .footer{
         color: var(--main-color);
         line-height: 1.5em;
-        padding: 1rem var(--header-content-margin);
+        padding: 1rem var(--standard-content-space);
         margin-top: 2rem;
         background: #00439c;
         text-align: center;
@@ -170,7 +165,7 @@
         background-image: linear-gradient(to bottom, var(--gradient-start-color) 0, var(--gradient-end-color) 100%);
       }
       .header-content{
-        margin: 0 var(--header-content-margin);
+        margin: 0 var(--content-content-margin);
         display: flex;
         flex-direction: column;
         gap: 1rem;
@@ -190,7 +185,7 @@
         flex-direction: column;
         gap: .3rem;
       }
-      .title h2{
+      .title h2, h1{
         font-weight: 700;
       }
       .header-content a {
@@ -212,7 +207,7 @@
       .page-content{
         color: var(--tertiary-color);
         z-index: var(--z-over-mask);
-        padding: 2rem var(--content-padding) 0;
+        padding: 2rem 0 0;
         line-height: 1.4;
       }
       .page-content h2{
@@ -233,7 +228,7 @@
       }
       @media (min-width: 768px){
         :root{
-          --header-content-margin: 4rem;
+          --standard-content-space: 4rem;
           --content-padding: 10rem;
           --overlap-margin: -4rem;
           --root-font-size: 16px;
@@ -275,7 +270,7 @@
           background-image: linear-gradient(to left,var(--gradient-start-color),var(--gradient-end-color));
         }
         .header-content{
-          margin: 5rem 0 0 var(--header-content-margin);
+          margin: 5rem 0 0 var(--standard-content-space);
           grid-column: 1/3;
           grid-row: 1;
         }
@@ -306,83 +301,7 @@
   </head>
   <body>
     <!--noscript>You need to enable JavaScript to run this app.</noscript-->
-    <header class="main-header">
-      <section class="hero-section">
-        <picture>
-          <source srcset="/img/sb_ps_780.webp"
-            media="(max-width: 639px)" />
-          <source srcset="/img/sp_ps_1920.webp"
-                  media="(min-width: 640px) and (max-width: 1023px)" />
-          <source srcset="/img/sb_ps_2048.webp"
-                  media="(min-width: 1024px)" />
-          <img class='hero-picture' src="/img/sb_ps_full.webp" alt="Yellow! lol!"/>
-        </picture>
-      </section>
-      <section class="header-content">
-        <h1 class="condensed-text">Who lives in the Pineapple under the Sea?</h1>
-        <div class="title">
-          <h2>SATISH RAMTEAERE</h2>
-          <p class="condensed-text">Software Engineer</p>
-          <ul>
-            <li><a class="icon-before linkedin" href="https://www.linkedin.com/in/satish-ramteare/" title="Linked" aria-label="to linkedin"></a></li>
-            <li><a class="icon-before github" href="https://github.com/sramteare?tab=repositories" title="Github" aria-label="to github"></a></li>
-          </ul>
-        </div>
-      </section>
-    </header>
-    <section class="page-content">
-      <h2>HCI Developer for Web and Beyond</h2>
-      <p>I build software that's easy and effective for people to use, applying Human-Computer Interaction principles to every solution.</p>
-      <p>My work involves making data easy to understand through visualization and using smart algorithms to create smooth, fast ways for people to interact with complex technology.</p>
-    </section>
-    <section class="page-content">
-      <h2>Leadership</h2>
-      <p>I enjoy leading teams to build great software. This means working closely with product managers and architects, guiding agile development, and ensuring our code is top-notch through careful reviews. I'm also passionate about helping others grow by sharing knowledge of core programming concepts, setting clear architectural standards, and always looking for ways to make our development work smoother and more effective.</p>  
-    </section>
-    <section class="page-content">
-      <h2>Frontend/Full-stack Expertise</h2>
-      <p>Deep expertise in developing and maintaining scalable component-based UI frameworks, leveraging strong software design patterns. Skilled in architecting and implementing resilient REST APIs and API Gateways within distributed microservice systems, with a core focus on optimizing Web UI and application performance through fundamental algorithm and data structure knowledge.</p>
-    </section>
-    <section class="page-content">
-      <h2>Bookmarks</h2>
-      <p>Some links I find interesting and you might too!</p>
-      <ul>
-        <li><a href="https://mathiasbynens.be/notes/shapes-ics">JavaScript engine fundamentals: Shapes and Inline Caches</a></li>
-        <li><a href="https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/">JavaScript Tasks, microtasks, queues and schedules</a></li>
-      </ul>
-    </section>
-    <section class="page-content">
-      <ul class="bubbles">
-        <li>AI</li>
-        <li>LLM</li>
-        <li>JavaScript</li>
-        <li>TypeScript</li>
-        <li>ES6</li>
-        <li>Problem Solving</li>
-        <li>Data structures</li>
-        <li>Algorithms</li>
-        <li>CSS</li>
-        <li>HTML</li>
-        <li>SPA</li> 
-        <li>NodeJs</li>
-        <li>REST API design</li>
-        <li>CI/CD</li>
-        <li>Git</li>
-        <li>Gradle</li>
-        <li>Unit Testing and Integration testing</li>
-        <li>Jest</li>
-        <li>React</li>
-        <li>Redux</li>
-        <li>OAuth</li>
-        <li>JWT</li>
-        <li>SOLR</li>
-        <li>Frontend performance/System performance</li>
-        <li>Distributed systems/microservice</li>
-        <li>Docker</li>
-        <li>AWS</li>
-      </ul>
-    </section>
-    <section class="page-content" id='root'></section>
+    <div id='root'></div>
     <footer class="footer">
       <p>This website is mobile first reponsive design, developed using React with Typescript and Vite.</p>
     </footer>
