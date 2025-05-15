@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Be Humble, Be Kind, Be Compassionate" />
@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
 
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="manifest" href="/manifest.json" />
     <title>Perspective!!</title>
     <style>
       *, *::after, *::before{
@@ -23,8 +23,9 @@
         --family-condensed: 'Open Sans Condensed', sans-serif;
         --root-font-size: 15px;
         --main-color: #ffffff;
-        --secondary-color: #b2b2b2;
-        --tertiary-color: #6c6c6c;
+        --golden-color: #FFD700;
+        --secondary-color: #87CEFA;
+        --tertiary-color: #D3D3D3;
         --overlap-margin: -2rem;
         --z-over-mask: 2;
         --content-padding: 1.5rem;
@@ -51,17 +52,23 @@
         flex-direction: column;
       }
       a {
-        color: var(--main-color);
-        text-decoration: none;
-        font-weight: 700;
+        font-family: 'Poppins', sans-serif; /* Use Poppins for links */
+        font-weight: 500;
+        color: var(--secondary-color); /* #87CEFA */
+        text-decoration: none; /* Optional: removes underline */
+      }
+
+      a:hover,
+      a:focus {
+        text-decoration: underline; /* Optional: adds underline on hover/focus for better accessibility */
+        /* You could also slightly brighten or change the color on hover/focus if desired */
+        color: #ADD8E6; /* Example: A lighter blue for hover */
       }
       hr {
-        margin: 1.5rem;
+        margin: .5rem .5rem .8rem;
         opacity: 0.1;
       }
       button.clear {
-        -moz-appearance: none;
-        -webkit-appearance: none;
         cursor: pointer;
         border: none;
         background: none;
@@ -71,6 +78,9 @@
         display: flex;
         flex-wrap: wrap;
         gap: .3rem;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
       }
       .bubbles > * {
         border: 2px solid var(--secondary-color);
@@ -195,20 +205,32 @@
       .header-content a:is(:hover, :focus) {
         transform:scale(1.3);
       }
-      .header-content dl{
+      .header-content ul{
           display: flex;
+          list-style-type: none;
         }
       .page-content{
-        color: var(--secondary-color);
+        color: var(--tertiary-color);
         z-index: var(--z-over-mask);
-        padding: 2rem var(--content-padding);
+        padding: 2rem var(--content-padding) 0;
         line-height: 1.4;
       }
       .page-content h2{
-        color: var(--main-color);
+        color: var(--golden-color); /* Changed from --golden-color */
         margin-bottom: .5rem;
+        font-size: 1.8rem; 
+        font-weight: 700; 
       }
-
+      .page-content h3{
+        color: var(--secondary-color);
+        font-size: 1.4rem; /* Adjusted font size */
+        font-weight: 600; /* Adjusted font weight (semi-bold) */
+        margin-bottom: 0.3rem; /* Optional: added some margin below h3 */
+      }
+      .page-content ul{
+        list-style-type: none;
+        padding: 0;
+      }
       @media (min-width: 768px){
         :root{
           --header-content-margin: 4rem;
@@ -301,67 +323,69 @@
         <div class="title">
           <h2>SATISH RAMTEAERE</h2>
           <p class="condensed-text">Software Engineer</p>
-          <dl>
-            <dt><a class="icon-before linkedin" href="https://www.linkedin.com/in/satish-ramteare/" title="Linked" aria-label="to linkedin"></a></dt>
-            <dt><a class="icon-before github" href="https://github.com/sramteare?tab=repositories" title="Github" aria-label="to github"></a></dt>
-          </dl>
+          <ul>
+            <li><a class="icon-before linkedin" href="https://www.linkedin.com/in/satish-ramteare/" title="Linked" aria-label="to linkedin"></a></li>
+            <li><a class="icon-before github" href="https://github.com/sramteare?tab=repositories" title="Github" aria-label="to github"></a></li>
+          </ul>
         </div>
       </section>
     </header>
     <section class="page-content">
       <h2>HCI Developer for Web and Beyond</h2>
-      <p>Developing software to make it easy for humans to interact with computers.</p>
-      <p>Visualize data efficiently for human consumption and provide easy means of communication between humans and computers.</p>
+      <p>I build software that's easy and effective for people to use, applying Human-Computer Interaction principles to every solution.</p>
+      <p>My work involves making data easy to understand through visualization and using smart algorithms to create smooth, fast ways for people to interact with complex technology.</p>
     </section>
     <section class="page-content">
       <h2>Leadership</h2>
-      <p>Collaborating with PM/UX and Architects, Scrum Planning, Code Reviews, teaching and mentoring, defining standards/goals in UI for the entire module team. Improving processes/tools for improved developer productivity as well as product quality.</p>  
+      <p>I enjoy leading teams to build great software. This means working closely with product managers and architects, guiding agile development, and ensuring our code is top-notch through careful reviews. I'm also passionate about helping others grow by sharing knowledge of core programming concepts, setting clear architectural standards, and always looking for ways to make our development work smoother and more effective.</p>  
     </section>
     <section class="page-content">
-      <h2>Frontend/Full-stack</h2>
-      <p>Experience developing and supporting a component-based UI framework (JUIC). Designing and developing REST APIs, API Gateways in distributed systems/microservice architecture, and Web UI/Application performance.</p>
+      <h2>Frontend/Full-stack Expertise</h2>
+      <p>Deep expertise in developing and maintaining scalable component-based UI frameworks, leveraging strong software design patterns. Skilled in architecting and implementing resilient REST APIs and API Gateways within distributed microservice systems, with a core focus on optimizing Web UI and application performance through fundamental algorithm and data structure knowledge.</p>
     </section>
     <section class="page-content">
       <h2>Bookmarks</h2>
-      <dl>
-        <dt><a href="https://mathiasbynens.be/notes/shapes-ics">JavaScript engine fundamentals: Shapes and Inline Caches</a></dt>
-        <dt><a href="https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/">JavaScript Tasks, microtasks, queues and schedules</a></dt>
-      </dl>
+      <p>Some links I find interesting and you might too!</p>
+      <ul>
+        <li><a href="https://mathiasbynens.be/notes/shapes-ics">JavaScript engine fundamentals: Shapes and Inline Caches</a></li>
+        <li><a href="https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/">JavaScript Tasks, microtasks, queues and schedules</a></li>
+      </ul>
     </section>
     <section class="page-content">
-      <dl class="bubbles">
-        <dt>AI</dt>
-        <dt>LLM</dt>
-        <dt>JavaScript</dt>
-        <dt>TypeScript</dt>
-        <dt>ES6</dt>
-        <dt>Problem Solving</dt>
-        <dt>Data structures</dt>
-        <dt>Algorithms</dt>
-        <dt>CSS</dt>
-        <dt>HTML</dt>
-        <dt>SPA</dt> 
-        <dt>NodeJs</dt>
-        <dt>REST API design</dt>
-        <dt>CI-CD</dt>
-        <dt>Git</dt>
-        <dt>Gradle</dt>
-        <dt>Unit Testing and Integration testing</dt>
-        <dt>Jest</dt>
-        <dt>React</dt>
-        <dt>Redux</dt>
-        <dt>OAuth</dt>
-        <dt>JWT</dt>
-        <dt>SOLR</dt>
-        <dt>Frontend performance/System performance</dt>
-        <dt>Distributed systems/microservice</dt>
-        <dt>Docker</dt>
-        <dt>AWS</dt>
-      </dl>
+      <ul class="bubbles">
+        <li>AI</li>
+        <li>LLM</li>
+        <li>JavaScript</li>
+        <li>TypeScript</li>
+        <li>ES6</li>
+        <li>Problem Solving</li>
+        <li>Data structures</li>
+        <li>Algorithms</li>
+        <li>CSS</li>
+        <li>HTML</li>
+        <li>SPA</li> 
+        <li>NodeJs</li>
+        <li>REST API design</li>
+        <li>CI/CD</li>
+        <li>Git</li>
+        <li>Gradle</li>
+        <li>Unit Testing and Integration testing</li>
+        <li>Jest</li>
+        <li>React</li>
+        <li>Redux</li>
+        <li>OAuth</li>
+        <li>JWT</li>
+        <li>SOLR</li>
+        <li>Frontend performance/System performance</li>
+        <li>Distributed systems/microservice</li>
+        <li>Docker</li>
+        <li>AWS</li>
+      </ul>
     </section>
     <section class="page-content" id='root'></section>
     <footer class="footer">
-      <p>This website is mobile first reponsive design, offline first PWA, developed using React with Typescript.</p>
+      <p>This website is mobile first reponsive design, developed using React with Typescript and Vite.</p>
     </footer>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

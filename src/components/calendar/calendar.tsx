@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import { JSX, useEffect, useState } from "react"
 import './css/calendar.css'
 
 const WEEK_DAYS = ["Sun","Mon","Tue","Wed","Thus","Fri","Sat"];
@@ -26,7 +26,7 @@ export const Calendar = () => {
     const lastDateLastMonth = new Date(today.getFullYear(), today.getMonth(),0);
     const lastDate = new Date(today.getFullYear(), today.getMonth()+1,0);
     let pad = lastDateLastMonth.getDay();
-    let date = lastDateLastMonth.getDate();
+    const date = lastDateLastMonth.getDate();
     const calendarMonth: Array<JSX.Element> = [];
     // numdays used as keys
     let numDays = 0;
@@ -34,7 +34,7 @@ export const Calendar = () => {
     // previous calendar dates
     let rows = Array.from({
         length:pad+1
-    }, (_,i)=>{
+    }, ()=>{
         const val = date-pad;
         pad--;
         return <td  key={getKey(numDays++)} className="non-current">{val}</td>;

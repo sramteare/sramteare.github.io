@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import './css/card-shuffle.css'
 /**
  * 
@@ -72,15 +72,15 @@ export function CardShuffle () {
             <section className="flex last-to-end">
                 <div className="cards-deck"
                 aria-label="Deck of cards">{deck.map( 
-                    (num, i)=>{
-                        return <InvertedCard action={drawCards} active={i===deck.length-1}></InvertedCard>
+                    ( _ , i)=>{
+                        return <InvertedCard key={i} action={drawCards} active={i===deck.length-1}></InvertedCard>
                     })}
                 </div>
                 <button className="clear icon-before refresh" onClick={reShuffle}>Shuffle</button>
             </section>
             <section aria-label="Open cards view" className="card cards-draw-plane">{cardsDrawn.map( 
                     (num, i)=>{
-                        return <Card identifier={num}></Card>
+                        return <Card key={i} identifier={num}></Card>
                     })}</section>
         </div>);
 }
@@ -91,7 +91,7 @@ function InvertedCard ({
     active: boolean,
     action: () => void
 }){
-    return active ? (<button className='clear playing-card inverted' onClick={action}></button>) 
+    return active ? (<div className='clear playing-card inverted' onClick={action}></div>) 
     : (<div className='playing-card inverted'></div>)
 }
 
