@@ -44,7 +44,7 @@ const HomePage: React.FC = () => {
         <p>Deep expertise in developing and maintaining scalable component-based UI frameworks, leveraging strong software design patterns. Skilled in architecting and implementing resilient REST APIs and API Gateways within distributed microservice systems, with a core focus on optimizing Web UI and application performance through fundamental algorithm and data structure knowledge.</p>
       </section>
       <section className="page-content">
-        <h2>Bookmarks</h2>
+        <h2>Bookmarks🔖</h2>
         <p>Some links I find interesting and you might too!</p>
         <ul>
             <li><a href="https://mathiasbynens.be/notes/shapes-ics">JavaScript engine fundamentals: Shapes and Inline Caches</a></li>
@@ -55,12 +55,12 @@ const HomePage: React.FC = () => {
         <ul className="bubbles">
             <li>AI</li>
             <li>LLM</li>
-            <li>JavaScript</li>
             <li>TypeScript</li>
             <li>ES6</li>
             <li>Problem Solving</li>
             <li>Data structures</li>
             <li>Algorithms</li>
+            <li>JavaScript</li>
             <li>CSS</li>
             <li>HTML</li>
             <li>SPA</li> 
@@ -70,8 +70,7 @@ const HomePage: React.FC = () => {
             <li>Git</li>
             <li>Gradle</li>
             <li>Unit Testing and Integration testing</li>
-            <li>Jest</li>
-            <li>React</li>
+            \<li>React</li>
             <li>Redux</li>
             <li>OAuth</li>
             <li>JWT</li>
