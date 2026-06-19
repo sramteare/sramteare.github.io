@@ -1,7 +1,16 @@
 {
 	"folders": [
 		{
+			"name": "Main Site",
 			"path": "."
+		},
+		{
+			"name": "Air War",
+			"path": "packages/air-war"
+		},
+		{
+			"name": "Car Race",
+			"path": "packages/car-race"
 		}
 	],
 	"settings": {}

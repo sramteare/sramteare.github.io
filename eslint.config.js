@@ -16,4 +16,7 @@ export default defineConfig([
       "react/react-in-jsx-scope": "off",
     },
   },
+  {
+    ignores: ["src/public/lib/**"],
+  },
 ]);

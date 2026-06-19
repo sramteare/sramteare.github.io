@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/packages/*/node_modules
 # from template cleanup
 /.pnp
 .pnp.js

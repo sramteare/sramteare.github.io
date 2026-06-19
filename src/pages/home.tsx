@@ -5,54 +5,54 @@ import { CardShuffle } from '../components/card-shuffle/card-shuffle';
 const HomePage: React.FC = () => {
   return (
     <>
-    <header className="main-header">
-      <section className="hero-section">
-        <picture>
-          <source srcSet="/img/sb_ps_780.webp"
-            media="(max-width: 639px)" />
-          <source srcSet="/img/sp_ps_1920.webp"
-                  media="(min-width: 640px) and (max-width: 1023px)" />
-          <source srcSet="/img/sb_ps_2048.webp"
-                  media="(min-width: 1024px)" />
-          <img className='hero-picture' src="/img/sb_ps_full.webp" alt="Yellow! lol!"/>
-        </picture>
-      </section>
-      <section className="header-content">
-        <h1 className="condensed-text">Who lives in the Pineapple under the Sea?</h1>
-        <div className="title">
-          <h2>SATISH RAMTEAERE</h2>
-          <p className="condensed-text">Software Engineer</p>
+      <header className="main-header">
+        <section className="hero-section">
+          <picture>
+            <source srcSet="/img/sb_ps_780.webp"
+              media="(max-width: 639px)" />
+            <source srcSet="/img/sp_ps_1920.webp"
+              media="(min-width: 640px) and (max-width: 1023px)" />
+            <source srcSet="/img/sb_ps_2048.webp"
+              media="(min-width: 1024px)" />
+            <img className='hero-picture' src="/img/sb_ps_full.webp" alt="Yellow! lol!" />
+          </picture>
+        </section>
+        <section className="header-content">
+          <h1 className="condensed-text">Who lives in the Pineapple under the Sea?</h1>
+          <div className="title">
+            <h2>SATISH RAMTEAERE</h2>
+            <p className="condensed-text">Software Engineer</p>
+            <ul>
+              <li><a className="icon-before linkedin" href="https://www.linkedin.com/in/satish-ramteare/" title="Linked" aria-label="to linkedin"></a></li>
+              <li><a className="icon-before github" href="https://github.com/sramteare?tab=repositories" title="Github" aria-label="to github"></a></li>
+            </ul>
+          </div>
+        </section>
+      </header>
+      <div className='main-content'>
+        <section className="page-content">
+          <h2>HCI Developer for Web and Beyond</h2>
+          <p>I build software that&apos;s easy and effective for people to use, applying Human-Computer Interaction principles to every solution.</p>
+          <p>My work involves making data easy to understand through visualization and using smart algorithms to create smooth, fast ways for people to interact with complex technology.</p>
+        </section>
+        <section className="page-content">
+          <h2>Leadership</h2>
+          <p>I enjoy leading teams to build great software. This means working closely with product managers and architects, guiding agile development, and ensuring our code is top-notch through careful reviews. I&apos;m also passionate about helping others grow by sharing knowledge of core programming concepts, setting clear architectural standards, and always looking for ways to make our development work smoother and more effective.</p>
+        </section>
+        <section className="page-content">
+          <h2>Frontend/Full-stack Expertise</h2>
+          <p>Deep expertise in developing and maintaining scalable component-based UI frameworks, leveraging strong software design patterns. Skilled in architecting and implementing resilient REST APIs and API Gateways within distributed microservice systems, with a core focus on optimizing Web UI and application performance through fundamental algorithm and data structure knowledge.</p>
+        </section>
+        <section className="page-content">
+          <h2>Bookmarks🔖</h2>
+          <p>Some links I find interesting and you might too!</p>
           <ul>
-            <li><a className="icon-before linkedin" href="https://www.linkedin.com/in/satish-ramteare/" title="Linked" aria-label="to linkedin"></a></li>
-            <li><a className="icon-before github" href="https://github.com/sramteare?tab=repositories" title="Github" aria-label="to github"></a></li>
-          </ul>
-        </div>
-      </section>
-    </header>
-    <div className='main-content'>
-      <section className="page-content">
-        <h2>HCI Developer for Web and Beyond</h2>
-        <p>I build software that's easy and effective for people to use, applying Human-Computer Interaction principles to every solution.</p>
-        <p>My work involves making data easy to understand through visualization and using smart algorithms to create smooth, fast ways for people to interact with complex technology.</p>
-      </section>
-      <section className="page-content">
-        <h2>Leadership</h2>
-        <p>I enjoy leading teams to build great software. This means working closely with product managers and architects, guiding agile development, and ensuring our code is top-notch through careful reviews. I'm also passionate about helping others grow by sharing knowledge of core programming concepts, setting clear architectural standards, and always looking for ways to make our development work smoother and more effective.</p>  
-      </section>
-      <section className="page-content">
-        <h2>Frontend/Full-stack Expertise</h2>
-        <p>Deep expertise in developing and maintaining scalable component-based UI frameworks, leveraging strong software design patterns. Skilled in architecting and implementing resilient REST APIs and API Gateways within distributed microservice systems, with a core focus on optimizing Web UI and application performance through fundamental algorithm and data structure knowledge.</p>
-      </section>
-      <section className="page-content">
-        <h2>Bookmarks🔖</h2>
-        <p>Some links I find interesting and you might too!</p>
-        <ul>
             <li><a href="https://mathiasbynens.be/notes/shapes-ics">JavaScript engine fundamentals: Shapes and Inline Caches</a></li>
             <li><a href="https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/">JavaScript Tasks, microtasks, queues and schedules</a></li>
-        </ul>
-      </section>
-      <section className="page-content">
-        <ul className="bubbles">
+          </ul>
+        </section>
+        <section className="page-content">
+          <ul className="bubbles">
             <li>AI</li>
             <li>LLM</li>
             <li>TypeScript</li>
@@ -63,7 +63,7 @@ const HomePage: React.FC = () => {
             <li>JavaScript</li>
             <li>CSS</li>
             <li>HTML</li>
-            <li>SPA</li> 
+            <li>SPA</li>
             <li>NodeJs</li>
             <li>REST API design</li>
             <li>CI/CD</li>
@@ -79,33 +79,70 @@ const HomePage: React.FC = () => {
             <li>Distributed systems/microservice</li>
             <li>Docker</li>
             <li>AWS</li>
-        </ul>
-      </section>
-      <section className="page-content">
-        <h2>Examples</h2> {/* Moved heading here */}
-        <div className='examples'>
+          </ul>
+        </section>
+        <section className="page-content homepage-games-section">
+          <h2>Games I created with my kid as activity 🦖</h2>
+          <p>A collection of simple coding and design activities we build together on weekends as a fun activity.</p>
+          <div className="games-grid">
+            <a href="/packages/air-war/index.html" target="_blank" rel="noreferrer" className="game-card">
+              <div className="game-card-media">
+                <img src="/img/void_drifter_preview.png" alt="Void Drifter game launcher — 360° space combat simulator" />
+              </div>
+              <div className="game-card-content">
+                <div>
+                  <h3>Void Drifter</h3>
+                  <p>A 360° space combat simulator. Pilot your ship and defend the central orbital station against mutating anomalies. Explores Newtonian inertia physics, 2D sprite rendering, and 3D WebGL meshes.</p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <span className="game-badge">Three.js / 2D Canvas</span>
+                  <span className="play-game-link">Launch Game ➡️</span>
+                </div>
+              </div>
+            </a>
+            
+            <a href="/packages/car-race/index.html" target="_blank" rel="noreferrer" className="game-card">
+              <div className="game-card-media">
+                <img src="/img/nitro_racer_preview.png" alt="Nitro Racer game launcher — high-octane 3D racing" />
+              </div>
+              <div className="game-card-content">
+                <div>
+                  <h3>Nitro Racer</h3>
+                  <p>High-octane action racing. Steer around dynamic obstacles, manage nitro boosts, and speed across the checkered line in low-poly style. Features 3D procedural roads, fog effects, and active physics.</p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <span className="game-badge">WebGL / Three.js</span>
+                  <span className="play-game-link">Launch Game ➡️</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </section>
+        <section className="page-content">
+          <h2>Examples</h2> {/* Moved heading here */}
+          <div className='examples'>
             <section>
-            <h3>Learn to code</h3>
-            <hr aria-hidden="true"/>
-            <p>A tool to learn coding on web</p>
-            <a href="https://github.com/sramteare/learn-coding" target="_blank" rel="noreferrer">Checkout Code</a>
-            <br />
-            <Link to="/learn-coding">Go to Learn Coding Page</Link>
+              <h3>Learn to code</h3>
+              <hr aria-hidden="true" />
+              <p>A tool to learn coding on web</p>
+              <a href="https://github.com/sramteare/learn-coding" target="_blank" rel="noreferrer">Checkout Code</a>
+              <br />
+              <Link to="/learn-coding">Go to Learn Coding Page</Link>
             </section>
             <section>
-            <h3>React - Simple calendar</h3>
-            <hr aria-hidden="true"/>
-            <p>Using React functional component for developing calendar widget. A simple calendar shows today&apos;s date and calendar view of the dates month. Right and left arrow buttons take user to previous or future dates.</p>
-            <Calendar />
+              <h3>React - Simple calendar</h3>
+              <hr aria-hidden="true" />
+              <p>Using React functional component for developing calendar widget. A simple calendar shows today&apos;s date and calendar view of the dates month. Right and left arrow buttons take user to previous or future dates.</p>
+              <Calendar />
             </section>
             <section>
-            <h3>React - Shuffle Cards</h3>
-            <hr aria-hidden="true"/>
-            <p>This component renders a Card deck and a draw plane. The shuffle function uses Fisher-Yates shuffle algorithm shuffle the deck. And when user clicks on the top card in the deck, 4 cards are drawn from the deck and displayed in the draw plane.</p>
-            <CardShuffle />
+              <h3>React - Shuffle Cards</h3>
+              <hr aria-hidden="true" />
+              <p>This component renders a Card deck and a draw plane. The shuffle function uses Fisher-Yates shuffle algorithm shuffle the deck. And when user clicks on the top card in the deck, 4 cards are drawn from the deck and displayed in the draw plane.</p>
+              <CardShuffle />
             </section>
-        </div>
-      </section>
+          </div>
+        </section>
       </div>
     </>
   );
