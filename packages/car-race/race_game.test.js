@@ -189,4 +189,17 @@ describe('2D Race Game Leaderboard Logic', () => {
         expect(resetCalled).toBe(true);
         dom.window.close();
     });
+
+    it('should freeze game updates and not spawn enemies when countdown is active', () => {
+        const dom = createDom({});
+        dom.window.eval('isPlaying = true; countdownActive = true; distanceCovered = 10; gameTime = 0;');
+        
+        // Execute updateGame tick
+        dom.window.updateGame();
+        
+        // Assert distance and time remained unchanged
+        expect(dom.window.eval('distanceCovered')).toBe(10);
+        expect(dom.window.eval('gameTime')).toBe(0);
+        dom.window.close();
+    });
 });

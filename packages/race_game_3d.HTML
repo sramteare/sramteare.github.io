@@ -162,6 +162,17 @@
             padding-top: 15px;
             line-height: 1.6;
         }
+
+        @keyframes pop-in {
+            0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+        }
+        .countdown-pop {
+            display: block !important;
+            animation: pop-in 1s ease-out forwards;
+        }
     </style>
 </head>
 <body>
@@ -185,6 +196,8 @@
 <div id="progress-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 300px; height: 12px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); z-index: 10; overflow: hidden;">
     <div id="progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f39c12, #f1c40f); transition: width 0.1s linear;"></div>
 </div>
+
+<div id="countdown-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 110px; font-weight: 900; z-index: 15; text-shadow: 0 0 30px rgba(0,0,0,0.85); pointer-events: none; display: none; text-transform: uppercase;"></div>
 
 <div id="launch-screen">
     <div class="launch-container">
@@ -956,6 +969,7 @@
     let finishedRacersCount = 0;
     let gameTime = 0;
     let lastFrameTime = Date.now();
+    let countdownActive = false;
     let playerFinishRank = 0;
     let opponents = [];
     let traffic = [];
@@ -1045,6 +1059,7 @@
 
     function startGame() {
         isPlaying = true;
+        countdownActive = true;
         finishTriggered = false;
         playerDist = 0;
         speedPenaltyTimer = 0;
@@ -1156,6 +1171,53 @@
 
         clearParticles();
         createRoadEnvironment();
+        startCountdown();
+    }
+
+    function startCountdown() {
+        const overlay = document.getElementById('countdown-overlay');
+        overlay.style.display = 'block';
+        
+        const steps = [
+            { text: '3', color: '#e74c3c' },
+            { text: '2', color: '#e67e22' },
+            { text: '1', color: '#f1c40f' },
+            { text: 'GO!', color: '#2ecc71' }
+        ];
+        
+        let currentStep = 0;
+        
+        function nextStep() {
+            if (!isPlaying) {
+                // If game was reset/exited during countdown, cleanup
+                overlay.style.display = 'none';
+                overlay.className = '';
+                return;
+            }
+            if (currentStep < steps.length) {
+                const step = steps[currentStep];
+                overlay.innerText = step.text;
+                overlay.style.color = step.color;
+                
+                overlay.className = '';
+                void overlay.offsetWidth; // trigger reflow
+                overlay.className = 'countdown-pop';
+                
+                currentStep++;
+                
+                if (step.text === 'GO!') {
+                    countdownActive = false;
+                    lastFrameTime = Date.now();
+                }
+                
+                setTimeout(nextStep, 1000);
+            } else {
+                overlay.style.display = 'none';
+                overlay.className = '';
+            }
+        }
+        
+        nextStep();
     }
 
     function gameLoop() {
@@ -1349,6 +1411,26 @@
             // Reset camera to standard showroom preview view
             camera.position.set(0, 12, 20);
             camera.lookAt(0, 2, 90);
+            renderer.render(scene, camera);
+            requestAnimationFrame(gameLoop);
+            return;
+        }
+
+        if (countdownActive) {
+            lastFrameTime = Date.now();
+            
+            // Render road segment curvature
+            scrollingRoadObjects.forEach(obj => {
+                const objDist = playerDist + (obj.mesh.position.z - 50);
+                const curveOffset = getRoadCurve(objDist) - getRoadCurve(playerDist);
+                obj.mesh.position.x = obj.localX + curveOffset;
+            });
+            
+            const lookAheadDist = playerDist + 70;
+            const lookAheadCurve = getRoadCurve(lookAheadDist) - getRoadCurve(playerDist);
+            camera.position.x = playerX * 0.4;
+            camera.lookAt(playerX * 0.2 + lookAheadCurve, 2, 110);
+            
             renderer.render(scene, camera);
             requestAnimationFrame(gameLoop);
             return;

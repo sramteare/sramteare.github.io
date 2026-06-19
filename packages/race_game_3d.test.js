@@ -296,4 +296,17 @@ describe('3D Race Game Leaderboard Logic', () => {
         expect(startCalled).toBe(true);
         dom.window.close();
     });
+
+    it('should freeze player and game time updates when countdown is active', () => {
+        const dom = createDom({});
+        dom.window.eval('isPlaying = true; countdownActive = true; playerDist = 0; gameTime = 0;');
+        
+        // Tick gameLoop
+        dom.window.gameLoop();
+        
+        // Assert playerDist and gameTime remained unchanged
+        expect(dom.window.eval('playerDist')).toBe(0);
+        expect(dom.window.eval('gameTime')).toBe(0);
+        dom.window.close();
+    });
 });
