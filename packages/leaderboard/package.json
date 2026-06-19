@@ -1,0 +1,8 @@
+{
+  "name": "leaderboard",
+  "version": "1.0.0",
+  "description": "Shared leaderboard component for games",
+  "main": "leaderboard.js",
+  "private": true,
+  "type": "module"
+}

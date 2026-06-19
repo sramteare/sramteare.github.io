@@ -20,8 +20,10 @@ jobs:
         run: npm ci
       - name: Run build
         run: npm run build --if-present
-      # - name: Run test
-      #   run: npm test
+      - name: Install dependencies in packages/car-race
+        run: npm ci --prefix packages/car-race
+      - name: Run tests
+        run: npm test --prefix packages/car-race
       - name: Upload npm debug log if it exists
         uses: actions/upload-artifact@v4
         if: failure() # Only upload on failure, or use always() to upload regardless

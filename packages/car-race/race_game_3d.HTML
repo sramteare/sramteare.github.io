@@ -170,6 +170,9 @@
     <div>POS: <span id="pos-label" style="color: #f1c40f;">4/4</span></div>
     <div>SPEED: <span id="speed-label">0</span> MPH</div>
     <div>DISTANCE: <span id="distance-label">0m / 600m</span></div>
+    <div>TIME: <span id="time-label">0.0s</span></div>
+    <div>SCORE: <span id="score-label">0</span></div>
+    <div>BEST: <span id="hud-high-score-3d">0</span></div>
     <div id="nitro-label">🔥 NITRO! 🔥</div>
     <div style="font-size: 14px; margin-top: 10px; color: #a1a1aa; display: flex; align-items: center; gap: 8px;">
         <span>NITRO:</span>
@@ -187,6 +190,7 @@
     <div class="launch-container">
         <h1 class="game-title">Nitro Racer 3D</h1>
         <p class="game-subtitle">Select your vehicle & start the race</p>
+        <div id="pb-container" style="font-size: 16px; color: #f1c40f; font-weight: bold; margin-bottom: 20px;">Personal Best: <span id="pb-score-3d">0</span></div>
         
         <div class="vehicle-grid">
             <div class="vehicle-card selected" onclick="selectVehicle('car')" id="card-car">
@@ -251,23 +255,62 @@
 </div>
 
 <div id="game-over-overlay">
-    <div class="overlay-card">
-        <div class="overlay-title" style="color: #e74c3c;">GAME OVER</div>
-        <div class="overlay-text">Distance Traveled: <span id="final-score">0</span></div>
-        <button onclick="resetGame()">Try Again</button>
+    <div class="overlay-card" style="padding: 20px; box-sizing: border-box; max-width: 320px; width: 90%;">
+        <div class="overlay-title" style="color: #e74c3c; font-size: 28px;">GAME OVER</div>
+        <div class="overlay-text" style="font-size: 15px; margin-top: 5px;">Distance: <span id="final-distance-3d">0</span>m</div>
+        <div class="overlay-text" style="font-size: 15px; margin-top: 2px;">Time: <span id="final-time-3d">0.0</span>s</div>
+        <div class="overlay-text" style="font-size: 18px; margin-top: 4px; font-weight: bold;">Score: <span id="final-score-3d">0</span></div>
+        <div class="overlay-text" style="font-size: 14px; color: #f1c40f; margin-top: 2px;">Best: <span id="overlay-best-3d">0</span></div>
+        
+        <!-- Leaderboard Input -->
+        <div id="leaderboard-input-go-3d" style="display: none; margin-top: 10px; text-align: center; width: 100%;">
+            <div id="leaderboard-heading-go-3d" style="font-size: 13px; color: #f1c40f; margin-bottom: 4px; font-weight: bold;">🎉 NEW HIGH SCORE! 🎉</div>
+            <div style="display: flex; gap: 5px; justify-content: center; width: 100%;">
+                <input type="text" id="player-name-go-3d" placeholder="ENTER NAME" maxlength="6" style="padding: 6px; font-size: 13px; border: 2px solid #2ecc71; border-radius: 4px; background: #2c3e50; color: white; font-family: inherit; text-align: center; width: 120px; text-transform: uppercase;" onkeydown="if(event.key === 'Enter') submitScore3D('player-name-go-3d', 'leaderboard-input-go-3d', 'leaderboard-records-go-3d')">
+                <button onclick="submitScore3D('player-name-go-3d', 'leaderboard-input-go-3d', 'leaderboard-records-go-3d')" style="padding: 6px 12px; font-size: 13px; margin-top: 0; box-shadow: none;">Submit</button>
+            </div>
+        </div>
+
+        <!-- Leaderboard List -->
+        <div id="leaderboard-list-go-3d" style="margin-top: 10px; width: 100%; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; box-sizing: border-box;">
+            <div style="font-size: 13px; color: #f1c40f; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">TOP 10 LEADERBOARD</div>
+            <div id="leaderboard-records-go-3d" style="font-size: 12px; line-height: 1.4; text-align: left; max-height: 100px; overflow-y: auto;"></div>
+        </div>
+
+        <button onclick="resetGame()" style="margin-top: 12px; padding: 8px 20px; font-size: 14px;">Try Again</button>
     </div>
 </div>
 
 <div id="victory-overlay">
-    <div class="overlay-card">
-        <div class="overlay-title" id="victory-title" style="color: #f1c40f;">🏁 YOU WIN! 🏁</div>
-        <div class="overlay-text" id="victory-standings">You crossed the finish line!</div>
-        <button onclick="resetGame()">Play Again</button>
+    <div class="overlay-card" style="padding: 20px; box-sizing: border-box; max-width: 320px; width: 90%;">
+        <div class="overlay-title" id="victory-title" style="color: #f1c40f; font-size: 26px;">🏁 YOU WIN! 🏁</div>
+        <div class="overlay-text" id="victory-standings" style="font-size: 13px; color: #bdc3c7; line-height: 1.3;">You crossed the finish line!</div>
+        <div class="overlay-text" style="font-size: 15px; margin-top: 5px; text-align: center;">Time: <span id="final-time-vic-3d">0.0</span>s</div>
+        <div class="overlay-text" style="font-size: 18px; margin-top: 4px; font-weight: bold; text-align: center;">Score: <span id="final-score-vic-3d">0</span></div>
+        <div class="overlay-text" style="font-size: 14px; color: #f1c40f; margin-top: 5px; text-align: center;">Best: <span id="overlay-best-vic-3d">0</span></div>
+        
+        <!-- Leaderboard Input -->
+        <div id="leaderboard-input-vic-3d" style="display: none; margin-top: 10px; text-align: center; width: 100%;">
+            <div id="leaderboard-heading-vic-3d" style="font-size: 13px; color: #f1c40f; margin-bottom: 4px; font-weight: bold;">🎉 NEW HIGH SCORE! 🎉</div>
+            <div style="display: flex; gap: 5px; justify-content: center; width: 100%;">
+                <input type="text" id="player-name-vic-3d" placeholder="ENTER NAME" maxlength="6" style="padding: 6px; font-size: 13px; border: 2px solid #2ecc71; border-radius: 4px; background: #2c3e50; color: white; font-family: inherit; text-align: center; width: 120px; text-transform: uppercase;" onkeydown="if(event.key === 'Enter') submitScore3D('player-name-vic-3d', 'leaderboard-input-vic-3d', 'leaderboard-records-vic-3d')">
+                <button onclick="submitScore3D('player-name-vic-3d', 'leaderboard-input-vic-3d', 'leaderboard-records-vic-3d')" style="padding: 6px 12px; font-size: 13px; margin-top: 0; box-shadow: none;">Submit</button>
+            </div>
+        </div>
+
+        <!-- Leaderboard List -->
+        <div id="leaderboard-list-vic-3d" style="margin-top: 10px; width: 100%; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; box-sizing: border-box;">
+            <div style="font-size: 13px; color: #f1c40f; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">TOP 10 LEADERBOARD</div>
+            <div id="leaderboard-records-vic-3d" style="font-size: 12px; line-height: 1.4; text-align: left; max-height: 100px; overflow-y: auto;"></div>
+        </div>
+
+        <button onclick="resetGame()" style="margin-top: 12px; padding: 8px 20px; font-size: 14px;">Play Again</button>
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="vehicle_models.js"></script>
+<script src="../leaderboard/leaderboard.js"></script>
 <script>
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87ceeb);
@@ -871,6 +914,8 @@
     }
 
     let isPlaying = false;
+    const leaderboardManager = new Leaderboard('race_game_3d_leaderboard', 'race_game_3d_high_score');
+    let highScore3d = leaderboardManager.getBestScore();
     let finishTriggered = false;
     let playerX = 0;
     const VEHICLE_STATS = {
@@ -909,12 +954,51 @@
     const RACE_DISTANCE = 6000;
     let speedPenaltyTimer = 0;
     let finishedRacersCount = 0;
+    let gameTime = 0;
+    let lastFrameTime = Date.now();
     let playerFinishRank = 0;
     let opponents = [];
     let traffic = [];
     let lastTrafficSpawnDist = 0;
 
     document.addEventListener('keydown', (e) => {
+        if (e.target && e.target.tagName === 'INPUT') return;
+        
+        const launchScreen = document.getElementById('launch-screen');
+        const launchVisible = launchScreen && launchScreen.style.display !== 'none';
+        
+        if (!isPlaying) {
+            if (launchVisible) {
+                if (e.key === 'Enter') {
+                    pressStart();
+                    return;
+                }
+                if (e.key === 'ArrowLeft') {
+                    if (selectedVehicleType === 'car') selectVehicle('truck');
+                    else if (selectedVehicleType === 'futuristic') selectVehicle('car');
+                    else if (selectedVehicleType === 'truck') selectVehicle('futuristic');
+                    return;
+                }
+                if (e.key === 'ArrowRight') {
+                    if (selectedVehicleType === 'car') selectVehicle('futuristic');
+                    else if (selectedVehicleType === 'futuristic') selectVehicle('truck');
+                    else if (selectedVehicleType === 'truck') selectVehicle('car');
+                    return;
+                }
+            } else {
+                if (e.key === 'Enter') {
+                    const goOverlay = document.getElementById('game-over-overlay');
+                    const vicOverlay = document.getElementById('victory-overlay');
+                    const goVisible = goOverlay && goOverlay.style.display === 'flex';
+                    const vicVisible = vicOverlay && vicOverlay.style.display === 'flex';
+                    if (goVisible || vicVisible) {
+                        resetGame();
+                        return;
+                    }
+                }
+            }
+        }
+        
         if (e.key === " ") { keys.Space = true; e.preventDefault(); }
         if (e.key === "ArrowLeft") keys.ArrowLeft = true;
         if (e.key === "ArrowRight") keys.ArrowRight = true;
@@ -929,6 +1013,7 @@
     });
 
     document.addEventListener('keyup', (e) => {
+        if (e.target && e.target.tagName === 'INPUT') return;
         if (e.key === " ") keys.Space = false;
         if (e.key === "ArrowLeft") keys.ArrowLeft = false;
         if (e.key === "ArrowRight") keys.ArrowRight = false;
@@ -966,6 +1051,8 @@
         finishedRacersCount = 0;
         playerFinishRank = 0;
         playerX = 0;
+        gameTime = 0;
+        lastFrameTime = Date.now();
 
         const stats = VEHICLE_STATS[selectedVehicleType];
         baseSpeed = stats.baseSpeed;
@@ -1072,6 +1159,10 @@
     }
 
     function gameLoop() {
+        const now = Date.now();
+        const delta = (now - lastFrameTime) / 1000;
+        lastFrameTime = now;
+
         if (isCrashed) {
             crashTimer++;
 
@@ -1262,6 +1353,8 @@
             requestAnimationFrame(gameLoop);
             return;
         }
+
+        gameTime += delta;
 
         const stats = VEHICLE_STATS[selectedVehicleType];
         
@@ -1795,20 +1888,63 @@
         document.getElementById('pos-label').innerText = posText + " / 4";
         document.getElementById('speed-label').innerText = (currentSpeed * 135).toFixed(0);
         document.getElementById('distance-label').innerText = (playerDist / 10).toFixed(0) + "m / " + (RACE_DISTANCE / 10).toFixed(0) + "m";
+        document.getElementById('time-label').innerText = gameTime.toFixed(1) + "s";
+        document.getElementById('score-label').innerText = getCalculatedScore3D();
         document.getElementById('progress-bar').style.width = Math.min(100, (playerDist / RACE_DISTANCE) * 100) + "%";
 
         renderer.render(scene, camera);
         requestAnimationFrame(gameLoop);
     }
 
+    function getCalculatedScore3D() {
+        const distance = playerDist / 10;
+        return gameTime > 0 ? Math.round((distance * distance) / gameTime) : 0;
+    }
+
+    function displayLeaderboard3D(recordsContainerId, inputContainerId, finalScore, checkScore, headingId, bestSpanId) {
+        leaderboardManager.render(recordsContainerId, inputContainerId, finalScore, checkScore, headingId, bestSpanId, true);
+    }
+
+    function submitScore3D(nameInputId, inputContainerId, recordsContainerId) {
+        const nameInput = document.getElementById(nameInputId);
+        const name = nameInput ? nameInput.value.trim() : '';
+        const finalScore = getCalculatedScore3D();
+        
+        leaderboardManager.submit(name, finalScore);
+        
+        const inputContainer = document.getElementById(inputContainerId);
+        if (inputContainer) inputContainer.style.display = 'none';
+        
+        leaderboardManager.render(recordsContainerId, null, finalScore, false, null, null, true);
+        
+        highScore3d = leaderboardManager.getBestScore();
+        const pbScore3d = document.getElementById('pb-score-3d');
+        if (pbScore3d) pbScore3d.innerText = highScore3d;
+        const hudHighScore = document.getElementById('hud-high-score-3d');
+        if (hudHighScore) hudHighScore.innerText = highScore3d;
+    }
+
     function gameOver() {
         isPlaying = false;
-        document.getElementById('final-score').innerText = (playerDist / 10).toFixed(0) + "m";
+        const finalScore = getCalculatedScore3D();
+        const finalDistM = Math.floor(playerDist / 10);
+        document.getElementById('final-distance-3d').innerText = finalDistM;
+        document.getElementById('final-time-3d').innerText = gameTime.toFixed(1);
+        document.getElementById('final-score-3d').innerText = finalScore;
+        
+        displayLeaderboard3D('leaderboard-records-go-3d', 'leaderboard-input-go-3d', finalScore, true, 'leaderboard-heading-go-3d', 'overlay-best-3d');
+        
         document.getElementById('game-over-overlay').style.display = 'flex';
     }
 
     function winGame() {
         isPlaying = false;
+        const finalScore = getCalculatedScore3D();
+        
+        document.getElementById('final-time-vic-3d').innerText = gameTime.toFixed(1);
+        document.getElementById('final-score-vic-3d').innerText = finalScore;
+        
+        displayLeaderboard3D('leaderboard-records-vic-3d', 'leaderboard-input-vic-3d', finalScore, true, 'leaderboard-heading-vic-3d', 'overlay-best-vic-3d');
         
         let positionText = "";
         if (playerFinishRank === 1) {
@@ -1885,8 +2021,14 @@
         });
         traffic = [];
         
+        const goInput = document.getElementById('player-name-go-3d');
+        const vicInput = document.getElementById('player-name-vic-3d');
+        if (goInput) goInput.value = '';
+        if (vicInput) vicInput.value = '';
+
         clearParticles();
         createRoadEnvironment();
+        initHighScore();
     }
 
     window.addEventListener('resize', () => {
@@ -1895,7 +2037,20 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    function initHighScore() {
+        highScore3d = leaderboardManager.getBestScore();
+        const pbScore3d = document.getElementById('pb-score-3d');
+        if (pbScore3d) {
+            pbScore3d.innerText = highScore3d;
+        }
+        const hudHighScore = document.getElementById('hud-high-score-3d');
+        if (hudHighScore) {
+            hudHighScore.innerText = highScore3d;
+        }
+    }
+
     // Initialize & Start Preview Showroom Loop
+    initHighScore();
     selectVehicle('car');
     createRoadEnvironment();
     gameLoop();

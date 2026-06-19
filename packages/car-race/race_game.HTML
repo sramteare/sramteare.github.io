@@ -28,7 +28,7 @@
         #ui-bar {
             display: flex;
             justify-content: space-between;
-            font-size: 20px;
+            font-size: 14px;
             font-weight: bold;
             margin-bottom: 10px;
             width: 400px;
@@ -326,8 +326,11 @@
 <div id="game-container">
     <div id="nitro-label">🔥 NITRO ACTIVATED! 🔥</div>
     <div id="ui-bar">
-        <div>Score: <span id="score">0</span>/400</div>
-        <div>Level: <span id="level">1</span></div>
+        <div>DIST: <span id="hud-distance-2d">0</span>/400m</div>
+        <div>TIME: <span id="hud-time-2d">0.0</span>s</div>
+        <div>SCORE: <span id="score">0</span></div>
+        <div>BEST: <span id="hud-high-score-2d">0</span></div>
+        <div>LVL: <span id="level">1</span></div>
     </div>
     
     <div id="game-board">
@@ -336,6 +339,7 @@
         <div id="guardrail-right" class="guardrail"></div>
 
         <!-- Road markings -->
+        <div class="road-line" style="top: -150px;"></div>
         <div class="road-line" style="top: 0px;"></div>
         <div class="road-line" style="top: 150px;"></div>
         <div class="road-line" style="top: 300px;"></div>
@@ -348,17 +352,55 @@
         <div id="player"></div>
 
         <!-- Game Over Screen -->
-        <div id="game-over-screen" class="screen">
+        <div id="game-over-screen" class="screen" style="padding: 15px; box-sizing: border-box;">
             <div style="font-size: 30px; color: #e74c3c; font-weight: bold;">GAME OVER</div>
-            <div id="final-score" style="font-size: 20px; margin-top: 10px;">Score: 0</div>
-            <button onclick="resetGame()">Try Again</button>
+            <div style="font-size: 16px; margin-top: 5px;">Distance: <span id="final-distance">0</span>m</div>
+            <div style="font-size: 16px; margin-top: 2px;">Time: <span id="final-time">0.0</span>s</div>
+            <div style="font-size: 18px; margin-top: 5px; font-weight: bold;">Score: <span id="final-score">0</span></div>
+            <div style="font-size: 16px; color: #f1c40f; margin-top: 2px;">Best: <span id="overlay-best-2d">0</span></div>
+            
+            <!-- Leaderboard Input -->
+            <div id="leaderboard-input-go" style="display: none; margin-top: 10px; text-align: center; width: 85%;">
+                <div id="leaderboard-heading-go" style="font-size: 14px; color: #f1c40f; margin-bottom: 5px; font-weight: bold;">🎉 NEW HIGH SCORE! 🎉</div>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="player-name-go" placeholder="ENTER NAME" maxlength="6" style="flex: 1; padding: 6px; font-size: 14px; border: 2px solid #2ecc71; border-radius: 4px; background: #2c3e50; color: white; font-family: inherit; text-align: center; text-transform: uppercase;" onkeydown="if(event.key === 'Enter') submitScore2D('player-name-go', 'leaderboard-input-go', 'leaderboard-records-go')">
+                    <button onclick="submitScore2D('player-name-go', 'leaderboard-input-go', 'leaderboard-records-go')" style="padding: 6px 12px; font-size: 14px; margin-top: 0;">Submit</button>
+                </div>
+            </div>
+
+            <!-- Leaderboard List -->
+            <div id="leaderboard-list-go" style="margin-top: 10px; width: 85%; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; box-sizing: border-box;">
+                <div style="font-size: 14px; color: #f1c40f; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">TOP 10 LEADERBOARD</div>
+                <div id="leaderboard-records-go" style="font-size: 13px; line-height: 1.4; text-align: left; max-height: 120px; overflow-y: auto;"></div>
+            </div>
+            
+            <button onclick="resetGame()" style="margin-top: 15px;">Try Again</button>
         </div>
 
         <!-- Victory Screen -->
-        <div id="victory-screen" class="screen">
+        <div id="victory-screen" class="screen" style="padding: 15px; box-sizing: border-box;">
             <div style="font-size: 32px; color: #f1c40f; font-weight: bold;">🏁 YOU WIN! 🏁</div>
-            <div style="font-size: 18px; margin-top: 10px; color: #2ecc71;">You crossed the finish line!</div>
-            <button onclick="resetGame()">Play Again</button>
+            <div style="font-size: 16px; margin-top: 5px; color: #2ecc71;">You crossed the finish line!</div>
+            <div style="font-size: 16px; margin-top: 5px;">Time: <span id="final-time-vic">0.0</span>s</div>
+            <div style="font-size: 18px; margin-top: 5px; font-weight: bold;">Score: <span id="final-score-vic">0</span></div>
+            <div style="font-size: 16px; color: #f1c40f; margin-top: 2px;">Best: <span id="overlay-best-vic-2d">0</span></div>
+            
+            <!-- Leaderboard Input -->
+            <div id="leaderboard-input-vic" style="display: none; margin-top: 10px; text-align: center; width: 85%;">
+                <div id="leaderboard-heading-vic" style="font-size: 14px; color: #f1c40f; margin-bottom: 5px; font-weight: bold;">🎉 NEW HIGH SCORE! 🎉</div>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="player-name-vic" placeholder="ENTER NAME" maxlength="6" style="flex: 1; padding: 6px; font-size: 14px; border: 2px solid #2ecc71; border-radius: 4px; background: #2c3e50; color: white; font-family: inherit; text-align: center; text-transform: uppercase;" onkeydown="if(event.key === 'Enter') submitScore2D('player-name-vic', 'leaderboard-input-vic', 'leaderboard-records-vic')">
+                    <button onclick="submitScore2D('player-name-vic', 'leaderboard-input-vic', 'leaderboard-records-vic')" style="padding: 6px 12px; font-size: 14px; margin-top: 0;">Submit</button>
+                </div>
+            </div>
+
+            <!-- Leaderboard List -->
+            <div id="leaderboard-list-vic" style="margin-top: 10px; width: 85%; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; box-sizing: border-box;">
+                <div style="font-size: 14px; color: #f1c40f; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">TOP 10 LEADERBOARD</div>
+                <div id="leaderboard-records-vic" style="font-size: 13px; line-height: 1.4; text-align: left; max-height: 120px; overflow-y: auto;"></div>
+            </div>
+
+            <button onclick="resetGame()" style="margin-top: 15px;">Play Again</button>
         </div>
     </div>
 </div>
@@ -396,6 +438,7 @@
     <div class="orientation-subtitle">Please turn your device to portrait mode to play.</div>
 </div>
 
+<script src="../leaderboard/leaderboard.js"></script>
 <script>
     const board = document.getElementById('game-board');
     const player = document.getElementById('player');
@@ -406,8 +449,13 @@
     const gameOverScreen = document.getElementById('game-over-screen');
     const victoryScreen = document.getElementById('victory-screen');
     const finalScoreDisplay = document.getElementById('final-score');
+    const hudHighScoreDisplay = document.getElementById('hud-high-score-2d');
 
-    let score = 0;
+    let distanceCovered = 0;
+    let gameTime = 0;
+    let lastFrameTime = Date.now();
+    const leaderboardManager = new Leaderboard('race_game_2d_leaderboard', 'race_game_2d_high_score');
+    let highScore2d = leaderboardManager.getBestScore();
     let currentLevel = 1;
     let gameInterval;
     let enemyTimeout; // Switched to timeout for dynamic pacing
@@ -423,6 +471,13 @@
     let keys = { ArrowLeft: false, ArrowRight: false, Space: false };
 
     document.addEventListener('keydown', (e) => {
+        if (e.target && e.target.tagName === 'INPUT') return;
+        if (e.key === 'Enter') {
+            if (!isPlaying && (gameOverScreen.style.display === 'flex' || victoryScreen.style.display === 'flex')) {
+                resetGame();
+                return;
+            }
+        }
         if (e.key === " ") { keys.Space = true; e.preventDefault(); }
         if (e.key === "ArrowLeft") keys.ArrowLeft = true;
         if (e.key === "ArrowRight") keys.ArrowRight = true;
@@ -438,13 +493,18 @@
         isPlaying = true;
         isPaused = false;
         finishTriggered = false;
-        score = 0;
+        distanceCovered = 0;
+        gameTime = 0;
+        lastFrameTime = Date.now();
         currentLevel = 1;
         baseSpeed = 5;
         enemySpawnRate = 1400;
         
-        scoreDisplay.innerText = score;
+        document.getElementById('hud-distance-2d').innerText = '0';
+        document.getElementById('hud-time-2d').innerText = '0.0';
+        scoreDisplay.innerText = '0';
         levelDisplay.innerText = currentLevel;
+        if (hudHighScoreDisplay) hudHighScoreDisplay.innerText = highScore2d;
         
         gameOverScreen.style.display = 'none';
         victoryScreen.style.display = 'none';
@@ -473,8 +533,8 @@
     }
 
     function checkLevelUp() {
-        // Levels jump every 50 points
-        let calculatedLevel = Math.floor(score / 50) + 1;
+        // Levels jump every 80 meters
+        let calculatedLevel = Math.floor(distanceCovered / 80) + 1;
         
         if (calculatedLevel > currentLevel && currentLevel < 5) {
             currentLevel = calculatedLevel;
@@ -485,15 +545,32 @@
             enemySpawnRate = Math.max(600, enemySpawnRate - 250);
         }
 
-        // Trigger finish line at 400 points
-        if (score >= 400 && !finishTriggered) {
+        // Trigger finish line at 400 meters
+        if (distanceCovered >= 400 && !finishTriggered) {
             finishTriggered = true;
             finishLine.style.display = 'block';
         }
     }
 
     function updateGame() {
+        const now = Date.now();
+        const delta = (now - lastFrameTime) / 1000;
+        lastFrameTime = now;
+
         if (!isPlaying || isPaused) return;
+
+        // Increment time and distance covered
+        gameTime += delta;
+        if (!finishTriggered) {
+            distanceCovered += currentSpeed * 0.05;
+            if (distanceCovered > 400) distanceCovered = 400;
+        }
+
+        // Update HUD real-time
+        document.getElementById('hud-distance-2d').innerText = Math.floor(distanceCovered);
+        document.getElementById('hud-time-2d').innerText = gameTime.toFixed(1);
+        const currentScore = gameTime > 0 ? Math.round((distanceCovered * distanceCovered) / gameTime) : 0;
+        scoreDisplay.innerText = currentScore;
 
         // Speed management for Nitro Boost
         if (keys.Space) {
@@ -515,7 +592,9 @@
         document.querySelectorAll('.road-line').forEach(line => {
             let top = parseInt(line.style.top);
             line.style.top = (top + currentSpeed) + 'px';
-            if (top >= 600) line.style.top = '-80px';
+            if (top >= 600) {
+                line.style.top = (top - 750) + 'px';
+            }
         });
 
         // Move finish line if triggered
@@ -548,13 +627,10 @@
 
             if (top >= 600) {
                 enemy.remove();
-                if (!finishTriggered) {
-                    score += keys.Space ? 20 : 10;
-                    scoreDisplay.innerText = score;
-                    checkLevelUp();
-                }
             }
         });
+
+        checkLevelUp();
     }
 
     function createEnemy() {
@@ -584,12 +660,43 @@
         board.appendChild(enemy);
     }
 
+    function getCalculatedScore2D() {
+        return gameTime > 0 ? Math.round((distanceCovered * distanceCovered) / gameTime) : 0;
+    }
+
+    function displayLeaderboard(recordsContainerId, inputContainerId, checkScore, headingId, bestSpanId) {
+        const finalScore = getCalculatedScore2D();
+        leaderboardManager.render(recordsContainerId, inputContainerId, finalScore, checkScore, headingId, bestSpanId, false);
+    }
+
+    function submitScore2D(nameInputId, inputContainerId, recordsContainerId) {
+        const nameInput = document.getElementById(nameInputId);
+        const name = nameInput ? nameInput.value.trim() : '';
+        const finalScore = getCalculatedScore2D();
+        leaderboardManager.submit(name, finalScore);
+        
+        const inputContainer = document.getElementById(inputContainerId);
+        if (inputContainer) inputContainer.style.display = 'none';
+        
+        leaderboardManager.render(recordsContainerId, null, finalScore, false, null, null, false);
+        
+        highScore2d = leaderboardManager.getBestScore();
+        if (hudHighScoreDisplay) hudHighScoreDisplay.innerText = highScore2d;
+    }
+
     function gameOver() {
         isPlaying = false;
         clearInterval(gameInterval);
         clearTimeout(enemyTimeout);
         document.querySelectorAll('.enemy').forEach(e => e.remove());
-        finalScoreDisplay.innerText = "Score Reached: " + score;
+        
+        const finalScore = getCalculatedScore2D();
+        finalScoreDisplay.innerText = finalScore;
+        document.getElementById('final-distance').innerText = Math.floor(distanceCovered);
+        document.getElementById('final-time').innerText = gameTime.toFixed(1);
+        
+        displayLeaderboard('leaderboard-records-go', 'leaderboard-input-go', true, 'leaderboard-heading-go', 'overlay-best-2d');
+        
         gameOverScreen.style.display = 'flex';
     }
 
@@ -598,10 +705,21 @@
         clearInterval(gameInterval);
         clearTimeout(enemyTimeout);
         document.querySelectorAll('.enemy').forEach(e => e.remove());
+        
+        const finalScore = getCalculatedScore2D();
+        document.getElementById('final-score-vic').innerText = finalScore;
+        document.getElementById('final-time-vic').innerText = gameTime.toFixed(1);
+        
+        displayLeaderboard('leaderboard-records-vic', 'leaderboard-input-vic', true, 'leaderboard-heading-vic', 'overlay-best-vic-2d');
+        
         victoryScreen.style.display = 'flex';
     }
 
     function resetGame() {
+        const goInput = document.getElementById('player-name-go');
+        const vicInput = document.getElementById('player-name-vic');
+        if (goInput) goInput.value = '';
+        if (vicInput) vicInput.value = '';
         startGame();
     }
 
@@ -712,6 +830,7 @@
     detectTouch();
     resizeGame();
     checkOrientation();
+    if (hudHighScoreDisplay) hudHighScoreDisplay.innerText = highScore2d;
 
     startGame();
 </script>
