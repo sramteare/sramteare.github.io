@@ -11,12 +11,16 @@ const htmlContent = rawHtmlContent
 
 const leaderboardCode = fs.readFileSync(path.resolve(__dirname, '../leaderboard/leaderboard.js'), 'utf8');
 
-function createDom(localStorageData = {}) {
+function createDom(localStorageData = {}, touchEnabled = false) {
     const dom = new JSDOM(htmlContent, {
         runScripts: "dangerously",
         resources: "usable",
         url: "http://localhost/",
         beforeParse(window) {
+            if (touchEnabled) {
+                window.ontouchstart = () => {};
+                Object.defineProperty(window.navigator, 'maxTouchPoints', { value: 5, configurable: true });
+            }
             window.setInterval = () => {};
             window.setTimeout = () => {};
             window.requestAnimationFrame = () => {};
@@ -307,6 +311,106 @@ describe('3D Race Game Leaderboard Logic', () => {
         // Assert playerDist and gameTime remained unchanged
         expect(dom.window.eval('playerDist')).toBe(0);
         expect(dom.window.eval('gameTime')).toBe(0);
+        dom.window.close();
+    });
+});
+
+describe('3D Race Game Mobile Friendly Features', () => {
+    it('should contain mobile controls and orientation screen elements in the HTML', () => {
+        const dom = createDom({});
+        const doc = dom.window.document;
+        expect(doc.getElementById('mobile-controls')).not.toBeNull();
+        expect(doc.getElementById('btn-left')).not.toBeNull();
+        expect(doc.getElementById('btn-right')).not.toBeNull();
+        expect(doc.getElementById('btn-nitro')).not.toBeNull();
+        expect(doc.getElementById('orientation-screen')).not.toBeNull();
+        dom.window.close();
+    });
+
+    it('should pause game and show overlay when touch device is in portrait mode', () => {
+        const dom = createDom({}, true);
+        const win = dom.window;
+        const doc = win.document;
+
+        // Force JSDOM window dimensions to portrait mobile
+        Object.defineProperty(win, 'innerWidth', { value: 375, writable: true });
+        Object.defineProperty(win, 'innerHeight', { value: 667, writable: true });
+        
+        // Mock active game state
+        win.eval('isPlaying = true; countdownActive = false;');
+
+        // Trigger orientation check
+        win.checkOrientation();
+
+        expect(doc.getElementById('orientation-screen').style.display).toBe('flex');
+        expect(win.eval('isPaused')).toBe(true);
+        dom.window.close();
+    });
+
+    it('should NOT pause game or show overlay when touch device is in landscape mode', () => {
+        const dom = createDom({}, true);
+        const win = dom.window;
+        const doc = win.document;
+
+        // Landscape mobile dimensions
+        Object.defineProperty(win, 'innerWidth', { value: 667, writable: true });
+        Object.defineProperty(win, 'innerHeight', { value: 375, writable: true });
+        
+        win.eval('isPlaying = true; countdownActive = false; isPaused = true;');
+
+        win.checkOrientation();
+
+        expect(doc.getElementById('orientation-screen').style.display).toBe('none');
+        expect(win.eval('isPaused')).toBe(false);
+        dom.window.close();
+    });
+
+    it('should auto-accelerate (set ArrowUp to true) when active racing is running on a touch device', () => {
+        const dom = createDom({}, true);
+        const win = dom.window;
+        
+        win.eval('isPlaying = true; countdownActive = false; keys.ArrowUp = false;');
+        
+        // Execute game loop logic
+        win.gameLoop();
+        
+        expect(win.eval('keys.ArrowUp')).toBe(true);
+        dom.window.close();
+    });
+
+    it('should map touch button pointer events to arrow/space key states', () => {
+        const dom = createDom({}, true);
+        const win = dom.window;
+        const doc = win.document;
+
+        const leftBtn = doc.getElementById('btn-left');
+        const rightBtn = doc.getElementById('btn-right');
+        const nitroBtn = doc.getElementById('btn-nitro');
+
+        // Dispatch pointerdown on left button
+        leftBtn.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+        expect(win.eval('keys.ArrowLeft')).toBe(true);
+
+        // Dispatch pointerup on left button
+        leftBtn.dispatchEvent(new win.PointerEvent('pointerup', { bubbles: true }));
+        expect(win.eval('keys.ArrowLeft')).toBe(false);
+
+        // Dispatch pointerdown on right button
+        rightBtn.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+        expect(win.eval('keys.ArrowRight')).toBe(true);
+
+        // Dispatch pointerup on right button
+        rightBtn.dispatchEvent(new win.PointerEvent('pointerup', { bubbles: true }));
+        expect(win.eval('keys.ArrowRight')).toBe(false);
+
+        // Dispatch pointerdown on nitro button
+        nitroBtn.dispatchEvent(new win.PointerEvent('pointerdown', { bubbles: true }));
+        expect(win.eval('keys.Space')).toBe(true);
+
+        // Dispatch pointerup on nitro button
+        nitroBtn.dispatchEvent(new win.PointerEvent('pointerup', { bubbles: true }));
+        expect(win.eval('keys.Space')).toBe(false);
+
         dom.window.close();
     });
 });
