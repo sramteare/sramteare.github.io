@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Void Drifter - 360° Space Shooter</title>
+    <title>Void Drifter 3D - 360° Space Shooter</title>
     <!-- Modern Tech Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,37 +85,177 @@
 
         <!-- Start Screen Overlay -->
         <div id="start-screen" class="overlay">
-            <div class="glass-card">
-                <h1 class="game-title">VOID DRIFTER</h1>
-                <p class="subtitle">360° Tactical Space Defense</p>
-                
-                <div class="story-text">
-                    Protect the central orbital station at coordinates (0,0) from mutating alien anomalies. Use Newtonian drift maneuvering to outflank the swarm. Collect floating scrap crystals to upgrade your systems.
+            <div class="glass-card" style="max-width: 780px;">
+                <div class="card-header">
+                    <h1 class="game-title">VOID DRIFTER</h1>
+                    <p class="subtitle">360° Tactical Space Defense</p>
                 </div>
+                
+                <div class="card-body">
+                    <div class="story-text">
+                        Protect the central orbital station at coordinates (0,0) from mutating alien anomalies. Use Newtonian drift maneuvering to outflank the swarm. Collect floating scrap crystals to upgrade your systems.
+                    </div>
 
-                <div class="controls-guide">
-                    <h3>MISSION CONTROLS</h3>
-                    <div class="controls-grid">
-                        <div class="control-key">W</div><div class="control-desc">Thrust / Accelerate</div>
-                        <div class="control-key">A / D</div><div class="control-desc">Rotate Left / Right</div>
-                        <div class="control-key">S</div><div class="control-desc">Reverse Thrusters</div>
-                        <div class="control-key">SPACEBAR</div><div class="control-desc">Fire Weapon</div>
-                        <div class="control-key">MOUSE CLICK</div><div class="control-desc">Fire Weapon</div>
-                        <div class="control-key">SHIFT</div><div class="control-desc">Warp Dash (Invulnerability)</div>
-                        <div class="control-key">E</div><div class="control-desc">Dock / Open Shop (Near Station)</div>
-                        <div class="control-key">G</div><div class="control-desc">Launch Next Wave Instantly</div>
+                    <div class="controls-guide">
+                        <h3>MISSION CONTROLS</h3>
+                        <div class="controls-carousel-wrapper">
+                            <button id="controls-scroll-left" class="scroll-arrow left" aria-label="Scroll Left">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                            </button>
+                            <div class="controls-scroll-container" id="controls-scroll-container">
+                                <div class="controls-grid">
+                                    <div class="control-item">
+                                        <div class="control-key">W</div>
+                                        <div class="control-desc">Thrust / Accelerate</div>
+                                    </div>
+                                    <div class="control-item">
+                                        <div class="control-key">A / D</div>
+                                        <div class="control-desc">Rotate Left / Right</div>
+                                    </div>
+                                    <div class="control-item">
+                                        <div class="control-key">S</div>
+                                        <div class="control-desc">Reverse Thrusters</div>
+                                    </div>
+                                    <div class="control-item">
+                                        <div class="control-key">SPACEBAR</div>
+                                        <div class="control-desc">Fire Weapon</div>
+                                    </div>
+                                    <div class="control-item">
+                                        <div class="control-key">MOUSE CLICK</div>
+                                        <div class="control-desc">Fire Weapon</div>
+                                    </div>
+                                    <div class="control-item">
+                                        <div class="control-key">SHIFT</div>
+                                        <div class="control-desc">Warp Dash (Invulnerability)</div>
+                                    </div>
+                                    <div class="control-item">
+                                        <div class="control-key">E</div>
+                                        <div class="control-desc">Dock / Open Shop</div>
+                                    </div>
+                                    <div class="control-item">
+                                        <div class="control-key">G</div>
+                                        <div class="control-desc">Launch Next Wave</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="controls-scroll-right" class="scroll-arrow right" aria-label="Scroll Right">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ship Selection -->
+                    <input type="hidden" id="selected-ship" value="vanguard">
+                    <div class="ship-selector">
+                        <h3>SELECT VESSEL</h3>
+                        <div class="ship-grid">
+                            <!-- Vanguard-7 -->
+                            <div class="ship-card selected" data-ship="vanguard">
+                                <div class="ship-name">VANGUARD-7</div>
+                                <div class="ship-subtitle">ALL-ROUNDER</div>
+                                <div class="ship-stats">
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">HUL</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 50%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">SHD</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 50%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">SPD</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 60%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">FPW</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 60%"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Wraith -->
+                            <div class="ship-card" data-ship="wraith">
+                                <div class="ship-name">WRAITH</div>
+                                <div class="ship-subtitle">GLASS CANNON</div>
+                                <div class="ship-stats">
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">HUL</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 27%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">SHD</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 27%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">SPD</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 100%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">FPW</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 90%"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Bastion -->
+                            <div class="ship-card" data-ship="bastion">
+                                <div class="ship-name">BASTION</div>
+                                <div class="ship-subtitle">HEAVY TANK</div>
+                                <div class="ship-stats">
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">HUL</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 100%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">SHD</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 83%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">SPD</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 33%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">FPW</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 40%"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Spectre -->
+                            <div class="ship-card" data-ship="spectre">
+                                <div class="ship-name">SPECTRE</div>
+                                <div class="ship-subtitle">SHIELD MASTER</div>
+                                <div class="ship-stats">
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">HUL</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 33%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">SHD</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 67%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">SPD</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 65%"></div></div>
+                                    </div>
+                                    <div class="ship-stat">
+                                        <span class="ship-stat-label">FPW</span>
+                                        <div class="ship-stat-track"><div class="ship-stat-fill" style="width: 55%"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="settings-option">
-                    <label class="switch-container">
-                        <input type="checkbox" id="toggle-station">
-                        <span class="custom-checkbox"></span>
-                        DISABLE CENTRAL STATION (SURVIVAL MODE)
-                    </label>
-                </div>
+                <div class="card-footer">
+                    <div class="settings-option">
+                        <label class="switch-container">
+                            <input type="checkbox" id="toggle-station">
+                            <span class="custom-checkbox"></span>
+                            DISABLE CENTRAL STATION (SURVIVAL MODE)
+                        </label>
+                    </div>
 
-                <button id="start-btn" class="glow-btn">INITIATE MISSION</button>
+                    <button id="start-btn" class="glow-btn">INITIATE MISSION</button>
+                </div>
             </div>
         </div>
 
@@ -231,9 +371,29 @@
                 <button id="restart-btn" class="glow-btn red-btn">REDEPLOY TEAM</button>
             </div>
         </div>
+
+        <!-- Mobile Controls Overlay (only visible on mobile/touch screens) -->
+        <div id="mobile-controls" class="hidden">
+            <!-- Left Joystick Zone -->
+            <div id="joystick-zone">
+                <div id="joystick-base">
+                    <div id="joystick-knob"></div>
+                </div>
+            </div>
+            
+            <!-- Right Actions Zone -->
+            <div id="mobile-actions">
+                <button id="btn-mobile-brake" class="mobile-action-btn neon-green-btn">BRAKE</button>
+                <button id="btn-mobile-dock" class="mobile-action-btn neon-orange-btn hidden">DOCK</button>
+                <button id="btn-mobile-dash" class="mobile-action-btn neon-blue-btn">DASH</button>
+                <button id="btn-mobile-fire" class="mobile-action-btn neon-red-btn">FIRE</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="models.js"></script>
     <script src="sound.js"></script>
     <script src="game.js"></script>
 </body>

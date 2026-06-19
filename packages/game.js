@@ -4,6 +4,70 @@
 const WORLD_SIZE = 4000; // Arena is 4000x4000 px (-2000 to +2000)
 const HALF_WORLD = WORLD_SIZE / 2;
 
+// --- Ship Classes Registry ---
+const SHIP_CLASSES = {
+    vanguard: {
+        name: 'VANGUARD-7',
+        subtitle: 'ALL-ROUNDER',
+        color: '#00f2ff',
+        meshType: 'vanguard',
+        maxHull: 150,
+        maxShield: 150,
+        thrustPower: 0.12,
+        maxSpeed: 6,
+        rotationSpeed: 0.033,
+        weaponDamage: 18,
+        weaponCooldownMax: 12,
+        shieldRechargeRate: 0.06,
+        shieldRechargeDelay: 120
+    },
+    wraith: {
+        name: 'WRAITH',
+        subtitle: 'GLASS CANNON',
+        color: '#b84dff',
+        meshType: 'wraith',
+        maxHull: 80,
+        maxShield: 80,
+        thrustPower: 0.18,
+        maxSpeed: 9,
+        rotationSpeed: 0.045,
+        weaponDamage: 22,
+        weaponCooldownMax: 8,
+        shieldRechargeRate: 0.04,
+        shieldRechargeDelay: 150
+    },
+    bastion: {
+        name: 'BASTION',
+        subtitle: 'HEAVY TANK',
+        color: '#ff6b00',
+        meshType: 'bastion',
+        maxHull: 300,
+        maxShield: 250,
+        thrustPower: 0.07,
+        maxSpeed: 4,
+        rotationSpeed: 0.022,
+        weaponDamage: 14,
+        weaponCooldownMax: 16,
+        shieldRechargeRate: 0.08,
+        shieldRechargeDelay: 100
+    },
+    spectre: {
+        name: 'SPECTRE',
+        subtitle: 'SHIELD MASTER',
+        color: '#00ff88',
+        meshType: 'spectre',
+        maxHull: 100,
+        maxShield: 200,
+        thrustPower: 0.13,
+        maxSpeed: 6.5,
+        rotationSpeed: 0.035,
+        weaponDamage: 16,
+        weaponCooldownMax: 10,
+        shieldRechargeRate: 0.12,
+        shieldRechargeDelay: 80
+    }
+};
+
 // --- Key Management ---
 const keys = {
     w: false, a: false, s: false, d: false,
@@ -64,6 +128,14 @@ class Particle {
         this.maxLife = life;
         this.life = life;
         this.friction = friction;
+
+        if (typeof THREE !== 'undefined' && game && game.scene) {
+            const mat = game.getParticleMaterial(color);
+            this.mesh = new THREE.Mesh(game.particleGeometry, mat.clone());
+            this.mesh.position.set(this.x, -this.y, 0);
+            this.mesh.scale.set(size / 3.0, size / 3.0, size / 3.0);
+            game.scene.add(this.mesh);
+        }
     }
 
     update() {
@@ -74,17 +146,15 @@ class Particle {
         this.life--;
     }
 
+    destroy() {
+        if (this.mesh && game && game.scene) {
+            game.scene.remove(this.mesh);
+            if (this.mesh.material) this.mesh.material.dispose();
+        }
+    }
+
     draw(ctx, camera) {
-        const drawX = this.x - camera.x;
-        const drawY = this.y - camera.y;
-        
-        ctx.save();
-        ctx.globalAlpha = this.life / this.maxLife;
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(drawX, drawY, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        // Rendered in WebGL loop
     }
 }
 
@@ -101,6 +171,13 @@ class Bullet {
         this.color = color;
         this.life = 120; // 2 seconds at 60 FPS
         this.angle = angle;
+
+        if (typeof THREE !== 'undefined' && game && game.scene) {
+            this.mesh = game.createBulletMesh(color);
+            this.mesh.position.set(this.x, -this.y, 0);
+            this.mesh.rotation.z = -angle;
+            game.scene.add(this.mesh);
+        }
     }
 
     update() {
@@ -109,21 +186,14 @@ class Bullet {
         this.life--;
     }
 
-    draw(ctx, camera) {
-        const drawX = this.x - camera.x;
-        const drawY = this.y - camera.y;
+    destroy() {
+        if (this.mesh && game && game.scene) {
+            game.scene.remove(this.mesh);
+        }
+    }
 
-        ctx.save();
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = this.color;
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(drawX - Math.cos(this.angle) * 8, drawY - Math.sin(this.angle) * 8);
-        ctx.lineTo(drawX, drawY);
-        ctx.stroke();
-        ctx.restore();
+    draw(ctx, camera) {
+        // Rendered in WebGL loop
     }
 }
 
@@ -139,6 +209,13 @@ class ScrapCrystal {
         this.color = '#ff9f00';
         this.angle = Math.random() * Math.PI * 2;
         this.rotSpeed = (Math.random() - 0.5) * 0.05;
+
+        if (typeof THREE !== 'undefined' && game && game.scene) {
+            this.mesh = game.createScrapMesh();
+            this.mesh.position.set(this.x, -this.y, 0);
+            this.mesh.rotation.z = -this.angle;
+            game.scene.add(this.mesh);
+        }
     }
 
     update(player, magnetRange) {
@@ -166,32 +243,23 @@ class ScrapCrystal {
         }
     }
 
-    draw(ctx, camera) {
-        const drawX = this.x - camera.x;
-        const drawY = this.y - camera.y;
+    destroy() {
+        if (this.mesh && game && game.scene) {
+            game.scene.remove(this.mesh);
+        }
+    }
 
-        ctx.save();
-        ctx.translate(drawX, drawY);
-        ctx.rotate(this.angle);
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = this.color;
-        ctx.fillStyle = this.color;
-        
-        // Draw crystalline diamond shape
-        ctx.beginPath();
-        ctx.moveTo(0, -this.radius);
-        ctx.lineTo(this.radius * 0.7, 0);
-        ctx.lineTo(0, this.radius);
-        ctx.lineTo(-this.radius * 0.7, 0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+    draw(ctx, camera) {
+        // Rendered in WebGL loop
     }
 }
 
 // --- Player Ship Class ---
 class PlayerShip {
-    constructor() {
+    constructor(shipType = 'vanguard') {
+        this.shipType = shipType;
+        const cfg = SHIP_CLASSES[shipType] || SHIP_CLASSES.vanguard;
+        
         this.x = 0;
         this.y = 350; // Spawn slightly below the central station
         this.vx = 0;
@@ -201,24 +269,25 @@ class PlayerShip {
         this.scrap = 0; // Fix scrap counter starting at undefined (NaN bug)
         this.isDestroyed = false; // Flag for death animation
         
-        // Base Stats (Modified by Upgrades)
-        this.maxShield = 150;
-        this.shield = 150;
-        this.maxHull = 150;
-        this.hull = 150;
+        // Base Stats (Loaded from ship class registry, modified by upgrades)
+        this.maxShield = cfg.maxShield;
+        this.shield = cfg.maxShield;
+        this.maxHull = cfg.maxHull;
+        this.hull = cfg.maxHull;
         
-        this.thrustPower = 0.12;
-        this.maxSpeed = 6;
-        this.rotationSpeed = 0.033; // Tuned down from 0.05 for smoother aiming
-        this.shieldRechargeRate = 0.06; // Boosted recharge
-        this.shieldRechargeDelay = 120; // 2 seconds
+        this.thrustPower = cfg.thrustPower;
+        this.maxSpeed = cfg.maxSpeed;
+        this.rotationSpeed = cfg.rotationSpeed;
+        this.shieldRechargeRate = cfg.shieldRechargeRate;
+        this.shieldRechargeDelay = cfg.shieldRechargeDelay;
         this.shieldTimer = 0;
+        this.shieldFlash = 0;
 
         // Weapons
         this.fireCooldown = 0;
         this.weaponLevel = 1;
-        this.weaponDamage = 18; // Boosted from 12
-        this.weaponCooldownMax = 12; // Lower is faster
+        this.weaponDamage = cfg.weaponDamage;
+        this.weaponCooldownMax = cfg.weaponCooldownMax;
 
         // Dash Ability
         this.dashCooldown = 0;
@@ -229,6 +298,13 @@ class PlayerShip {
         this.levelShield = 1;
         this.levelMagnet = 1;
         this.magnetRange = 120;
+
+        if (typeof THREE !== 'undefined' && game && game.scene) {
+            this.mesh = game.createPlayerShipMesh(shipType);
+            this.mesh.position.set(this.x, -this.y, 0);
+            this.mesh.rotation.z = -this.angle;
+            game.scene.add(this.mesh);
+        }
     }
 
     update() {
@@ -242,6 +318,11 @@ class PlayerShip {
             this.shieldTimer--;
         } else if (this.shield < this.maxShield) {
             this.shield = Math.min(this.maxShield, this.shield + this.shieldRechargeRate);
+        }
+
+        if (this.shieldFlash > 0) {
+            this.shieldFlash -= 0.04;
+            if (this.shieldFlash < 0) this.shieldFlash = 0;
         }
 
         // Warp Dash State Check
@@ -381,6 +462,7 @@ class PlayerShip {
         
         if (this.shield > 0) {
             this.shield -= amount;
+            this.shieldFlash = 1.0;
             if (typeof sounds !== 'undefined') sounds.shieldHit();
             
             // Shield hit ripple particles
@@ -423,68 +505,7 @@ class PlayerShip {
     }
 
     draw(ctx, camera) {
-        if (this.isDestroyed) return;
-        const drawX = this.x - camera.x;
-        const drawY = this.y - camera.y;
-
-        ctx.save();
-        ctx.translate(drawX, drawY);
-        ctx.rotate(this.angle);
-
-        // Retain glowing canvas shadows
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = '#00f2ff';
-
-        // Draw Player Ship (Vanguard-7 layout)
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2.5;
-        ctx.fillStyle = '#060f24';
-
-        ctx.beginPath();
-        // Nose
-        ctx.moveTo(18, 0);
-        // Right wingtip
-        ctx.lineTo(-12, 14);
-        // Back tail fins
-        ctx.lineTo(-8, 5);
-        ctx.lineTo(-12, 0);
-        ctx.lineTo(-8, -5);
-        // Left wingtip
-        ctx.lineTo(-12, -14);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Draw glowing reactor thrusters
-        ctx.fillStyle = '#ff6c00';
-        ctx.beginPath();
-        ctx.arc(-11, -3, 2.5, 0, Math.PI * 2);
-        ctx.arc(-11, 3, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-
-        // Draw active energy shields around ship if active
-        if (this.shield > 0) {
-            ctx.save();
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#00f2ff';
-            ctx.strokeStyle = `rgba(0, 242, 255, ${0.1 + (this.shield / this.maxShield) * 0.4})`;
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(drawX, drawY, this.radius + 6, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // Faint glassy radial fill inside the circle to make it look solid and three-dimensional
-            const shieldGrad = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, this.radius + 6);
-            shieldGrad.addColorStop(0, 'rgba(0, 242, 255, 0)');
-            shieldGrad.addColorStop(0.75, `rgba(0, 242, 255, ${(this.shield / this.maxShield) * 0.04})`);
-            shieldGrad.addColorStop(1, `rgba(0, 242, 255, ${(this.shield / this.maxShield) * 0.15})`);
-            ctx.fillStyle = shieldGrad;
-            ctx.fill();
-            
-            ctx.restore();
-        }
+        // Rendered in WebGL loop
     }
 }
 
@@ -507,6 +528,7 @@ class SpaceStation {
         this.shieldRecharge = 0;
         this.shieldRechargeDelay = 180; // 3 seconds
         this.shieldTimer = 0;
+        this.shieldFlash = 0;
 
         // Auto Defense Turrets
         this.turretLevel = 0; // Starts at 0 (defenseless)
@@ -517,6 +539,12 @@ class SpaceStation {
         this.turretCooldownMax = 45; // Fires every 0.75 seconds (Faster fire rate)
 
         this.angle = 0; // Rotate slowly for visual style
+
+        if (typeof THREE !== 'undefined' && game && game.scene) {
+            this.mesh = game.createSpaceStationMesh();
+            this.mesh.position.set(this.x, -this.y, 0);
+            // We only add it to scene if not disabled, which is handled in start()
+        }
     }
 
     update(enemies) {
@@ -527,6 +555,11 @@ class SpaceStation {
             this.shieldTimer--;
         } else if (this.shield < this.maxShield) {
             this.shield = Math.min(this.maxShield, this.shield + this.shieldRecharge);
+        }
+
+        if (this.shieldFlash > 0) {
+            this.shieldFlash -= 0.04;
+            if (this.shieldFlash < 0) this.shieldFlash = 0;
         }
 
         // Automated Defense Turrets firing sequence
@@ -572,6 +605,7 @@ class SpaceStation {
         this.shieldTimer = this.shieldRechargeDelay;
         if (this.shield > 0) {
             this.shield -= amount;
+            this.shieldFlash = 1.0;
             if (typeof sounds !== 'undefined') sounds.shieldHit();
             
             // Shield spark particles
@@ -613,126 +647,7 @@ class SpaceStation {
     }
 
     draw(ctx, camera) {
-        if (this.isDestroyed) return;
-        const drawX = this.x - camera.x;
-        const drawY = this.y - camera.y;
-
-        // Draw Docking Zone ring (light dashed overlay)
-        ctx.save();
-        ctx.strokeStyle = 'rgba(0, 242, 255, 0.05)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([5, 10]);
-        ctx.beginPath();
-        ctx.arc(drawX, drawY, this.dockRadius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.translate(drawX, drawY);
-        ctx.rotate(this.angle);
-
-        // Core Reactor Glow
-        ctx.shadowBlur = 25;
-        ctx.shadowColor = '#00f2ff';
-        ctx.fillStyle = '#0a1a3a';
-        ctx.strokeStyle = '#00f2ff';
-        ctx.lineWidth = 3.5;
-        
-        // Main core ring
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radius - 20, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        // Concentric Outer Panels
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 4; i++) {
-            ctx.rotate(Math.PI / 2);
-            ctx.beginPath();
-            ctx.moveTo(this.radius - 20, -10);
-            ctx.lineTo(this.radius + 15, -25);
-            ctx.lineTo(this.radius + 15, 25);
-            ctx.lineTo(this.radius - 20, 10);
-            ctx.closePath();
-            ctx.fillStyle = '#030815';
-            ctx.fill();
-            ctx.stroke();
-            
-            // Solar solar grid highlights
-            ctx.strokeStyle = 'rgba(0, 242, 255, 0.3)';
-            ctx.beginPath();
-            ctx.moveTo(this.radius - 5, -12);
-            ctx.lineTo(this.radius + 10, -20);
-            ctx.moveTo(this.radius - 5, 12);
-            ctx.lineTo(this.radius + 10, 20);
-            ctx.stroke();
-            ctx.strokeStyle = '#fff';
-        }
-
-        // Center Reactor Core (super glow)
-        ctx.shadowBlur = 35;
-        ctx.shadowColor = '#00f2ff';
-        ctx.fillStyle = '#e0faff';
-        ctx.beginPath();
-        ctx.arc(0, 0, 15, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-
-        // Draw Turrets on the Station perimeter (stable relative to station rotation)
-        if (this.turretsCount > 0) {
-            ctx.save();
-            ctx.translate(drawX, drawY);
-            ctx.fillStyle = '#404050';
-            ctx.strokeStyle = '#00f2ff';
-            ctx.lineWidth = 1.5;
-            
-            for (let i = 0; i < this.turretsCount; i++) {
-                // Distribute turrets evenly around station perimeter
-                const tAngle = (i * (Math.PI * 2 / this.turretsCount));
-                ctx.save();
-                ctx.rotate(tAngle);
-                
-                // Gun mount pod
-                ctx.beginPath();
-                ctx.arc(this.radius - 15, 0, 8, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-
-                // Gun barrels (pointing outwards)
-                ctx.fillStyle = '#101015';
-                ctx.beginPath();
-                ctx.rect(this.radius - 15, -3, 20, 6);
-                ctx.fill();
-                ctx.stroke();
-                
-                ctx.restore();
-            }
-            ctx.restore();
-        }
-
-        // Station Energy Shield Ring
-        if (this.shield > 0) {
-            ctx.save();
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = '#00f2ff';
-            ctx.strokeStyle = `rgba(0, 242, 255, ${0.08 + (this.shield / this.maxShield) * 0.3})`;
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.arc(drawX, drawY, this.radius + 25, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // Faint glassy radial fill inside the station shield ring
-            const shieldGrad = ctx.createRadialGradient(drawX, drawY, this.radius - 10, drawX, drawY, this.radius + 25);
-            shieldGrad.addColorStop(0, 'rgba(0, 242, 255, 0)');
-            shieldGrad.addColorStop(0.7, `rgba(0, 242, 255, ${(this.shield / this.maxShield) * 0.02})`);
-            shieldGrad.addColorStop(1, `rgba(0, 242, 255, ${(this.shield / this.maxShield) * 0.1})`);
-            ctx.fillStyle = shieldGrad;
-            ctx.fill();
-            
-            ctx.restore();
-        }
+        // Rendered in WebGL loop
     }
 }
 
@@ -766,7 +681,7 @@ class Enemy {
             this.radius = 18;
             this.maxHp = Math.round(45 * diffMultiplier);
             this.speed = 1.6 * speedMultiplier;
-            this.color = '#00ff66';
+            this.color = '#ff7700';
             this.points = 400;
             this.collisionDmg = Math.round(20 * damageMultiplier);
             this.fireCooldown = Math.random() * 60; // Offset start
@@ -784,6 +699,12 @@ class Enemy {
         
         this.hp = this.maxHp;
         this.angle = 0;
+
+        if (typeof THREE !== 'undefined' && game && game.scene) {
+            this.mesh = game.createEnemyMesh(this.type);
+            this.mesh.position.set(this.x, -this.y, 0);
+            game.scene.add(this.mesh);
+        }
     }
 
     update(player, station) {
@@ -918,70 +839,13 @@ class Enemy {
     }
 
     draw(ctx, camera) {
-        const drawX = this.x - camera.x;
-        const drawY = this.y - camera.y;
-
-        ctx.save();
-        ctx.translate(drawX, drawY);
-        ctx.rotate(this.angle);
-
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = this.color;
-        ctx.strokeStyle = this.color;
-        ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        ctx.lineWidth = 2;
-
-        if (this.type === 'swarmer') {
-            // Draw standard glowing delta blade shape
-            ctx.beginPath();
-            ctx.moveTo(12, 0);
-            ctx.lineTo(-8, 9);
-            ctx.lineTo(-4, 0);
-            ctx.lineTo(-8, -9);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-        } else if (this.type === 'bomber') {
-            // Draw hexagonal glowing defensive structure
-            ctx.beginPath();
-            for (let i = 0; i < 6; i++) {
-                const bAngle = (Math.PI / 3) * i;
-                ctx.lineTo(Math.cos(bAngle) * this.radius, Math.sin(bAngle) * this.radius);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            
-            // Core weapon port
-            ctx.fillStyle = '#fff';
-            ctx.beginPath();
-            ctx.arc(4, 0, 4, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (this.type === 'behemoth') {
-            // Large spiked armored boss ship
-            ctx.beginPath();
-            ctx.moveTo(32, 0);
-            ctx.lineTo(10, 20);
-            ctx.lineTo(15, 32);
-            ctx.lineTo(-12, 28);
-            ctx.lineTo(-20, 15);
-            ctx.lineTo(-14, 0);
-            ctx.lineTo(-20, -15);
-            ctx.lineTo(-12, -28);
-            ctx.lineTo(15, -32);
-            ctx.lineTo(10, -20);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Inner core
-            ctx.fillStyle = 'rgba(191, 0, 255, 0.4)';
-            ctx.beginPath();
-            ctx.arc(-2, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
+        // Rendered in WebGL loop
+    }
+    
+    destroy() {
+        if (this.mesh && game && game.scene) {
+            game.scene.remove(this.mesh);
         }
-
-        ctx.restore();
     }
 }
 
@@ -989,8 +853,68 @@ class Enemy {
 class GameEngine {
     constructor() {
         this.canvas = document.getElementById('game-canvas');
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = (typeof THREE === 'undefined') ? this.canvas.getContext('2d') : null;
         
+        // Setup Three.js Scene, Camera, Renderer, Lighting, Grid and Starfield
+        if (typeof THREE !== 'undefined') {
+            this.scene = new THREE.Scene();
+            this.scene.background = new THREE.Color('#020207');
+            this.scene.fog = new THREE.FogExp2('#020207', 0.001);
+
+            this.camera3D = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 3000);
+            this.camera3D.position.set(0, -180, 450);
+            this.camera3D.lookAt(0, 0, 0);
+
+            this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.renderer.setPixelRatio(window.devicePixelRatio || 1);
+            this.renderer.shadowMap.enabled = true;
+
+            const ambientLight = new THREE.AmbientLight('#ffffff', 0.3);
+            this.scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight('#00f2ff', 1.2);
+            sunLight.position.set(200, 300, 400);
+            this.scene.add(sunLight);
+
+            const backLight = new THREE.DirectionalLight('#ff7a00', 0.6);
+            backLight.position.set(-200, -300, 200);
+            this.scene.add(backLight);
+
+            // Grid helper on XY plane
+            this.gridHelper = new THREE.GridHelper(WORLD_SIZE, 40, '#00f2ff', '#00f2ff');
+            this.gridHelper.rotation.x = Math.PI / 2;
+            this.gridHelper.material.opacity = 0.08;
+            this.gridHelper.material.transparent = true;
+            this.scene.add(this.gridHelper);
+
+            // Boundaries
+            const boundaryGeo = new THREE.BoxGeometry(WORLD_SIZE, WORLD_SIZE, 10);
+            const boundaryEdges = new THREE.EdgesGeometry(boundaryGeo);
+            const boundaryMat = new THREE.LineBasicMaterial({ color: '#00f2ff', transparent: true, opacity: 0.25 });
+            this.boundaryLines = new THREE.LineSegments(boundaryEdges, boundaryMat);
+            this.boundaryLines.position.set(0, 0, -5);
+            this.scene.add(this.boundaryLines);
+
+            // Shared geometries & materials
+            this.bulletGeometry = new THREE.CylinderGeometry(1.5, 1.5, 12, 8);
+            this.bulletGeometry.rotateZ(Math.PI / 2);
+
+            this.scrapGeometry = new THREE.OctahedronGeometry(6, 0);
+            this.scrapMaterial = new THREE.MeshStandardMaterial({
+                color: '#ff9f00',
+                emissive: '#3d1c00',
+                roughness: 0.1,
+                metalness: 0.9,
+                flatShading: true
+            });
+
+            this.particleGeometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
+            this.particleMaterials = {};
+
+
+        }
+
         // Entities Containers
         this.player = new PlayerShip();
         this.station = new SpaceStation();
@@ -1018,7 +942,11 @@ class GameEngine {
         this.deathTimer = 0;
 
         // Visual Parallax Elements
-        this.initStars();
+        if (typeof THREE !== 'undefined') {
+            this.initStars3D();
+        } else {
+            this.initStars();
+        }
         this.initResize();
     }
 
@@ -1036,34 +964,153 @@ class GameEngine {
         }
     }
 
+    initStars3D() {
+        const starCount = 600;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(starCount * 3);
+        const colors = new Float32Array(starCount * 3);
+
+        const colorOptions = [
+            new THREE.Color('#00f2ff'),
+            new THREE.Color('#ff9f00'),
+            new THREE.Color('#ffffff'),
+            new THREE.Color('#ffffff')
+        ];
+
+        for (let i = 0; i < starCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * WORLD_SIZE * 1.5;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * WORLD_SIZE * 1.5;
+            positions[i * 3 + 2] = -100 - Math.random() * 1100;
+
+            const c = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+            colors[i * 3] = c.r;
+            colors[i * 3 + 1] = c.g;
+            colors[i * 3 + 2] = c.b;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 16;
+        canvas.height = 16;
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 16, 16);
+        const starTexture = new THREE.CanvasTexture(canvas);
+
+        const material = new THREE.PointsMaterial({
+            size: 4.5,
+            vertexColors: true,
+            map: starTexture,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        this.starfield = new THREE.Points(geometry, material);
+        this.scene.add(this.starfield);
+    }
+
+    getParticleMaterial(color) {
+        if (!this.particleMaterials[color]) {
+            this.particleMaterials[color] = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+        }
+        return this.particleMaterials[color];
+    }
+
+    // --- Model creation delegated to shared VoidModels module ---
+    createPlayerShipMesh(shipType) {
+        return VoidModels.createPlayerShipMesh(shipType);
+    }
+
+    createSpaceStationMesh() {
+        return VoidModels.createSpaceStationMesh();
+    }
+
+    createEnemyMesh(type) {
+        return VoidModels.createEnemyMesh(type);
+    }
+
+    createScrapMesh() {
+        return new THREE.Mesh(this.scrapGeometry, this.scrapMaterial);
+    }
+
+    createBulletMesh(color) {
+        return new THREE.Mesh(this.bulletGeometry, new THREE.MeshBasicMaterial({ color: color }));
+    }
+
+
     initResize() {
         window.addEventListener('resize', () => this.resizeCanvas());
         this.resizeCanvas();
     }
 
     resizeCanvas() {
-        // High-DPI responsive canvas sizing
-        const dpr = window.devicePixelRatio || 1;
         const width = window.innerWidth;
         const height = window.innerHeight;
         
-        this.canvas.width = width * dpr;
-        this.canvas.height = height * dpr;
+        if (this.renderer) {
+            this.renderer.setSize(width, height);
+        }
+        if (this.camera3D) {
+            this.camera3D.aspect = width / height;
+            this.camera3D.updateProjectionMatrix();
+        }
+
+        this.canvas.width = width * (window.devicePixelRatio || 1);
+        this.canvas.height = height * (window.devicePixelRatio || 1);
         this.canvas.style.width = width + 'px';
         this.canvas.style.height = height + 'px';
         
-        this.ctx.resetTransform();
-        this.ctx.scale(dpr, dpr);
+        if (this.ctx) {
+            this.ctx.resetTransform();
+            this.ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+        }
+    }
+
+    clear3DScene() {
+        if (!this.scene) return;
+        const toRemove = [];
+        this.scene.traverse((object) => {
+            if (object.isMesh || object.isGroup || object.isLineSegments || object.isPoints) {
+                if (object !== this.gridHelper && object !== this.boundaryLines && object !== this.starfield && object.parent === this.scene) {
+                    toRemove.push(object);
+                }
+            }
+        });
+        toRemove.forEach(object => this.scene.remove(object));
     }
 
     start() {
+        if (typeof activePreviews !== 'undefined') {
+            activePreviews.forEach(p => p.cleanup());
+            activePreviews.length = 0;
+        }
+
         if (typeof sounds !== 'undefined') sounds.init();
         
         const toggleCheckbox = document.getElementById('toggle-station');
         this.disableStation = toggleCheckbox ? toggleCheckbox.checked : false;
+
+        // Read selected ship type from UI
+        const shipInput = document.getElementById('selected-ship');
+        this.selectedShipType = shipInput ? shipInput.value : 'vanguard';
         
+        if (typeof THREE !== 'undefined') {
+            this.clear3DScene();
+            if (this.gridHelper) this.gridHelper.visible = true;
+        }
+
         // Reset metrics
-        this.player = new PlayerShip();
+        this.player = new PlayerShip(this.selectedShipType);
         this.station = new SpaceStation();
         this.enemies = [];
         this.bullets = [];
@@ -1080,6 +1127,13 @@ class GameEngine {
         this.deathTimer = 0;
         this.defeatReason = '';
 
+        if (typeof THREE !== 'undefined') {
+            if (this.player.mesh) this.scene.add(this.player.mesh);
+            if (!this.disableStation && this.station.mesh) {
+                this.scene.add(this.station.mesh);
+            }
+        }
+
         if (this.disableStation) {
             document.getElementById('station-hud-header').style.display = 'none';
             document.getElementById('station-shield-container').style.display = 'none';
@@ -1095,6 +1149,10 @@ class GameEngine {
             document.querySelector('.shop-grid').style.gridTemplateColumns = '1fr 1fr';
             document.querySelector('.shop-card').style.maxWidth = '850px';
         }
+
+        // Update HUD ship name to match selected vessel
+        const shipCfg = SHIP_CLASSES[this.selectedShipType] || SHIP_CLASSES.vanguard;
+        document.querySelector('.player-panel .panel-header').innerText = shipCfg.name + ' HULL';
 
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
@@ -1114,7 +1172,7 @@ class GameEngine {
         
         const reasonText = this.defeatReason === 'station_destroyed' 
             ? "STATION CORE BREACHED - BASE OBLITERATED"
-            : "VANGUARD-7 HULL INTEGRITY CRITICAL - SHIP DESTROYED";
+            : `${(SHIP_CLASSES[this.selectedShipType] || SHIP_CLASSES.vanguard).name} HULL INTEGRITY CRITICAL - SHIP DESTROYED`;
         document.getElementById('game-over-reason').innerText = reasonText;
         
         document.getElementById('final-waves').innerText = this.wave;
@@ -1310,6 +1368,16 @@ class GameEngine {
             }
         }
 
+        // Update mobile dock button visibility
+        const mobileDockBtn = document.getElementById('btn-mobile-dock');
+        if (mobileDockBtn) {
+            if (dockPrompt && dockPrompt.style.display === 'block') {
+                mobileDockBtn.classList.remove('hidden');
+            } else {
+                mobileDockBtn.classList.add('hidden');
+            }
+        }
+
         // Run director and entity update if not docked in menu
         if (!this.isDocked && !this.player.isDestroyed) {
             this.player.update();
@@ -1342,6 +1410,7 @@ class GameEngine {
             const b = this.bullets[i];
             b.update();
             if (b.life <= 0) {
+                b.destroy();
                 this.bullets.splice(i, 1);
             }
         }
@@ -1386,6 +1455,7 @@ class GameEngine {
                         ));
                     }
 
+                    s.destroy();
                     this.scrap.splice(i, 1);
                     this.updateHUD();
                     continue;
@@ -1412,6 +1482,7 @@ class GameEngine {
                     ));
                 }
                 
+                s.destroy();
                 this.scrap.splice(i, 1);
                 this.updateHUD();
                 continue;
@@ -1432,6 +1503,7 @@ class GameEngine {
                 if (dist < enemy.radius + this.player.radius) {
                     this.player.damage(enemy.collisionDmg);
                     enemy.damage(999); // Instantly vaporize Swarmer on impact
+                    enemy.destroy();
                     this.enemies.splice(i, 1);
                     this.checkWaveCleaned();
                     continue;
@@ -1446,6 +1518,7 @@ class GameEngine {
                     if (distS < enemy.radius + this.station.radius) {
                         this.station.damage(enemy.collisionDmg);
                         enemy.damage(999);
+                        enemy.destroy();
                         this.enemies.splice(i, 1);
                         this.checkWaveCleaned();
                     }
@@ -1461,6 +1534,7 @@ class GameEngine {
             const p = this.particles[i];
             p.update();
             if (p.life <= 0) {
+                p.destroy();
                 this.particles.splice(i, 1);
             }
         }
@@ -1525,9 +1599,11 @@ class GameEngine {
                     if (dist < enemy.radius + b.radius) {
                         // Enemy Hit
                         const isDead = enemy.damage(b.damage);
+                        b.destroy();
                         this.bullets.splice(bIndex, 1);
                         
                         if (isDead) {
+                            enemy.destroy();
                             this.enemies.splice(eIndex, 1);
                             this.checkWaveCleaned();
                         }
@@ -1542,6 +1618,7 @@ class GameEngine {
                 
                 if (distP < this.player.radius + b.radius) {
                     this.player.damage(b.damage);
+                    b.destroy();
                     this.bullets.splice(bIndex, 1);
                     continue;
                 }
@@ -1554,6 +1631,7 @@ class GameEngine {
                     
                     if (distS < this.station.radius + b.radius) {
                         this.station.damage(b.damage);
+                        b.destroy();
                         this.bullets.splice(bIndex, 1);
                     }
                 }
@@ -1768,56 +1846,167 @@ class GameEngine {
     }
 
     // Render loop
+    // Render loop
     draw() {
-        // Clear canvas
-        this.ctx.fillStyle = '#020207';
-        this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        if (typeof THREE !== 'undefined' && this.renderer) {
+            // Update 3D camera position to follow player
+            const targetCamX = this.player.x;
+            const targetCamY = -this.player.y;
+            
+            // Camera follow interpolation
+            this.camera3D.position.x += (targetCamX - this.camera3D.position.x) * 0.08;
+            this.camera3D.position.y += (targetCamY - 180 - this.camera3D.position.y) * 0.08;
+            
+            const lookTarget = new THREE.Vector3(
+                this.camera3D.position.x,
+                this.camera3D.position.y + 180,
+                0
+            );
+            this.camera3D.lookAt(lookTarget);
 
-        // Apply dynamic screen shake translation matrices
-        this.ctx.save();
-        if (this.screenShake > 0) {
-            const shakeX = (Math.random() - 0.5) * this.screenShake;
-            const shakeY = (Math.random() - 0.5) * this.screenShake;
-            this.ctx.translate(shakeX, shakeY);
+            // Backup position for screen shake restoration
+            const originalCamPos = this.camera3D.position.clone();
+
+            // Apply 3D screen shake
+            if (this.screenShake > 0) {
+                const shakeOffset = new THREE.Vector3(
+                    (Math.random() - 0.5) * this.screenShake,
+                    (Math.random() - 0.5) * this.screenShake,
+                    (Math.random() - 0.5) * this.screenShake * 0.5
+                );
+                this.camera3D.position.add(shakeOffset);
+            }
+
+            // Sync Player Ship
+            if (this.player.mesh) {
+                this.player.mesh.position.set(this.player.x, -this.player.y, 0);
+                this.player.mesh.rotation.z = -this.player.angle;
+                this.player.mesh.visible = !this.player.isDestroyed;
+                
+                // Animate thruster flames based on movement keys
+                const isThrusting = keys.w || keys.ArrowUp;
+                if (this.player.mesh.flames) {
+                    this.player.mesh.flames.forEach(flame => {
+                        flame.visible = isThrusting && !this.player.isDestroyed;
+                        if (isThrusting) {
+                            flame.scale.x = 0.8 + Math.random() * 0.4;
+                            flame.scale.y = 0.8 + Math.random() * 0.4;
+                        }
+                    });
+                }
+                
+                // Animate shield mesh core
+                if (this.player.mesh.shieldMesh) {
+                    if (this.player.shield > 0 && !this.player.isDestroyed) {
+                        this.player.mesh.shieldMesh.visible = true;
+                        // Determine opacity: flash takes precedence, otherwise use a faint glassy baseline
+                        const baseOpacity = 0.08 + (this.player.shield / this.player.maxShield) * 0.07;
+                        this.player.mesh.shieldMesh.material.opacity = Math.max(this.player.shieldFlash, baseOpacity);
+                        
+                        // Slower rotation for the base state, faster rotation on impact
+                        const rotSpeed = 0.005 + (this.player.shieldFlash > 0.01 ? 0.015 : 0);
+                        this.player.mesh.shieldMesh.rotation.z += rotSpeed;
+                    } else {
+                        this.player.mesh.shieldMesh.visible = false;
+                    }
+                }
+            }
+
+            // Sync Space Station
+            if (!this.disableStation && this.station.mesh) {
+                this.station.mesh.position.set(this.station.x, -this.station.y, 0);
+                this.station.mesh.visible = !this.station.isDestroyed;
+                
+                if (this.station.mesh.solarPanels) {
+                    this.station.mesh.solarPanels.rotation.z = this.station.angle;
+                }
+                
+                this.station.mesh.updateTurrets(this.station.turretsCount);
+
+                if (this.station.mesh.shieldMesh) {
+                    if (this.station.shield > 0 && this.station.maxShield > 0 && !this.station.isDestroyed) {
+                        this.station.mesh.shieldMesh.visible = true;
+                        // Faint glassy baseline opacity that increases slightly with remaining shield
+                        const baseOpacity = 0.05 + (this.station.shield / this.station.maxShield) * 0.05;
+                        this.station.mesh.shieldMesh.material.opacity = Math.max(this.station.shieldFlash, baseOpacity);
+                        
+                        const rotSpeed = -0.001 - (this.station.shieldFlash > 0.01 ? 0.004 : 0);
+                        this.station.mesh.shieldMesh.rotation.z += rotSpeed;
+                    } else {
+                        this.station.mesh.shieldMesh.visible = false;
+                    }
+                }
+            }
+
+            // Sync bullets
+            this.bullets.forEach(b => {
+                if (b.mesh) {
+                    b.mesh.position.set(b.x, -b.y, 0);
+                    const bulletAngle = Math.atan2(b.vy, b.vx);
+                    b.mesh.rotation.z = -bulletAngle;
+                }
+            });
+
+            // Sync enemies
+            this.enemies.forEach(e => {
+                if (e.mesh) {
+                    e.mesh.position.set(e.x, -e.y, 0);
+                    e.mesh.rotation.z = -e.angle;
+                    if (typeof e.mesh.tick === 'function') {
+                        e.mesh.tick(e, this);
+                    }
+                }
+            });
+
+            // Sync scrap crystals
+            this.scrap.forEach(s => {
+                if (s.mesh) {
+                    s.mesh.position.set(s.x, -s.y, 0);
+                    s.mesh.rotation.z = -s.angle;
+                    s.mesh.rotation.y += 0.02;
+                    s.mesh.rotation.x += 0.01;
+                }
+            });
+
+            // Sync particles
+            this.particles.forEach(p => {
+                if (p.mesh) {
+                    p.mesh.position.set(p.x, -p.y, 0);
+                    p.mesh.material.opacity = p.life / p.maxLife;
+                }
+            });
+
+            // Render WebGL
+            this.renderer.render(this.scene, this.camera3D);
+
+            // Restore camera position to clean coords (prevent accumulating drift)
+            this.camera3D.position.copy(originalCamPos);
+        } else {
+            // Fallback flat 2D render loop
+            this.ctx.fillStyle = '#020207';
+            this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+            this.ctx.save();
+            if (this.screenShake > 0) {
+                const shakeX = (Math.random() - 0.5) * this.screenShake;
+                const shakeY = (Math.random() - 0.5) * this.screenShake;
+                this.ctx.translate(shakeX, shakeY);
+            }
+
+            this.drawParallaxStars();
+            this.drawWorldBoundaries();
+
+            for (let crystal of this.scrap) crystal.draw(this.ctx, this.camera);
+            for (let bullet of this.bullets) bullet.draw(this.ctx, this.camera);
+            if (!this.disableStation) this.station.draw(this.ctx, this.camera);
+            for (let enemy of this.enemies) enemy.draw(this.ctx, this.camera);
+            this.player.draw(this.ctx, this.camera);
+            for (let particle of this.particles) particle.draw(this.ctx, this.camera);
+
+            this.ctx.restore();
         }
 
-        // Draw parallax star backgrounds
-        this.drawParallaxStars();
-
-        // Draw Arena Grid Boundary highlights
-        this.drawWorldBoundaries();
-
-        // Draw scrap crystals
-        for (let crystal of this.scrap) {
-            crystal.draw(this.ctx, this.camera);
-        }
-
-        // Draw space bullets
-        for (let bullet of this.bullets) {
-            bullet.draw(this.ctx, this.camera);
-        }
-
-        // Draw central base station
-        if (!this.disableStation) {
-            this.station.draw(this.ctx, this.camera);
-        }
-
-        // Draw active enemy ships
-        for (let enemy of this.enemies) {
-            enemy.draw(this.ctx, this.camera);
-        }
-
-        // Draw player ship
-        this.player.draw(this.ctx, this.camera);
-
-        // Draw particles engine
-        for (let particle of this.particles) {
-            particle.draw(this.ctx, this.camera);
-        }
-
-        this.ctx.restore();
-
-        // Draw radar HUD minimap
+        // Always render radar HUD minimap
         this.drawRadar();
     }
 
@@ -1935,10 +2124,101 @@ class GameEngine {
     }
 }
 
+const activePreviews = [];
+
+function initShipSelectionPreviews() {
+    document.querySelectorAll('.ship-card').forEach(card => {
+        const shipId = card.getAttribute('data-ship');
+        if (!shipId) return;
+
+        const container = document.createElement('div');
+        container.className = 'ship-preview-container';
+        
+        const canvas = document.createElement('canvas');
+        canvas.className = 'ship-preview-canvas';
+        container.appendChild(canvas);
+
+        const nameEl = card.querySelector('.ship-name');
+        const subtitleEl = card.querySelector('.ship-subtitle');
+        if (subtitleEl) {
+            card.insertBefore(container, subtitleEl.nextSibling);
+        } else if (nameEl) {
+            card.insertBefore(container, nameEl.nextSibling);
+        } else {
+            card.insertBefore(container, card.firstChild);
+        }
+
+        const width = 120;
+        const height = 80;
+        
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(width, height, false);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(40, width / height, 1, 100);
+        camera.position.set(0, 10, 32);
+        camera.lookAt(0, 0, 0);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0x00f2ff, 1.2);
+        sunLight.position.set(10, 15, 10);
+        scene.add(sunLight);
+
+        const backLight = new THREE.DirectionalLight(0xff7a00, 0.5);
+        backLight.position.set(-10, -5, -5);
+        scene.add(backLight);
+
+        const mesh = VoidModels.createPlayerShipMesh(shipId);
+        scene.add(mesh);
+
+        if (mesh.shieldMesh) {
+            mesh.shieldMesh.visible = false;
+        }
+
+        let animId;
+        function animate() {
+            animId = requestAnimationFrame(animate);
+            mesh.rotation.y += 0.005;
+            mesh.rotation.x = 0.2;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        activePreviews.push({
+            renderer,
+            scene,
+            cleanup: () => {
+                cancelAnimationFrame(animId);
+                mesh.traverse(child => {
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(m => m.dispose());
+                        } else {
+                            child.material.dispose();
+                        }
+                    }
+                });
+                renderer.dispose();
+            }
+        });
+    });
+}
+
 // --- Setup Click listeners on Window ---
 let game;
 window.addEventListener('load', () => {
     game = new GameEngine();
+    initMobileControls();
+    initControlsCarousel();
+    
+    if (typeof THREE !== 'undefined' && typeof VoidModels !== 'undefined') {
+        initShipSelectionPreviews();
+    }
     
     // UI Mouse bindings
     window.addEventListener('mousemove', (e) => {
@@ -1970,6 +2250,15 @@ window.addEventListener('load', () => {
         game.start();
     });
 
+    // Ship Selection Card Click Handlers
+    document.querySelectorAll('.ship-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.ship-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            document.getElementById('selected-ship').value = card.dataset.ship;
+        });
+    });
+
     // Shop Upgrade Buttons bindings
     document.getElementById('btn-repair').addEventListener('click', () => game.purchaseUpgrade('repair'));
     document.getElementById('btn-upgrade-weapon').addEventListener('click', () => game.purchaseUpgrade('weapon'));
@@ -1981,3 +2270,232 @@ window.addEventListener('load', () => {
     document.getElementById('btn-upgrade-station-shield').addEventListener('click', () => game.purchaseUpgrade('station-shield'));
     document.getElementById('btn-upgrade-magnet').addEventListener('click', () => game.purchaseUpgrade('magnet'));
 });
+
+// --- Controls Carousel Scroll Handler ---
+function initControlsCarousel() {
+    const container = document.getElementById('controls-scroll-container');
+    const leftBtn = document.getElementById('controls-scroll-left');
+    const rightBtn = document.getElementById('controls-scroll-right');
+    
+    if (!container || !leftBtn || !rightBtn) return;
+    
+    function updateArrows() {
+        const scrollLeft = container.scrollLeft;
+        const scrollWidth = container.scrollWidth;
+        const clientWidth = container.clientWidth;
+        
+        // Show left arrow if we are not scrolled to the very left
+        if (scrollLeft > 2) {
+            leftBtn.classList.add('visible');
+        } else {
+            leftBtn.classList.remove('visible');
+        }
+        
+        // Show right arrow if we can scroll right
+        if (scrollLeft < scrollWidth - clientWidth - 2) {
+            rightBtn.classList.add('visible');
+        } else {
+            rightBtn.classList.remove('visible');
+        }
+    }
+    
+    leftBtn.addEventListener('click', () => {
+        container.scrollBy({ left: -200, behavior: 'smooth' });
+    });
+    
+    rightBtn.addEventListener('click', () => {
+        container.scrollBy({ left: 200, behavior: 'smooth' });
+    });
+    
+    container.addEventListener('scroll', updateArrows);
+    
+    if (typeof ResizeObserver !== 'undefined') {
+        const resizeObserver = new ResizeObserver(() => {
+            updateArrows();
+        });
+        resizeObserver.observe(container);
+    } else {
+        window.addEventListener('resize', updateArrows);
+    }
+    
+    // Initial check after elements are rendered and styles applied
+    setTimeout(updateArrows, 100);
+}
+
+// --- Mobile Controls Initialization ---
+function initMobileControls() {
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (!isTouchDevice) return;
+
+    // Add mobile-mode class to the container
+    const container = document.getElementById('game-container');
+    if (container) {
+        container.classList.add('mobile-mode');
+    }
+
+    // Show mobile controls
+    const mobileControls = document.getElementById('mobile-controls');
+    if (mobileControls) {
+        mobileControls.classList.remove('hidden');
+    }
+
+    // Joystick elements
+    const joystickZone = document.getElementById('joystick-zone');
+    const joystickBase = document.getElementById('joystick-base');
+    const joystickKnob = document.getElementById('joystick-knob');
+    
+    if (joystickZone && joystickBase && joystickKnob) {
+        let joystickActive = false;
+        let startX = 0;
+        let startY = 0;
+        const maxRadius = 45; // limit boundary in pixels
+
+        const handleStart = (clientX, clientY) => {
+            joystickActive = true;
+            const baseRect = joystickBase.getBoundingClientRect();
+            startX = baseRect.left + baseRect.width / 2;
+            startY = baseRect.top + baseRect.height / 2;
+            handleMove(clientX, clientY);
+        };
+
+        const handleMove = (clientX, clientY) => {
+            if (!joystickActive) return;
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            let dragX = dx;
+            let dragY = dy;
+            
+            if (distance > maxRadius) {
+                dragX = (dx / distance) * maxRadius;
+                dragY = (dy / distance) * maxRadius;
+            }
+            
+            joystickKnob.style.transform = `translate(${dragX}px, ${dragY}px)`;
+            
+            const angle = Math.atan2(dy, dx);
+            const normDist = Math.min(1, distance / maxRadius);
+            
+            if (game && game.player && !game.player.isDestroyed) {
+                let targetAngle = angle;
+                let playerAngle = game.player.angle;
+                
+                let diff = targetAngle - playerAngle;
+                diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+                
+                if (diff > 0.15) {
+                    keys.d = true;
+                    keys.a = false;
+                } else if (diff < -0.15) {
+                    keys.a = true;
+                    keys.d = false;
+                } else {
+                    keys.a = false;
+                    keys.d = false;
+                }
+                
+                if (normDist > 0.35) {
+                    keys.w = true;
+                } else {
+                    keys.w = false;
+                }
+            }
+        };
+
+        const handleEnd = () => {
+            joystickActive = false;
+            joystickKnob.style.transform = 'translate(0px, 0px)';
+            keys.a = false;
+            keys.d = false;
+            keys.w = false;
+        };
+
+        joystickZone.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                handleStart(e.touches[0].clientX, e.touches[0].clientY);
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!joystickActive) return;
+            if (e.touches.length > 0) {
+                handleMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            if (joystickActive) {
+                if (e.touches.length === 0) {
+                    handleEnd();
+                }
+            }
+        });
+        window.addEventListener('touchcancel', () => {
+            if (joystickActive) handleEnd();
+        });
+    }
+
+    // Action buttons touch listeners
+    const btnFire = document.getElementById('btn-mobile-fire');
+    const btnDash = document.getElementById('btn-mobile-dash');
+    const btnBrake = document.getElementById('btn-mobile-brake');
+    const btnDock = document.getElementById('btn-mobile-dock');
+
+    if (btnFire) {
+        btnFire.addEventListener('touchstart', (e) => {
+            keys[' '] = true;
+            e.preventDefault();
+        }, { passive: false });
+        btnFire.addEventListener('touchend', (e) => {
+            keys[' '] = false;
+            e.preventDefault();
+        }, { passive: false });
+        btnFire.addEventListener('touchcancel', () => {
+            keys[' '] = false;
+        });
+    }
+
+    if (btnDash) {
+        btnDash.addEventListener('touchstart', (e) => {
+            keys.Shift = true;
+            e.preventDefault();
+        }, { passive: false });
+        btnDash.addEventListener('touchend', (e) => {
+            keys.Shift = false;
+            e.preventDefault();
+        }, { passive: false });
+        btnDash.addEventListener('touchcancel', () => {
+            keys.Shift = false;
+        });
+    }
+
+    if (btnBrake) {
+        btnBrake.addEventListener('touchstart', (e) => {
+            keys.s = true;
+            e.preventDefault();
+        }, { passive: false });
+        btnBrake.addEventListener('touchend', (e) => {
+            keys.s = false;
+            e.preventDefault();
+        }, { passive: false });
+        btnBrake.addEventListener('touchcancel', () => {
+            keys.s = false;
+        });
+    }
+
+    if (btnDock) {
+        btnDock.addEventListener('touchstart', (e) => {
+            keys.e = true;
+            e.preventDefault();
+        }, { passive: false });
+        btnDock.addEventListener('touchend', (e) => {
+            keys.e = false;
+            e.preventDefault();
+        }, { passive: false });
+        btnDock.addEventListener('touchcancel', () => {
+            keys.e = false;
+        });
+    }
+}
