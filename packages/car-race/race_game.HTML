@@ -319,6 +319,17 @@
         #guardrail-right {
             right: 0;
         }
+
+        @keyframes pop-in {
+            0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+        }
+        .countdown-pop {
+            display: block !important;
+            animation: pop-in 1s ease-out forwards;
+        }
     </style>
 </head>
 <body>
@@ -334,6 +345,9 @@
     </div>
     
     <div id="game-board">
+        <!-- Countdown Overlay -->
+        <div id="countdown-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; font-weight: 900; z-index: 15; text-shadow: 0 0 25px rgba(0,0,0,0.85); pointer-events: none; display: none; text-align: center; width: 100%; font-family: inherit;"></div>
+
         <!-- Guardrails -->
         <div id="guardrail-left" class="guardrail"></div>
         <div id="guardrail-right" class="guardrail"></div>
@@ -454,6 +468,7 @@
     let distanceCovered = 0;
     let gameTime = 0;
     let lastFrameTime = Date.now();
+    let countdownActive = false;
     const leaderboardManager = new Leaderboard('race_game_2d_leaderboard', 'race_game_2d_high_score');
     let highScore2d = leaderboardManager.getBestScore();
     let currentLevel = 1;
@@ -492,6 +507,7 @@
     function startGame() {
         isPlaying = true;
         isPaused = false;
+        countdownActive = true;
         finishTriggered = false;
         distanceCovered = 0;
         gameTime = 0;
@@ -521,11 +537,58 @@
         
         gameInterval = setInterval(updateGame, 20);
         spawnEnemyLoop();
+        startCountdown();
+    }
+
+    function startCountdown() {
+        const overlay = document.getElementById('countdown-overlay');
+        overlay.style.display = 'block';
+        
+        const steps = [
+            { text: '3', color: '#e74c3c' },
+            { text: '2', color: '#e67e22' },
+            { text: '1', color: '#f1c40f' },
+            { text: 'GO!', color: '#2ecc71' }
+        ];
+        
+        let currentStep = 0;
+        
+        function nextStep() {
+            if (!isPlaying) {
+                // If game was reset/exited during countdown, cleanup
+                overlay.style.display = 'none';
+                overlay.className = '';
+                return;
+            }
+            if (currentStep < steps.length) {
+                const step = steps[currentStep];
+                overlay.innerText = step.text;
+                overlay.style.color = step.color;
+                
+                overlay.className = '';
+                void overlay.offsetWidth; // trigger reflow
+                overlay.className = 'countdown-pop';
+                
+                currentStep++;
+                
+                if (step.text === 'GO!') {
+                    countdownActive = false;
+                    lastFrameTime = Date.now();
+                }
+                
+                setTimeout(nextStep, 1000);
+            } else {
+                overlay.style.display = 'none';
+                overlay.className = '';
+            }
+        }
+        
+        nextStep();
     }
 
     function spawnEnemyLoop() {
         if (!isPlaying || finishTriggered) return;
-        if (!isPaused) {
+        if (!isPaused && !countdownActive) {
             createEnemy();
         }
         // Dynamic loops adjust spawn rates automatically when leveling up
@@ -558,6 +621,7 @@
         lastFrameTime = now;
 
         if (!isPlaying || isPaused) return;
+        if (countdownActive) return;
 
         // Increment time and distance covered
         gameTime += delta;
