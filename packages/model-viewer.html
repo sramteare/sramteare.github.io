@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Void Drifter — Model Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* ================================================================
+           VARIABLES & RESET
+           ================================================================ */
+        :root {
+            --bg: #020208;
+            --card-bg: rgba(6, 15, 36, 0.45);
+            --border: rgba(0, 242, 255, 0.15);
+            --cyan: #00f2ff;
+            --orange: #ff9f00;
+            --text: #e0f5ff;
+            --text-dim: rgba(224, 245, 255, 0.55);
+            --sidebar-w: 310px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* ================================================================
+           AMBIENT BACKGROUNDS
+           ================================================================ */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            width: 150%; height: 150%;
+            background-image:
+                radial-gradient(circle at 30% 20%, rgba(0,242,255,0.07) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(255,159,0,0.05) 0%, transparent 40%);
+            animation: drift 25s infinite alternate ease-in-out;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes drift {
+            0%   { transform: translate(-10%, -10%) rotate(0deg); }
+            100% { transform: translate(10%, 10%) rotate(10deg); }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            background-size: 50px 50px;
+            background-image:
+                linear-gradient(to right, rgba(0,242,255,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,242,255,0.02) 1px, transparent 1px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ================================================================
+           SIDEBAR
+           ================================================================ */
+        .sidebar {
+            position: relative;
+            z-index: 20;
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: rgba(2, 4, 14, 0.88);
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,242,255,0.15) transparent;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.15); border-radius: 4px; }
+
+        /* Back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.78rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.25s;
+        }
+        .back-link:hover { color: var(--cyan); }
+        .back-link svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* Sidebar title */
+        .sidebar-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            padding: 10px 20px 16px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0,242,255,0.3);
+        }
+
+        /* Section groups */
+        .model-section {
+            padding: 0 14px 8px;
+        }
+
+        .section-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            padding: 10px 6px 6px;
+            border-bottom: 1px solid rgba(0,242,255,0.06);
+            margin-bottom: 6px;
+        }
+
+        /* Model cards */
+        .model-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: rgba(6, 15, 36, 0.25);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            width: 3px; height: 100%;
+            background: var(--card-accent, var(--cyan));
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .model-card:hover {
+            transform: translateY(-2px);
+            background: rgba(6, 18, 44, 0.5);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .model-card:hover::before { opacity: 0.5; }
+
+        .model-card.active {
+            background: rgba(6, 18, 44, 0.65);
+            border-color: var(--card-accent, var(--cyan));
+            box-shadow:
+                0 0 12px color-mix(in srgb, var(--card-accent, var(--cyan)) 25%, transparent),
+                inset 0 0 16px color-mix(in srgb, var(--card-accent, var(--cyan)) 8%, transparent);
+        }
+        .model-card.active::before { opacity: 1; }
+
+        .card-pip {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--card-accent, var(--cyan));
+            flex-shrink: 0;
+            box-shadow: 0 0 6px var(--card-accent, var(--cyan));
+            opacity: 0.5;
+            transition: opacity 0.25s;
+        }
+        .model-card.active .card-pip { opacity: 1; }
+
+        .card-info { flex: 1; min-width: 0; }
+
+        .card-name {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        /* ================================================================
+           CONTROLS PANEL (bottom of sidebar)
+           ================================================================ */
+        .controls-panel {
+            margin-top: auto;
+            padding: 14px;
+            border-top: 1px solid var(--border);
+            background: rgba(2, 4, 14, 0.5);
+        }
+
+        .controls-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+        }
+
+        .control-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: rgba(224,245,255,0.8);
+        }
+
+        /* Custom sci-fi toggle switch */
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 22px;
+            cursor: pointer;
+        }
+
+        .toggle input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            border-radius: 11px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(224,245,255,0.3);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+
+        .toggle input:checked ~ .toggle-track {
+            background: rgba(0,242,255,0.15);
+            border-color: var(--cyan);
+            box-shadow: 0 0 8px rgba(0,242,255,0.2);
+        }
+
+        .toggle input:checked ~ .toggle-thumb {
+            left: 25px;
+            background: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* Reset camera button */
+        .btn-reset {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid rgba(0,242,255,0.2);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-reset:hover {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 16px rgba(0,242,255,0.3);
+        }
+
+        /* ================================================================
+           MAIN VIEWPORT
+           ================================================================ */
+        .viewport {
+            position: relative;
+            flex: 1;
+            height: 100vh;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .viewport canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ================================================================
+           INFO PANEL (top of viewport)
+           ================================================================ */
+        .info-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 30;
+            padding: 18px 28px 14px;
+            background: linear-gradient(180deg, rgba(2,2,8,0.85) 0%, rgba(2,2,8,0.4) 70%, transparent 100%);
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .info-name {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 14px rgba(0,242,255,0.3);
+            transition: all 0.35s ease;
+        }
+
+        .info-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--cyan);
+            transition: color 0.35s ease;
+        }
+
+        .info-description {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-dim);
+            max-width: 560px;
+            line-height: 1.5;
+            margin-top: 4px;
+            transition: all 0.35s ease;
+        }
+
+        /* ================================================================
+           VIEWPORT CORNER DECORATIONS
+           ================================================================ */
+        .corner-deco {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            z-index: 25;
+            pointer-events: none;
+        }
+        .corner-deco::before,
+        .corner-deco::after {
+            content: '';
+            position: absolute;
+            background: rgba(0,242,255,0.12);
+        }
+        .corner-tl { top: 12px; left: 12px; }
+        .corner-tl::before { width: 30px; height: 1px; top: 0; left: 0; }
+        .corner-tl::after  { width: 1px; height: 30px; top: 0; left: 0; }
+        .corner-tr { top: 12px; right: 12px; }
+        .corner-tr::before { width: 30px; height: 1px; top: 0; right: 0; }
+        .corner-tr::after  { width: 1px; height: 30px; top: 0; right: 0; }
+        .corner-bl { bottom: 12px; left: 12px; }
+        .corner-bl::before { width: 30px; height: 1px; bottom: 0; left: 0; }
+        .corner-bl::after  { width: 1px; height: 30px; bottom: 0; left: 0; }
+        .corner-br { bottom: 12px; right: 12px; }
+        .corner-br::before { width: 30px; height: 1px; bottom: 0; right: 0; }
+        .corner-br::after  { width: 1px; height: 30px; bottom: 0; right: 0; }
+
+        /* Status footer in viewport */
+        .viewport-footer {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 2px;
+            color: rgba(0,242,255,0.2);
+            text-transform: uppercase;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* ================================================================
+           RESPONSIVE — SMALL SCREENS
+           ================================================================ */
+        @media (max-width: 800px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-width: 100%;
+                height: auto;
+                max-height: 45vh;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                flex-direction: column;
+            }
+
+            .viewport {
+                height: 55vh;
+            }
+
+            .model-section {
+                /* Make cards scroll horizontally on mobile */
+            }
+
+            .info-bar {
+                padding: 12px 16px 10px;
+            }
+
+            .info-name {
+                font-size: 1.1rem;
+                letter-spacing: 2px;
+            }
+
+            .info-description {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ================================================================
+           ANIMATIONS
+           ================================================================ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .model-card {
+            animation: fadeIn 0.4s ease backwards;
+        }
+
+        /* stagger card animations */
+        .model-card:nth-child(1) { animation-delay: 0.05s; }
+        .model-card:nth-child(2) { animation-delay: 0.1s; }
+        .model-card:nth-child(3) { animation-delay: 0.15s; }
+        .model-card:nth-child(4) { animation-delay: 0.2s; }
+        .model-card:nth-child(5) { animation-delay: 0.25s; }
+        .model-card:nth-child(6) { animation-delay: 0.3s; }
+        .model-card:nth-child(7) { animation-delay: 0.35s; }
+        .model-card:nth-child(8) { animation-delay: 0.4s; }
+
+        /* Loading state */
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            transition: opacity 0.6s ease;
+        }
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 4px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50%      { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+
+    <!-- ============================================================
+         LEFT SIDEBAR
+         ============================================================ -->
+    <aside class="sidebar" id="sidebar">
+        <a href="../index.html" class="back-link">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            Launcher
+        </a>
+
+        <div class="sidebar-title">Model Viewer</div>
+
+        <!-- Model cards injected by JS -->
+        <div id="model-list"></div>
+
+        <!-- Controls -->
+        <div class="controls-panel">
+            <div class="controls-title">// Controls</div>
+
+            <div class="control-row">
+                <span class="control-label">Auto-Rotate</span>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-rotate" checked>
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                </label>
+            </div>
+
+            <div class="control-row">
+                <span class="control-label">Wireframe</span>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-wireframe">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                </label>
+            </div>
+
+            <div class="control-row">
+                <span class="control-label">Shield</span>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-shield">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                </label>
+            </div>
+
+            <button class="btn-reset" id="btn-reset">Reset Camera</button>
+        </div>
+    </aside>
+
+    <!-- ============================================================
+         MAIN VIEWPORT
+         ============================================================ -->
+    <main class="viewport" id="viewport">
+        <div class="loading-overlay" id="loading">
+            <span class="loading-text">Initializing Renderer…</span>
+        </div>
+
+        <div class="info-bar" id="info-bar">
+            <div class="info-name" id="info-name">—</div>
+            <div class="info-subtitle" id="info-subtitle">—</div>
+            <div class="info-description" id="info-desc">Select a model from the sidebar.</div>
+        </div>
+
+        <div class="corner-deco corner-tl"></div>
+        <div class="corner-deco corner-tr"></div>
+        <div class="corner-deco corner-bl"></div>
+        <div class="corner-deco corner-br"></div>
+
+        <div class="viewport-footer">Drag to orbit · Scroll to zoom · Void Drifter Dev Tools</div>
+    </main>
+
+    <!-- ============================================================
+         SCRIPTS
+         ============================================================ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="models.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // ---- DOM Refs ----
+        const viewportEl    = document.getElementById('viewport');
+        const loadingEl     = document.getElementById('loading');
+        const modelListEl   = document.getElementById('model-list');
+        const infoName      = document.getElementById('info-name');
+        const infoSubtitle  = document.getElementById('info-subtitle');
+        const infoDesc      = document.getElementById('info-desc');
+        const toggleRotate  = document.getElementById('toggle-rotate');
+        const toggleWire    = document.getElementById('toggle-wireframe');
+        const toggleShield  = document.getElementById('toggle-shield');
+        const btnReset      = document.getElementById('btn-reset');
+
+        // ---- State ----
+        let currentModelId  = null;
+        let currentGroup    = null;
+        let autoRotate      = true;
+        let wireframeOn     = false;
+        let shieldOn        = false;
+
+        // ---- Category config ----
+        const CATEGORIES = [
+            { key: 'ship',    label: 'Vessels' },
+            { key: 'station', label: 'Station' },
+            { key: 'enemy',   label: 'Hostiles' },
+        ];
+
+        // ==================================================================
+        //  BUILD SIDEBAR MODEL LIST
+        // ==================================================================
+        function buildModelList() {
+            const catalog = VoidModels.MODEL_CATALOG;
+            let html = '';
+
+            CATEGORIES.forEach(cat => {
+                const entries = Object.entries(catalog).filter(([, v]) => v.category === cat.key);
+                if (!entries.length) return;
+
+                html += `<div class="model-section">`;
+                html += `<div class="section-label">${cat.label}</div>`;
+
+                entries.forEach(([id, entry]) => {
+                    html += `
+                        <div class="model-card" data-model="${id}" style="--card-accent: ${entry.color};">
+                            <div class="card-pip"></div>
+                            <div class="card-info">
+                                <div class="card-name">${entry.name}</div>
+                                <div class="card-subtitle">${entry.subtitle}</div>
+                            </div>
+                        </div>`;
+                });
+
+                html += `</div>`;
+            });
+
+            modelListEl.innerHTML = html;
+
+            // Attach click listeners
+            modelListEl.querySelectorAll('.model-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    selectModel(card.dataset.model);
+                });
+            });
+        }
+
+        // ==================================================================
+        //  THREE.JS SETUP
+        // ==================================================================
+        const scene    = new THREE.Scene();
+        scene.background = new THREE.Color('#020207');
+
+        const camera   = new THREE.PerspectiveCamera(50, 1, 0.1, 5000);
+        camera.position.set(40, 30, 40);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        viewportEl.appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.enablePan = true;
+        controls.minDistance = 10;
+        controls.maxDistance = 800;
+
+        // ---- Lights ----
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+
+        const keyLight = new THREE.DirectionalLight(0x00f2ff, 1.2);
+        keyLight.position.set(60, 80, 40);
+        scene.add(keyLight);
+
+        const backLight = new THREE.DirectionalLight(0xff7a00, 0.6);
+        backLight.position.set(-50, -60, -30);
+        scene.add(backLight);
+
+        // Subtle rim light from below
+        const rimLight = new THREE.DirectionalLight(0x4400aa, 0.25);
+        rimLight.position.set(0, 0, -50);
+        scene.add(rimLight);
+
+        // ---- Grid Helper ----
+        const gridHelper = new THREE.GridHelper(400, 40, 0x0a1a3a, 0x060e24);
+        gridHelper.rotation.x = Math.PI / 2; // XY plane
+        gridHelper.material.opacity = 0.35;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+
+        // ---- Resize handler ----
+        function onResize() {
+            const rect = viewportEl.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h, false);
+        }
+
+        window.addEventListener('resize', onResize);
+        // Initial size
+        requestAnimationFrame(onResize);
+
+        // ==================================================================
+        //  SELECT MODEL
+        // ==================================================================
+        function selectModel(id) {
+            const catalog = VoidModels.MODEL_CATALOG;
+            const entry = catalog[id];
+            if (!entry) return;
+
+            // Update active card
+            modelListEl.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+            const activeCard = modelListEl.querySelector(`[data-model="${id}"]`);
+            if (activeCard) activeCard.classList.add('active');
+
+            // Remove old model
+            if (currentGroup) {
+                scene.remove(currentGroup);
+                // Dispose geometries and materials safely
+                currentGroup.traverse(child => {
+                    if (child.geometry && typeof child.geometry.dispose === 'function') {
+                        child.geometry.dispose();
+                    }
+                    if (child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(m => {
+                                if (m && typeof m.dispose === 'function') m.dispose();
+                            });
+                        } else if (typeof child.material.dispose === 'function') {
+                            child.material.dispose();
+                        }
+                    }
+                });
+            }
+
+            // Create new model
+            currentGroup = entry.create();
+            scene.add(currentGroup);
+            currentModelId = id;
+
+            // Apply current toggle states
+            applyWireframe(wireframeOn);
+            applyShield(shieldOn);
+
+            // Update info bar
+            infoName.textContent = entry.name;
+            infoName.style.textShadow = `0 0 14px ${entry.color}40`;
+            infoSubtitle.textContent = entry.subtitle;
+            infoSubtitle.style.color = entry.color;
+            infoDesc.textContent = entry.description;
+
+            // Animate camera to appropriate distance
+            animateCamera(entry.cameraDistance);
+        }
+
+        // ==================================================================
+        //  CAMERA ANIMATION
+        // ==================================================================
+        let cameraAnim = null;
+
+        function animateCamera(targetDist) {
+            const start = {
+                x: camera.position.x,
+                y: camera.position.y,
+                z: camera.position.z,
+            };
+
+            // Position camera at 45° angle
+            const factor = targetDist / Math.sqrt(3);
+            const target = {
+                x: factor,
+                y: factor * 0.75,
+                z: factor,
+            };
+
+            const duration = 600;
+            const startTime = performance.now();
+
+            if (cameraAnim) cancelAnimationFrame(cameraAnim);
+
+            function step(now) {
+                const t = Math.min((now - startTime) / duration, 1);
+                const ease = 1 - Math.pow(1 - t, 3); // easeOutCubic
+
+                camera.position.set(
+                    start.x + (target.x - start.x) * ease,
+                    start.y + (target.y - start.y) * ease,
+                    start.z + (target.z - start.z) * ease,
+                );
+                controls.target.set(0, 0, 0);
+
+                if (t < 1) {
+                    cameraAnim = requestAnimationFrame(step);
+                } else {
+                    cameraAnim = null;
+                }
+            }
+
+            cameraAnim = requestAnimationFrame(step);
+        }
+
+        // ==================================================================
+        //  TOGGLES
+        // ==================================================================
+        function applyWireframe(on) {
+            if (!currentGroup) return;
+            currentGroup.traverse(child => {
+                if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                    child.material.wireframe = on;
+                }
+            });
+        }
+
+        function applyShield(on) {
+            if (!currentGroup || !currentGroup.shieldMesh) return;
+            currentGroup.shieldMesh.material.opacity = on ? 0.15 : 0;
+        }
+
+        toggleRotate.addEventListener('change', () => {
+            autoRotate = toggleRotate.checked;
+        });
+
+        toggleWire.addEventListener('change', () => {
+            wireframeOn = toggleWire.checked;
+            applyWireframe(wireframeOn);
+        });
+
+        toggleShield.addEventListener('change', () => {
+            shieldOn = toggleShield.checked;
+            applyShield(shieldOn);
+        });
+
+        btnReset.addEventListener('click', () => {
+            controls.target.set(0, 0, 0);
+            if (currentModelId) {
+                const entry = VoidModels.MODEL_CATALOG[currentModelId];
+                if (entry) animateCamera(entry.cameraDistance);
+            }
+        });
+
+        // ==================================================================
+        //  ANIMATION LOOP
+        // ==================================================================
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = clock.getDelta();
+
+            // Auto-rotate model
+            if (autoRotate && currentGroup) {
+                currentGroup.rotation.z += dt * 0.3;
+            }
+
+            // Tick custom model animations (e.g. swirling core, writhing tentacles)
+            if (currentGroup && typeof currentGroup.tick === 'function') {
+                currentGroup.tick({ dt: dt, time: clock.getElapsedTime(), inViewer: true });
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // ==================================================================
+        //  INIT
+        // ==================================================================
+        buildModelList();
+
+        // Select first model (vanguard)
+        const firstId = Object.keys(VoidModels.MODEL_CATALOG)[0];
+        selectModel(firstId);
+
+        // Start rendering
+        animate();
+
+        // Hide loading overlay
+        setTimeout(() => {
+            loadingEl.classList.add('hidden');
+        }, 400);
+
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Up Nitro Racer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Courier New', Courier, monospace;
+            color: white;
+            overflow: hidden;
+            touch-action: none; /* Prevent browser gestures/scrolling on mobile */
+        }
+
+        #game-container {
+            text-align: center;
+            position: relative;
+            transition: transform 0.1s ease-out;
+        }
+
+        #ui-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            width: 400px;
+        }
+
+        #game-board {
+            width: 400px;
+            height: 600px;
+            background-color: #34495e;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            touch-action: none; /* Prevent default touch behavior on the board */
+        }
+
+        /* Mobile Controls */
+        #mobile-controls {
+            position: absolute;
+            bottom: 25px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
+            display: none; /* Controlled by CSS/JS media queries and touch detection */
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none; /* Let pointer events pass through container */
+            z-index: 15;
+        }
+
+        .control-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto; /* Enable touch on buttons */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            transition: all 0.12s ease-out;
+            cursor: pointer;
+        }
+
+        .direction-controls {
+            display: flex;
+            gap: 15px;
+            pointer-events: none;
+        }
+
+        .direction-controls .control-btn {
+            pointer-events: auto;
+        }
+
+        .control-btn svg {
+            width: 32px;
+            height: 32px;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Hover & Active States */
+        .control-btn:active, .control-btn.active {
+            background: rgba(52, 152, 219, 0.25); /* Cyan glow */
+            border-color: rgba(52, 152, 219, 0.7);
+            color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.45);
+            transform: scale(0.92);
+        }
+
+        .control-btn#btn-nitro {
+            width: 75px;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .control-btn#btn-nitro svg {
+            width: 38px;
+            height: 38px;
+        }
+
+        .control-btn#btn-nitro:active, .control-btn#btn-nitro.active {
+            background: rgba(243, 156, 18, 0.25); /* Orange glow */
+            border-color: rgba(243, 156, 18, 0.7);
+            color: #f39c12;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.55);
+            transform: scale(0.92) rotate(-5deg);
+        }
+
+        /* Media queries for narrow viewports */
+        @media (max-width: 768px) {
+            #mobile-controls {
+                display: flex;
+            }
+        }
+
+        /* Show mobile controls when touch device is detected */
+        .show-controls #mobile-controls {
+            display: flex;
+        }
+
+        /* The Road */
+        .road-line {
+            position: absolute;
+            width: 10px;
+            height: 80px;
+            background-color: #f1c40f;
+            left: 195px;
+        }
+
+        /* Finish Line */
+        #finish-line {
+            position: absolute;
+            width: 100%;
+            height: 40px;
+            background-image: 
+                linear-gradient(45deg, #fff 25%, transparent 25%), 
+                linear-gradient(-45deg, #fff 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #fff 75%),
+                linear-gradient(-45deg, transparent 75%, #fff 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            background-color: #000;
+            top: -100px;
+            display: none;
+        }
+
+        /* Player Car */
+        #player {
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            background-color: #e74c3c;
+            bottom: 20px;
+            left: 175px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            transition: background-color 0.1s;
+            z-index: 10;
+        }
+
+        /* Opponent Cars */
+        .enemy {
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            top: -100px;
+            border-radius: 5px;
+        }
+
+        #nitro-label {
+            font-size: 16px;
+            color: #2ecc71;
+            font-weight: bold;
+            visibility: hidden;
+            margin-bottom: 5px;
+            height: 20px;
+        }
+
+        .screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            z-index: 20;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background-color: #27ae60;
+        }
+
+        /* Guardrails */
+        .guardrail {
+            position: absolute;
+            width: 20px;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                #e74c3c 0px,
+                #e74c3c 10px,
+                #fff 10px,
+                #fff 20px
+            );
+            top: 0;
+            z-index: 5;
+        }
+
+        #guardrail-left {
+            left: 0;
+        }
+
+        #guardrail-right {
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="nitro-label">🔥 NITRO ACTIVATED! 🔥</div>
+    <div id="ui-bar">
+        <div>Score: <span id="score">0</span>/400</div>
+        <div>Level: <span id="level">1</span></div>
+    </div>
+    
+    <div id="game-board">
+        <!-- Guardrails -->
+        <div id="guardrail-left" class="guardrail"></div>
+        <div id="guardrail-right" class="guardrail"></div>
+
+        <!-- Road markings -->
+        <div class="road-line" style="top: 0px;"></div>
+        <div class="road-line" style="top: 150px;"></div>
+        <div class="road-line" style="top: 300px;"></div>
+        <div class="road-line" style="top: 450px;"></div>
+
+        <!-- Finish Line -->
+        <div id="finish-line"></div>
+
+        <!-- Player -->
+        <div id="player"></div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen">
+            <div style="font-size: 30px; color: #e74c3c; font-weight: bold;">GAME OVER</div>
+            <div id="final-score" style="font-size: 20px; margin-top: 10px;">Score: 0</div>
+            <button onclick="resetGame()">Try Again</button>
+        </div>
+
+        <!-- Victory Screen -->
+        <div id="victory-screen" class="screen">
+            <div style="font-size: 32px; color: #f1c40f; font-weight: bold;">🏁 YOU WIN! 🏁</div>
+            <div style="font-size: 18px; margin-top: 10px; color: #2ecc71;">You crossed the finish line!</div>
+            <button onclick="resetGame()">Play Again</button>
+        </div>
+
+        <!-- Mobile Controls -->
+        <div id="mobile-controls">
+            <div class="direction-controls">
+                <div id="btn-left" class="control-btn" aria-label="Move Left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </div>
+                <div id="btn-right" class="control-btn" aria-label="Move Right">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <div id="btn-nitro" class="control-btn" aria-label="Nitro Boost">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const board = document.getElementById('game-board');
+    const player = document.getElementById('player');
+    const finishLine = document.getElementById('finish-line');
+    const scoreDisplay = document.getElementById('score');
+    const levelDisplay = document.getElementById('level');
+    const nitroLabel = document.getElementById('nitro-label');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const victoryScreen = document.getElementById('victory-screen');
+    const finalScoreDisplay = document.getElementById('final-score');
+
+    let score = 0;
+    let currentLevel = 1;
+    let gameInterval;
+    let enemyTimeout; // Switched to timeout for dynamic pacing
+    let isPlaying = false;
+    let finishTriggered = false;
+    let playerX = 175; 
+    
+    let baseSpeed = 5; 
+    let currentSpeed = 5;
+    let enemySpawnRate = 1400; // Lower means faster spawning
+    
+    let keys = { ArrowLeft: false, ArrowRight: false, Space: false };
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === " ") { keys.Space = true; e.preventDefault(); }
+        if (e.key === "ArrowLeft") keys.ArrowLeft = true;
+        if (e.key === "ArrowRight") keys.ArrowRight = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if (e.key === " ") keys.Space = false;
+        if (e.key === "ArrowLeft") keys.ArrowLeft = false;
+        if (e.key === "ArrowRight") keys.ArrowRight = false;
+    });
+
+    function startGame() {
+        isPlaying = true;
+        finishTriggered = false;
+        score = 0;
+        currentLevel = 1;
+        baseSpeed = 5;
+        enemySpawnRate = 1400;
+        
+        scoreDisplay.innerText = score;
+        levelDisplay.innerText = currentLevel;
+        
+        gameOverScreen.style.display = 'none';
+        victoryScreen.style.display = 'none';
+        nitroLabel.style.visibility = 'hidden';
+        
+        finishLine.style.display = 'none';
+        finishLine.style.top = '-100px';
+
+        playerX = 175;
+        player.style.left = playerX + 'px';
+        player.style.backgroundColor = '#e74c3c';
+        
+        gameInterval = setInterval(updateGame, 20);
+        spawnEnemyLoop();
+    }
+
+    function spawnEnemyLoop() {
+        if (!isPlaying || finishTriggered) return;
+        createEnemy();
+        // Dynamic loops adjust spawn rates automatically when leveling up
+        enemyTimeout = setTimeout(spawnEnemyLoop, enemySpawnRate);
+    }
+
+    function checkLevelUp() {
+        // Levels jump every 50 points
+        let calculatedLevel = Math.floor(score / 50) + 1;
+        
+        if (calculatedLevel > currentLevel && currentLevel < 5) {
+            currentLevel = calculatedLevel;
+            levelDisplay.innerText = currentLevel;
+            
+            // Make the game faster
+            baseSpeed += 2;
+            enemySpawnRate = Math.max(600, enemySpawnRate - 250);
+        }
+
+        // Trigger finish line at 400 points
+        if (score >= 400 && !finishTriggered) {
+            finishTriggered = true;
+            finishLine.style.display = 'block';
+        }
+    }
+
+    function updateGame() {
+        if (!isPlaying) return;
+
+        // Speed management for Nitro Boost
+        if (keys.Space) {
+            currentSpeed = baseSpeed * 2; 
+            nitroLabel.style.visibility = 'visible';
+            player.style.backgroundColor = '#f39c12'; 
+        } else {
+            currentSpeed = baseSpeed;
+            nitroLabel.style.visibility = 'hidden';
+            player.style.backgroundColor = '#e74c3c'; 
+        }
+
+        // Move player
+        if (keys.ArrowLeft && playerX > 20) playerX -= 8;
+        if (keys.ArrowRight && playerX < 330) playerX += 8;
+        player.style.left = playerX + 'px';
+
+        // Move road lines
+        document.querySelectorAll('.road-line').forEach(line => {
+            let top = parseInt(line.style.top);
+            line.style.top = (top + currentSpeed) + 'px';
+            if (top >= 600) line.style.top = '-80px';
+        });
+
+        // Move finish line if triggered
+        if (finishTriggered) {
+            let finishTop = parseInt(finishLine.style.top);
+            finishLine.style.top = (finishTop + currentSpeed) + 'px';
+
+            // Win condition check
+            if (finishTop >= 500) {
+                winGame();
+            }
+        }
+
+        // Move enemies & hit testing
+        document.querySelectorAll('.enemy').forEach(enemy => {
+            let top = parseInt(enemy.style.top);
+            enemy.style.top = (top + currentSpeed) + 'px';
+
+            let playerRect = player.getBoundingClientRect();
+            let enemyRect = enemy.getBoundingClientRect();
+
+            if (
+                playerRect.left < enemyRect.right &&
+                playerRect.right > enemyRect.left &&
+                playerRect.top < enemyRect.bottom &&
+                playerRect.bottom > enemyRect.top
+            ) {
+                gameOver();
+            }
+
+            if (top >= 600) {
+                enemy.remove();
+                if (!finishTriggered) {
+                    score += keys.Space ? 20 : 10;
+                    scoreDisplay.innerText = score;
+                    checkLevelUp();
+                }
+            }
+        });
+    }
+
+    function createEnemy() {
+        const enemy = document.createElement('div');
+        enemy.classList.add('enemy');
+        
+        // More lanes including edges
+        const lanes = [45, 95, 145, 195, 245, 295, 345];
+        const randomLane = lanes[Math.floor(Math.random() * lanes.length)];
+        
+        // Different vehicle sizes
+        const sizes = [
+            { width: 40, height: 70 },   // small car
+            { width: 50, height: 80 },   // normal car
+            { width: 60, height: 90 }    // truck
+        ];
+        const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+        
+        const colors = ['#2980b9', '#2ecc71', '#9b59b6', '#f1c40f', '#e74c3c'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        enemy.style.left = randomLane + 'px';
+        enemy.style.width = randomSize.width + 'px';
+        enemy.style.height = randomSize.height + 'px';
+        enemy.style.backgroundColor = randomColor;
+        enemy.style.top = '-100px';
+        board.appendChild(enemy);
+    }
+
+    function gameOver() {
+        isPlaying = false;
+        clearInterval(gameInterval);
+        clearTimeout(enemyTimeout);
+        document.querySelectorAll('.enemy').forEach(e => e.remove());
+        finalScoreDisplay.innerText = "Score Reached: " + score;
+        gameOverScreen.style.display = 'flex';
+    }
+
+    function winGame() {
+        isPlaying = false;
+        clearInterval(gameInterval);
+        clearTimeout(enemyTimeout);
+        document.querySelectorAll('.enemy').forEach(e => e.remove());
+        victoryScreen.style.display = 'flex';
+    }
+
+    function resetGame() {
+        startGame();
+    }
+
+    // Pointer/touch controls setup
+    const btnLeft = document.getElementById('btn-left');
+    const btnRight = document.getElementById('btn-right');
+    const btnNitro = document.getElementById('btn-nitro');
+
+    function setupButton(buttonElement, keyName) {
+        if (!buttonElement) return;
+
+        const press = (e) => {
+            e.preventDefault();
+            keys[keyName] = true;
+            buttonElement.classList.add('active');
+        };
+
+        const release = (e) => {
+            e.preventDefault();
+            keys[keyName] = false;
+            buttonElement.classList.remove('active');
+        };
+
+        // Pointer events support touch and mouse clicks natively and performantly
+        buttonElement.addEventListener('pointerdown', press);
+        buttonElement.addEventListener('pointerup', release);
+        buttonElement.addEventListener('pointercancel', release);
+        buttonElement.addEventListener('pointerleave', release);
+
+        // Prevent default touch behavior (double-tap zoom, context menu, scrolling)
+        buttonElement.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+    }
+
+    setupButton(btnLeft, 'ArrowLeft');
+    setupButton(btnRight, 'ArrowRight');
+    setupButton(btnNitro, 'Space');
+
+    // Auto-detect touch support and toggle container class
+    function detectTouch() {
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isTouchDevice) {
+            document.body.classList.add('show-controls');
+        }
+    }
+
+    // Dynamic scale to fit viewport height and width
+    function resizeGame() {
+        const container = document.getElementById('game-container');
+        if (!container) return;
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        // Base container dimensions: 400px board + borders + UI spacing (around 420px width x 670px height)
+        const baseWidth = 420;
+        const baseHeight = 670;
+
+        const scaleX = width / baseWidth;
+        const scaleY = height / baseHeight;
+        const scale = Math.min(scaleX, scaleY, 1); // Only scale down, never up
+
+        if (scale < 1) {
+            container.style.transform = `scale(${scale})`;
+            container.style.transformOrigin = 'center center';
+        } else {
+            container.style.transform = 'none';
+        }
+    }
+
+    // Initialize mobile-responsive sizing and touch checks
+    window.addEventListener('resize', resizeGame);
+    window.addEventListener('load', resizeGame);
+    
+    detectTouch();
+    resizeGame();
+
+    startGame();
+</script>
+</body>
+</html>

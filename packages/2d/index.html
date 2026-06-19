@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Void Drifter - 360° Space Shooter</title>
+    <!-- Modern Tech Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Game Viewport Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Dynamic Starfield/Grid Background (CSS Animated fallback behind canvas) -->
+        <div class="grid-overlay"></div>
+
+        <!-- HUD Overlay (Active during gameplay) -->
+        <div id="hud" class="hidden">
+            <!-- Left Side: Player Status -->
+            <div class="hud-panel player-panel">
+                <div class="panel-header">VANGUARD-7 HULL</div>
+                <div class="bar-container">
+                    <div id="player-shield-bar" class="bar shield-bar" style="width: 100%;">
+                        <span class="bar-label">SHIELD</span>
+                    </div>
+                </div>
+                <div class="bar-container">
+                    <div id="player-hull-bar" class="bar hull-bar" style="width: 100%;">
+                        <span class="bar-label">ARMOR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: Station Status & Waves -->
+            <div class="hud-panel center-panel">
+                <div class="wave-display">WAVE <span id="hud-wave">1</span></div>
+                <div class="panel-header" id="station-hud-header">ORBITAL STATION - DEFENSE PROTOCOL</div>
+                <div class="bar-container station-bar-container" id="station-shield-container">
+                    <div id="station-shield-bar" class="bar shield-bar" style="width: 100%;">
+                        <span class="bar-label">STATION SHIELD</span>
+                    </div>
+                </div>
+                <div class="bar-container station-bar-container" id="station-hull-container">
+                    <div id="station-hull-bar" class="bar hull-bar" style="width: 100%;">
+                        <span class="bar-label">STATION HULL</span>
+                    </div>
+                </div>
+                <div class="warning-ticker" id="warning-ticker">DOCK SECURE - STANDBY</div>
+            </div>
+
+            <!-- Right Side: Score & Currency -->
+            <div class="hud-panel score-panel">
+                <div class="stat-row">
+                    <span class="stat-label">SCORE:</span>
+                    <span id="hud-score" class="stat-value text-glow">000,000</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">SCRAP:</span>
+                    <span id="hud-scrap" class="stat-value scrap-glow">0</span>
+                </div>
+            </div>
+
+            <!-- Bottom Left: Weapon Stats & Dash -->
+            <div class="hud-panel weapon-panel">
+                <div id="active-weapon">PULSE BEAM</div>
+                <div class="dash-indicator-container">
+                    <span class="dash-label">WARP DASH (SHIFT)</span>
+                    <div class="dash-cooldown-wrapper">
+                        <div id="dash-cooldown-bar" class="dash-cooldown-bar" style="width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="docking-prompt" id="docking-prompt">PRESS [E] TO DOCK & UPGRADE</div>
+            </div>
+
+            <!-- Bottom Right: Radar Minimap -->
+            <div class="hud-panel radar-panel">
+                <canvas id="minimap-canvas" width="150" height="150"></canvas>
+                <div class="radar-label">SECTOR RADAR</div>
+            </div>
+        </div>
+
+        <!-- Start Screen Overlay -->
+        <div id="start-screen" class="overlay">
+            <div class="glass-card">
+                <h1 class="game-title">VOID DRIFTER</h1>
+                <p class="subtitle">360° Tactical Space Defense</p>
+                
+                <div class="story-text">
+                    Protect the central orbital station at coordinates (0,0) from mutating alien anomalies. Use Newtonian drift maneuvering to outflank the swarm. Collect floating scrap crystals to upgrade your systems.
+                </div>
+
+                <div class="controls-guide">
+                    <h3>MISSION CONTROLS</h3>
+                    <div class="controls-grid">
+                        <div class="control-key">W</div><div class="control-desc">Thrust / Accelerate</div>
+                        <div class="control-key">A / D</div><div class="control-desc">Rotate Left / Right</div>
+                        <div class="control-key">S</div><div class="control-desc">Reverse Thrusters</div>
+                        <div class="control-key">SPACEBAR</div><div class="control-desc">Fire Weapon</div>
+                        <div class="control-key">MOUSE CLICK</div><div class="control-desc">Fire Weapon</div>
+                        <div class="control-key">SHIFT</div><div class="control-desc">Warp Dash (Invulnerability)</div>
+                        <div class="control-key">E</div><div class="control-desc">Dock / Open Shop (Near Station)</div>
+                        <div class="control-key">G</div><div class="control-desc">Launch Next Wave Instantly</div>
+                    </div>
+                </div>
+
+                <div class="settings-option">
+                    <label class="switch-container">
+                        <input type="checkbox" id="toggle-station">
+                        <span class="custom-checkbox"></span>
+                        DISABLE CENTRAL STATION (SURVIVAL MODE)
+                    </label>
+                </div>
+
+                <button id="start-btn" class="glow-btn">INITIATE MISSION</button>
+            </div>
+        </div>
+
+        <!-- Upgrade Shop Overlay -->
+        <div id="shop-screen" class="overlay hidden">
+            <div class="glass-card shop-card">
+                <h2 class="menu-title">STATION HANGAR & UPGRADES</h2>
+                <p class="shop-currency">AVAILABLE SCRAP: <span id="shop-scrap">0</span> CRYSTALS</p>
+                
+                <div class="shop-grid">
+                    <!-- Column 1: Player Ship -->
+                    <div class="shop-section">
+                        <h3>VANGUARD-7 SYSTEMS</h3>
+                        
+                        <div class="shop-item">
+                            <div class="item-info">
+                                <span class="item-name">Hull Repair</span>
+                                <span class="item-desc">Restores hull integrity to maximum</span>
+                            </div>
+                            <button class="upgrade-btn" id="btn-repair" data-cost="20">20 SCRAP</button>
+                        </div>
+
+                        <div class="shop-item">
+                            <div class="item-info">
+                                <span class="item-name">Plasma Cannon [Lvl <span id="lvl-weapon">1</span>]</span>
+                                <span class="item-desc">Increases shot speed and rate of fire</span>
+                            </div>
+                            <button class="upgrade-btn" id="btn-upgrade-weapon" data-cost="40">40 SCRAP</button>
+                        </div>
+
+                        <div class="shop-item">
+                            <div class="item-info">
+                                <span class="item-name">Fusion Thrusters [Lvl <span id="lvl-speed">1</span>]</span>
+                                <span class="item-desc">Increases ship speed & rotation speed</span>
+                            </div>
+                            <button class="upgrade-btn" id="btn-upgrade-speed" data-cost="30">30 SCRAP</button>
+                        </div>
+
+                        <div class="shop-item">
+                            <div class="item-info">
+                                <span class="item-name">Shield Core [Lvl <span id="lvl-shield">1</span>]</span>
+                                <span class="item-desc">Increases max shield capacity & recharge rate</span>
+                            </div>
+                            <button class="upgrade-btn" id="btn-upgrade-shield" data-cost="35">35 SCRAP</button>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Station Systems -->
+                    <div class="shop-section" id="shop-station-section">
+                        <h3>STATION DEFENSES</h3>
+
+                        <div class="shop-item">
+                            <div class="item-info">
+                                <span class="item-name">Station Repair</span>
+                                <span class="item-desc">Restores station structural integrity</span>
+                            </div>
+                            <button class="upgrade-btn" id="btn-repair-station" data-cost="30">30 SCRAP</button>
+                        </div>
+
+                        <div class="shop-item">
+                            <div class="item-info">
+                                <span class="item-name">Pulse Turrets [Lvl <span id="lvl-station-turrets">1</span>]</span>
+                                <span class="item-desc">Upgrades station automatic defense rate & count</span>
+                            </div>
+                            <button class="upgrade-btn" id="btn-upgrade-station-turrets" data-cost="50">50 SCRAP</button>
+                        </div>
+
+                        <div class="shop-item">
+                            <div class="item-info">
+                                <span class="item-name">Station Shield Core [Lvl <span id="lvl-station-shield">1</span>]</span>
+                                <span class="item-desc">Increases station maximum energy shields</span>
+                            </div>
+                            <button class="upgrade-btn" id="btn-upgrade-station-shield" data-cost="45">45 SCRAP</button>
+                        </div>
+
+                        <div class="shop-item">
+                            <div class="item-info">
+                                <span class="item-name">Scrap Magnet [Lvl <span id="lvl-magnet">1</span>]</span>
+                                <span class="item-desc">Increases range at which scrap pulls toward ship</span>
+                            </div>
+                            <button class="upgrade-btn" id="btn-upgrade-magnet" data-cost="25">25 SCRAP</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shop-footer">
+                    <button id="resume-btn" class="glow-btn">RESUME DEPLOYMENT [ESC]</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen Overlay -->
+        <div id="game-over-screen" class="overlay hidden">
+            <div class="glass-card">
+                <h1 class="game-title text-red">MISSION FAILURE</h1>
+                <p class="subtitle" id="game-over-reason">Your ship or the space station was vaporized</p>
+
+                <div class="stats-box">
+                    <div class="stat-row">
+                        <span>WAVES CLEARED:</span>
+                        <span id="final-waves" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>FINAL SCORE:</span>
+                        <span id="final-score" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>SCRAP COLLECTED:</span>
+                        <span id="final-scrap" class="stat-value">0</span>
+                    </div>
+                </div>
+
+                <button id="restart-btn" class="glow-btn red-btn">REDEPLOY TEAM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="sound.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

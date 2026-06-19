@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Vehicle Showroom & Inspector</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Showroom Panel UI */
+        #showroom-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            width: 320px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0 0 8px 0;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .select-btn {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+        }
+
+        .select-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .color-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+
+        .color-dot.active {
+            border-color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        /* Toggle Switches */
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .toggle-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+            margin: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.15);
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Instructions overlay */
+        #help-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 8px 18px;
+            font-size: 12px;
+            color: #94a3b8;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            #showroom-panel {
+                width: calc(100vw - 70px);
+                left: 15px;
+                top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div id="showroom-panel">
+    <h1>3D VEHICLE INSPECTOR</h1>
+    <div class="subtitle">Rotate, zoom, and inspect vehicle geometry</div>
+
+    <!-- Vehicle Selection -->
+    <div class="control-group">
+        <div class="control-label">Vehicle Class</div>
+        <select id="vehicle-select" class="select-btn">
+            <option value="car">Level Up Nitro Racer</option>
+            <option value="futuristic">Cyber Hypercar</option>
+            <option value="truck">Heavy Duty Hauler</option>
+            <option value="sedan">Commuter Sedan (Traffic)</option>
+            <option value="suv">Family SUV (Traffic)</option>
+            <option value="van">Cargo Van (Traffic)</option>
+        </select>
+    </div>
+
+    <!-- Paint Color selection -->
+    <div class="control-group">
+        <div class="control-label">Paint Finish</div>
+        <div class="color-palette">
+            <div class="color-dot active" style="background-color: #e74c3c;" data-color="0xe74c3c" title="Racing Red"></div>
+            <div class="color-dot" style="background-color: #3498db;" data-color="0x3498db" title="Electric Blue"></div>
+            <div class="color-dot" style="background-color: #2ecc71;" data-color="0x2ecc71" title="Hyper Green"></div>
+            <div class="color-dot" style="background-color: #f1c40f;" data-color="0xf1c40f" title="Formula Gold"></div>
+            <div class="color-dot" style="background-color: #9b59b6;" data-color="0x9b59b6" title="Midnight Purple"></div>
+        </div>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 20px 0;">
+
+    <!-- Auto-Rotate -->
+    <div class="control-group">
+        <div class="toggle-row">
+            <span class="toggle-text">Auto-Rotation</span>
+            <label class="switch">
+                <input type="checkbox" id="auto-rotate-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Wireframe -->
+    <div class="control-group">
+        <div class="toggle-row">
+            <span class="toggle-text">Wireframe Topology</span>
+            <label class="switch">
+                <input type="checkbox" id="wireframe-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<div id="help-overlay">
+    🖱️ Left click + drag to rotate horizontally/vertically &nbsp;|&nbsp; 📜 Scroll to zoom
+</div>
+
+<!-- Three.js and OrbitControls -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="vehicle_models.js"></script>
+
+<script>
+    // -------------------------------------------------------------
+    // 3D Scene Initialization
+    // -------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0d14);
+
+    // Studio/Showroom Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    keyLight.position.set(20, 20, 20);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.bias = -0.001;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x3b82f6, 0.5); // Cool blue fill light
+    fillLight.position.set(-20, 10, -20);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.8); // White rim light from behind
+    rimLight.position.set(0, 15, -30);
+    scene.add(rimLight);
+
+    // Camera setup
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(20, 8, 25);
+
+    // Renderer setup
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // Orbit Controls
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 10;
+    controls.maxDistance = 60;
+    controls.target.set(0, 2, 0);
+
+    // -------------------------------------------------------------
+    // VEHICLE MODEL CREATION (Shared from vehicle_models.js)
+    // -------------------------------------------------------------
+
+    // -------------------------------------------------------------
+    // SHOWROOM OBJECT MANAGEMENT
+    // -------------------------------------------------------------
+    let currentVehicleMesh = null;
+    let selectedVehicleType = 'car';
+    let selectedColor = 0xe74c3c;
+    let autoRotate = false;
+    let wireframeMode = false;
+
+    function loadVehicle() {
+        if (currentVehicleMesh) {
+            scene.remove(currentVehicleMesh);
+        }
+
+        if (selectedVehicleType === 'car') {
+            currentVehicleMesh = createCar(selectedColor, 1);
+            currentVehicleMesh.position.set(0, 0.2, 0);
+        } else if (selectedVehicleType === 'futuristic') {
+            currentVehicleMesh = createFuturisticCar(selectedColor, 1);
+            currentVehicleMesh.position.set(0, 0.2, 0);
+        } else if (selectedVehicleType === 'truck') {
+            currentVehicleMesh = createTruck(selectedColor, 0.85);
+            currentVehicleMesh.position.set(0, 0.51, 0);
+        } else if (selectedVehicleType === 'sedan') {
+            currentVehicleMesh = createTrafficSedan(selectedColor, 1.0);
+            currentVehicleMesh.position.set(0, 0.2, 0);
+        } else if (selectedVehicleType === 'suv') {
+            currentVehicleMesh = createTrafficSUV(selectedColor, 1.0);
+            currentVehicleMesh.position.set(0, 0.2, 0);
+        } else if (selectedVehicleType === 'van') {
+            currentVehicleMesh = createTrafficVan(selectedColor, 1.0);
+            currentVehicleMesh.position.set(0, 0.2, 0);
+        }
+
+        scene.add(currentVehicleMesh);
+
+        applyWireframe();
+    }
+
+    function applyWireframe() {
+        if (!currentVehicleMesh) return;
+        currentVehicleMesh.traverse(child => {
+            if (child.isMesh) {
+                child.material.wireframe = wireframeMode;
+            }
+        });
+    }
+
+    // -------------------------------------------------------------
+    // INTERACTIVE UI EVENT LISTENERS
+    // -------------------------------------------------------------
+    
+    // Type Select
+    document.getElementById('vehicle-select').addEventListener('change', (e) => {
+        selectedVehicleType = e.target.value;
+        loadVehicle();
+    });
+
+    // Paint Color Picker
+    document.querySelectorAll('.color-dot').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            document.querySelector('.color-dot.active').classList.remove('active');
+            e.target.classList.add('active');
+            selectedColor = parseInt(e.target.getAttribute('data-color'));
+            loadVehicle();
+        });
+    });
+
+    // Auto Rotate Toggle
+    const autoRotateToggle = document.getElementById('auto-rotate-toggle');
+    autoRotateToggle.addEventListener('change', (e) => {
+        console.log("Auto-rotation checkbox changed. Checked state:", e.target.checked);
+        autoRotate = e.target.checked;
+        controls.autoRotate = autoRotate;
+        controls.autoRotateSpeed = 2.0; // Steady horizontal rotation speed
+    });
+
+    // Wireframe Toggle
+    document.getElementById('wireframe-toggle').addEventListener('change', (e) => {
+        wireframeMode = e.target.checked;
+        applyWireframe();
+    });
+
+    // Initialize orbit controls state
+    controls.autoRotate = autoRotate;
+    controls.autoRotateSpeed = 2.0;
+
+    // Load first vehicle
+    loadVehicle();
+
+    // -------------------------------------------------------------
+    // ANIMATION & RESIZE LOOPS
+    // -------------------------------------------------------------
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        // Update camera position via orbit controls (handles damping & auto-rotate)
+        controls.update();
+
+        // Spin wheels slowly on their axles to show assembly movement
+        if (currentVehicleMesh && currentVehicleMesh.userData && Array.isArray(currentVehicleMesh.userData.wheels)) {
+            currentVehicleMesh.userData.wheels.forEach(wheelGroup => {
+                wheelGroup.rotation.x += 0.008;
+            });
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Responsive Resizing
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+
+</body>
+</html>

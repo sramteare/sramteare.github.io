@@ -1,0 +1,731 @@
+/* Custom Fonts & Styling Rules for Void Drifter */
+:root {
+    --bg-color: #03030f;
+    --neon-blue: hsl(190, 100%, 50%);
+    --neon-blue-glow: hsla(190, 100%, 50%, 0.4);
+    --neon-green: hsl(120, 100%, 50%);
+    --neon-green-glow: hsla(120, 100%, 50%, 0.4);
+    --neon-red: hsl(0, 100%, 50%);
+    --neon-red-glow: hsla(0, 100%, 50%, 0.4);
+    --neon-orange: hsl(30, 100%, 50%);
+    --neon-orange-glow: hsla(30, 100%, 50%, 0.4);
+
+    --glass-bg: rgba(5, 5, 20, 0.4);
+    --glass-border: rgba(190, 220, 255, 0.25);
+    --font-heading: 'Orbitron', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-sans: 'Rajdhani', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: #e0e0ff;
+    font-family: var(--font-sans);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #080820 0%, #020208 100%);
+}
+
+#game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* Background animated scanlines/grid */
+.grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 6px 100%;
+    opacity: 0.7;
+}
+
+/* General overlay style (Menus, Overlays) */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(2, 2, 8, 0.35);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 10;
+    transition: opacity 0.5s ease, visibility 0.5s;
+    opacity: 1;
+    visibility: visible;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 40px;
+    width: 90%;
+    max-width: 650px;
+    text-align: center;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5),
+        inset 0 0 15px rgba(255, 255, 255, 0.05);
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.game-title {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: #fff;
+    text-shadow: 0 0 10px var(--neon-blue),
+        0 0 20px var(--neon-blue-glow);
+    margin-bottom: 5px;
+}
+
+.text-red {
+    text-shadow: 0 0 10px var(--neon-red),
+        0 0 20px var(--neon-red-glow) !important;
+}
+
+.subtitle {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    color: var(--neon-blue);
+    margin-bottom: 25px;
+    text-transform: uppercase;
+}
+
+.story-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #a0a0c0;
+    margin-bottom: 30px;
+}
+
+/* Controls Guide grid */
+.controls-guide {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.controls-guide h3 {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    color: #fff;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 8px 15px;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+}
+
+.control-key {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    text-align: center;
+    padding: 2px 5px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--neon-blue);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.control-desc {
+    color: #c0c0d8;
+    display: flex;
+    align-items: center;
+}
+
+/* Buttons */
+.glow-btn {
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 12px 35px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    box-shadow: 0 0 10px var(--neon-blue-glow);
+}
+
+.glow-btn:hover {
+    background: var(--neon-blue);
+    box-shadow: 0 0 20px var(--neon-blue),
+        0 0 40px var(--neon-blue-glow);
+    transform: scale(1.03);
+}
+
+.red-btn {
+    border-color: var(--neon-red);
+    box-shadow: 0 0 10px var(--neon-red-glow);
+}
+
+.red-btn:hover {
+    background: var(--neon-red);
+    box-shadow: 0 0 20px var(--neon-red),
+        0 0 40px var(--neon-red-glow);
+}
+
+/* HUD Overlay */
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 280px 1fr 280px;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+        "player center score"
+        ". . ."
+        "weapon . radar";
+    transition: opacity 0.5s ease;
+}
+
+#hud.hidden {
+    opacity: 0;
+}
+
+.hud-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 12px 15px;
+    pointer-events: auto;
+    /* Allow clicks on HUD panels */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* Panel Area Placements */
+.player-panel {
+    grid-area: player;
+}
+
+.center-panel {
+    grid-area: center;
+    justify-self: center;
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+}
+
+.score-panel {
+    grid-area: score;
+    text-align: right;
+}
+
+.weapon-panel {
+    grid-area: weapon;
+    align-self: end;
+}
+
+.radar-panel {
+    grid-area: radar;
+    align-self: end;
+    justify-self: end;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+}
+
+/* Status Bars */
+.panel-header {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    color: #a0a0c0;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.bar-container {
+    width: 100%;
+    height: 18px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    margin-bottom: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.bar-container:last-child {
+    margin-bottom: 0;
+}
+
+.bar {
+    height: 100%;
+    transition: width 0.15s ease-out;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+}
+
+.shield-bar {
+    background: linear-gradient(90deg, #005f9e 0%, var(--neon-blue) 100%);
+    box-shadow: 0 0 8px var(--neon-blue-glow);
+}
+
+.hull-bar {
+    background: linear-gradient(90deg, #7a0000 0%, var(--neon-red) 100%);
+    box-shadow: 0 0 8px var(--neon-red-glow);
+}
+
+.bar-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* Center Panel (Wave / Warning ticker) */
+.wave-display {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 4px;
+    margin-bottom: 4px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.station-bar-container {
+    height: 12px;
+}
+
+.station-bar-container .bar-label {
+    font-size: 0.6rem;
+    line-height: 10px;
+}
+
+.warning-ticker {
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--neon-green);
+    letter-spacing: 1px;
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.warning-ticker.alert-active {
+    color: var(--neon-red);
+    animation: fast-blink 0.5s infinite;
+    font-weight: bold;
+}
+
+@keyframes fast-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.1;
+    }
+}
+
+/* Score Panel details */
+.stat-row {
+    margin-bottom: 4px;
+}
+
+.stat-row:last-child {
+    margin-bottom: 0;
+}
+
+.stat-label {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    color: #a0a0c0;
+    margin-right: 5px;
+}
+
+.stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.text-glow {
+    text-shadow: 0 0 6px var(--neon-blue);
+}
+
+.scrap-glow {
+    color: var(--neon-orange);
+    text-shadow: 0 0 6px var(--neon-orange-glow);
+}
+
+/* Weapon panel detail */
+#active-weapon {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-shadow: 0 0 5px var(--neon-blue-glow);
+}
+
+.dash-indicator-container {
+    width: 100%;
+}
+
+.dash-label {
+    font-size: 0.7rem;
+    color: #8080a0;
+    display: block;
+    margin-bottom: 3px;
+    font-family: var(--font-mono);
+}
+
+.dash-cooldown-wrapper {
+    width: 120px;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.dash-cooldown-bar {
+    height: 100%;
+    background: var(--neon-blue);
+    box-shadow: 0 0 5px var(--neon-blue-glow);
+}
+
+.docking-prompt {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--neon-orange);
+    text-shadow: 0 0 5px var(--neon-orange-glow);
+    animation: blink 1.2s infinite;
+    display: none;
+    /* Shown dynamically when close to central station */
+}
+
+/* Radar */
+#minimap-canvas {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 30, 0.5);
+    border-radius: 50%;
+    box-shadow: inset 0 0 10px rgba(0, 0, 255, 0.2);
+}
+
+.radar-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: #8080a0;
+    margin-top: 4px;
+    letter-spacing: 1px;
+}
+
+/* Shop Overlay Card Styling */
+.shop-card {
+    max-width: 850px;
+    width: 95%;
+}
+
+.menu-title {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    letter-spacing: 3px;
+    margin-bottom: 5px;
+    color: #fff;
+    text-shadow: 0 0 10px var(--neon-orange-glow);
+}
+
+.shop-currency {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    color: var(--neon-orange);
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px var(--neon-orange-glow);
+}
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 700px) {
+    .shop-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+.shop-section h3 {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    color: #a0a0c0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 6px;
+    margin-bottom: 15px;
+}
+
+.shop-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    transition: background 0.2s ease;
+}
+
+.shop-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.item-info {
+    max-width: 68%;
+}
+
+.item-name {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.item-desc {
+    display: block;
+    font-size: 0.8rem;
+    color: #8080a0;
+    margin-top: 2px;
+}
+
+.upgrade-btn {
+    background: transparent;
+    border: 1px solid var(--neon-orange);
+    color: var(--neon-orange);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.upgrade-btn:hover {
+    background: var(--neon-orange);
+    color: #000;
+    box-shadow: 0 0 10px var(--neon-orange-glow);
+}
+
+.upgrade-btn:disabled {
+    border-color: #404050;
+    color: #606070;
+    cursor: not-allowed;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* Stats Box on Game Over */
+.stats-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 25px auto;
+    max-width: 320px;
+    text-align: left;
+}
+
+.stats-box .stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+    padding-bottom: 4px;
+}
+
+.stats-box .stat-row:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.stats-box span {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    color: #8080a0;
+}
+
+.stats-box .stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+/* Settings Checkbox Styling */
+.settings-option {
+    margin: 25px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.switch-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #a0a0c0;
+    font-family: var(--font-heading);
+    letter-spacing: 1.5px;
+    transition: color 0.2s ease;
+}
+
+.switch-container:hover {
+    color: #fff;
+}
+
+.switch-container input {
+    display: none;
+    /* Hide default browser input */
+}
+
+.custom-checkbox {
+    width: 38px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 10px;
+    margin-right: 12px;
+    display: inline-block;
+    position: relative;
+    box-shadow: 0 0 5px rgba(0, 240, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.custom-checkbox::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #a0a0c0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.switch-container:hover .custom-checkbox {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 8px var(--neon-blue-glow);
+}
+
+.switch-container input:checked+.custom-checkbox {
+    background-color: rgba(0, 240, 255, 0.1);
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 12px var(--neon-blue-glow);
+}
+
+.switch-container input:checked+.custom-checkbox::before {
+    transform: translateX(18px);
+    background-color: var(--neon-blue);
+    box-shadow: 0 0 8px var(--neon-blue);
+}
