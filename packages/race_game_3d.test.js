@@ -88,6 +88,9 @@ function createDom(localStorageData = {}, touchEnabled = false) {
             window.createCar = () => new window.THREE.Group();
             window.createFuturisticCar = () => new window.THREE.Group();
             window.createTruck = () => new window.THREE.Group();
+            window.createTrafficSedan = () => new window.THREE.Group();
+            window.createTrafficSUV = () => new window.THREE.Group();
+            window.createTrafficVan = () => new window.THREE.Group();
             window.initializeSharedAssets = () => {};
             
             // Load and run the shared Leaderboard class
@@ -410,6 +413,62 @@ describe('3D Race Game Mobile Friendly Features', () => {
         // Dispatch pointerup on nitro button
         nitroBtn.dispatchEvent(new win.PointerEvent('pointerup', { bubbles: true }));
         expect(win.eval('keys.Space')).toBe(false);
+
+        dom.window.close();
+    });
+});
+
+describe('3D Race Game Redesigned HUD & Progress Bar', () => {
+    it('should initialize progress markers with correct colors on startGame', () => {
+        const dom = createDom({});
+        const win = dom.window;
+        const doc = win.document;
+
+        win.startGame();
+
+        const playerMarker = doc.getElementById('marker-player');
+        const opp0Marker = doc.getElementById('marker-opp0');
+        const opp1Marker = doc.getElementById('marker-opp1');
+        const opp2Marker = doc.getElementById('marker-opp2');
+
+        // Check if colors are rgb representation of hex colors
+        expect(playerMarker.style.backgroundColor).toBe('rgb(231, 76, 60)'); // #e74c3c (231, 76, 60)
+        expect(opp0Marker.style.backgroundColor).toBe('rgb(0, 255, 255)');   // #00ffff (0, 255, 255)
+        expect(opp1Marker.style.backgroundColor).toBe('rgb(155, 89, 182)'); // #9b59b6 (155, 89, 182)
+        expect(opp2Marker.style.backgroundColor).toBe('rgb(230, 126, 34)');  // #e67e22 (230, 126, 34)
+
+        dom.window.close();
+    });
+
+    it('should calculate ranks and positions on progress bar during gameLoop', () => {
+        const dom = createDom({});
+        const win = dom.window;
+        const doc = win.document;
+
+        win.startGame();
+
+        // Set distances for testing ranks and positioning
+        win.eval('isPlaying = true; countdownActive = false;');
+        win.eval('playerDist = 3000; opponents[0].dist = 4000; opponents[1].dist = 2000; opponents[2].dist = 1000;');
+
+        win.gameLoop();
+
+        const playerMarker = doc.getElementById('marker-player');
+        const opp0Marker = doc.getElementById('marker-opp0');
+        const opp1Marker = doc.getElementById('marker-opp1');
+        const opp2Marker = doc.getElementById('marker-opp2');
+
+        // Check rank text inside markers
+        expect(opp0Marker.textContent.trim()).toBe('1');   // 4000m (Ahead of player)
+        expect(playerMarker.textContent.trim()).toBe('2'); // 3000m (You)
+        expect(opp1Marker.textContent.trim()).toBe('3');   // 2000m
+        expect(opp2Marker.textContent.trim()).toBe('4');   // 1000m
+
+        // Check horizontal percentage positions (left styles) within a minor 1% tolerance due to frame tick movement
+        expect(parseFloat(opp0Marker.style.left)).toBeCloseTo(66.6667, 1);
+        expect(parseFloat(playerMarker.style.left)).toBeCloseTo(50.0000, 1);
+        expect(parseFloat(opp1Marker.style.left)).toBeCloseTo(33.3333, 1);
+        expect(parseFloat(opp2Marker.style.left)).toBeCloseTo(16.6667, 1);
 
         dom.window.close();
     });

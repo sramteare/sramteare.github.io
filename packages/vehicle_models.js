@@ -201,7 +201,7 @@ function createNumberDecalTexture(numberStr, type = 'classic') {
     return texture;
 }
 
-function createCar(color, scale = 1, numberStr = "07") {
+function createCar(color, scale = 1, numberStr = "07", tailLightZ = null) {
     initializeSharedAssets();
 
     const carGroup = new THREE.Group();
@@ -441,15 +441,16 @@ function createCar(color, scale = 1, numberStr = "07") {
 
     // Taillights
     const taillightMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff2222, emissive: 0xff0000, emissiveIntensity: 0.5
+        color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.0
     });
+    const zPos = tailLightZ !== null ? tailLightZ : -8.67;
     const leftTaillight = new THREE.Mesh(new THREE.CircleGeometry(0.7, 16), taillightMaterial);
-    leftTaillight.position.set(-3.4, 1.6, -8.55);
+    leftTaillight.position.set(-3.4, 1.6, zPos);
     leftTaillight.rotation.y = Math.PI;
     carGroup.add(leftTaillight);
 
     const rightTaillight = new THREE.Mesh(new THREE.CircleGeometry(0.7, 16), taillightMaterial);
-    rightTaillight.position.set(3.4, 1.6, -8.55);
+    rightTaillight.position.set(3.4, 1.6, zPos);
     rightTaillight.rotation.y = Math.PI;
     carGroup.add(rightTaillight);
 
@@ -457,7 +458,7 @@ function createCar(color, scale = 1, numberStr = "07") {
     return carGroup;
 }
 
-function createFuturisticCar(color, scale = 1, numberStr = "99") {
+function createFuturisticCar(color, scale = 1, numberStr = "99", tailLightZ = null) {
     initializeSharedAssets();
 
     const carGroup = new THREE.Group();
@@ -486,9 +487,9 @@ function createFuturisticCar(color, scale = 1, numberStr = "99") {
         emissiveIntensity: 1.3
     });
     const neonRedMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff1133,
-        emissive: 0xff0022,
-        emissiveIntensity: 1.2
+        color: 0xff0000,
+        emissive: 0xff0000,
+        emissiveIntensity: 2.5
     });
     const underglowMaterial = new THREE.MeshStandardMaterial({
         color: 0x00ccff,
@@ -724,13 +725,14 @@ function createFuturisticCar(color, scale = 1, numberStr = "99") {
     // =========================================================
     // 10. REAR LED TAILLIGHT BAR (Full-width glowing strip)
     // =========================================================
+    const zPos = tailLightZ !== null ? tailLightZ : -9.45;
     const tailBar = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.18, 0.15), neonRedMaterial);
-    tailBar.position.set(0, 1.8, -9.3);
+    tailBar.position.set(0, 1.8, zPos);
     carGroup.add(tailBar);
 
     // Upper brake light strip
     const brakeStrip = new THREE.Mesh(new THREE.BoxGeometry(5.0, 0.08, 0.08), neonRedMaterial);
-    brakeStrip.position.set(0, 2.8, -9.25);
+    brakeStrip.position.set(0, 2.8, zPos);
     carGroup.add(brakeStrip);
 
     // =========================================================
@@ -820,7 +822,7 @@ function createFuturisticCar(color, scale = 1, numberStr = "99") {
     return carGroup;
 }
 
-function createTruck(colorVal, scale = 1, numberStr = "88") {
+function createTruck(colorVal, scale = 1, numberStr = "88", tailLightZ = null) {
     initializeSharedAssets();
 
     const truckGroup = new THREE.Group();
@@ -849,9 +851,9 @@ function createTruck(colorVal, scale = 1, numberStr = "88") {
         emissiveIntensity: 1.2
     });
     const neonRedMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff2222,
+        color: 0xff0000,
         emissive: 0xff0000,
-        emissiveIntensity: 1.0
+        emissiveIntensity: 2.5
     });
     const underglowMaterial = new THREE.MeshStandardMaterial({
         color: 0x00cccc,
@@ -989,13 +991,14 @@ function createTruck(colorVal, scale = 1, numberStr = "88") {
     // =========================================================
     // 7. REAR TAILLIGHT BAR + ACCENTS
     // =========================================================
+    const zPos = tailLightZ !== null ? tailLightZ : -15.12;
     const rearTailBar = new THREE.Mesh(new THREE.BoxGeometry(7.0, 0.2, 0.18), neonRedMaterial);
-    rearTailBar.position.set(0, 3.0, -14.9);
+    rearTailBar.position.set(0, 3.0, zPos);
     truckGroup.add(rearTailBar);
 
     // Lower rear reflector strip
     const rearLowerBar = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.12, 0.12), neonRedMaterial);
-    rearLowerBar.position.set(0, 1.2, -14.9);
+    rearLowerBar.position.set(0, 1.2, zPos);
     truckGroup.add(rearLowerBar);
 
     // =========================================================
@@ -1108,7 +1111,7 @@ function createTruck(colorVal, scale = 1, numberStr = "88") {
 // COMMUTER TRAFFIC MODELS (Non-Racey Everyday Vehicles)
 // ============================================================================
 
-function createTrafficSedan(color, scale = 1) {
+function createTrafficSedan(color, scale = 1, tailLightZ = null) {
     initializeSharedAssets();
 
     const sedanGroup = new THREE.Group();
@@ -1227,12 +1230,13 @@ function createTrafficSedan(color, scale = 1) {
     sedanGroup.add(frLight);
 
     // Taillights
-    const tailMat = new THREE.MeshStandardMaterial({ color: 0xaa2222, emissive: 0xaa2222, emissiveIntensity: 0.4 });
+    const tailMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.0 });
+    const zPos = tailLightZ !== null ? tailLightZ : -7.72;
     const rlLight = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.1), tailMat);
-    rlLight.position.set(-2.8, 1.4, -7.51);
+    rlLight.position.set(-2.8, 1.4, zPos);
     sedanGroup.add(rlLight);
     const rrLight = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.1), tailMat);
-    rrLight.position.set(2.8, 1.4, -7.51);
+    rrLight.position.set(2.8, 1.4, zPos);
     sedanGroup.add(rrLight);
 
     // 6. Wheels (Narrower commuter wheels scaled along X axis)
@@ -1249,7 +1253,7 @@ function createTrafficSedan(color, scale = 1) {
     return sedanGroup;
 }
 
-function createTrafficSUV(color, scale = 1) {
+function createTrafficSUV(color, scale = 1, tailLightZ = null) {
     initializeSharedAssets();
 
     const suvGroup = new THREE.Group();
@@ -1361,12 +1365,13 @@ function createTrafficSUV(color, scale = 1) {
     suvGroup.add(frLight);
 
     // Taillights
-    const tailMat = new THREE.MeshStandardMaterial({ color: 0xaa2222, emissive: 0xaa2222, emissiveIntensity: 0.4 });
+    const tailMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.0 });
+    const zPos = tailLightZ !== null ? tailLightZ : -8.22;
     const rlLight = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.4, 0.1), tailMat);
-    rlLight.position.set(-3.6, 2.8, -7.51);
+    rlLight.position.set(-3.6, 2.8, zPos);
     suvGroup.add(rlLight);
     const rrLight = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.4, 0.1), tailMat);
-    rrLight.position.set(3.6, 2.8, -7.51);
+    rrLight.position.set(3.6, 2.8, zPos);
     suvGroup.add(rrLight);
 
     // 6. Wheels (SUV wheels, slightly larger, scaled narrower in X)
@@ -1383,7 +1388,7 @@ function createTrafficSUV(color, scale = 1) {
     return suvGroup;
 }
 
-function createTrafficVan(color, scale = 1) {
+function createTrafficVan(color, scale = 1, tailLightZ = null) {
     initializeSharedAssets();
 
     const vanGroup = new THREE.Group();
@@ -1457,12 +1462,13 @@ function createTrafficVan(color, scale = 1) {
     vanGroup.add(frLight);
 
     // 5. Taillights (Positioned outward at Z = -8.72 and X = 3.5/-3.5 to sit proud of beveled rear cargo wall)
-    const tailMat = new THREE.MeshStandardMaterial({ color: 0x992222, emissive: 0x992222, emissiveIntensity: 0.3 });
+    const tailMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.0 });
+    const zPos = tailLightZ !== null ? tailLightZ : -8.75;
     const rlLight = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.8, 0.1), tailMat);
-    rlLight.position.set(-3.5, 2.2, -8.72);
+    rlLight.position.set(-3.5, 2.2, zPos);
     vanGroup.add(rlLight);
     const rrLight = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.8, 0.1), tailMat);
-    rrLight.position.set(3.5, 2.2, -8.72);
+    rrLight.position.set(3.5, 2.2, zPos);
     vanGroup.add(rrLight);
 
     // 6. Wheels (Scaled narrower in X)
