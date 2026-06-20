@@ -939,6 +939,7 @@ class GameEngine {
         this.isPlaying = false;
         this.isGameOver = false;
         this.isDocked = false;
+        this.isPaused = false;
         this.deathTimer = 0;
 
         // Visual Parallax Elements
@@ -1327,7 +1328,7 @@ class GameEngine {
 
     // Central Update Logic
     update() {
-        if (!this.isPlaying) return;
+        if (!this.isPlaying || this.isPaused) return;
 
         // Check death animation timer
         if (this.deathTimer > 0) {
@@ -2269,6 +2270,31 @@ window.addEventListener('load', () => {
     document.getElementById('btn-upgrade-station-turrets').addEventListener('click', () => game.purchaseUpgrade('station-turrets'));
     document.getElementById('btn-upgrade-station-shield').addEventListener('click', () => game.purchaseUpgrade('station-shield'));
     document.getElementById('btn-upgrade-magnet').addEventListener('click', () => game.purchaseUpgrade('magnet'));
+
+    // Landscape orientation locking protocol
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    
+    function checkOrientation() {
+        const isPortrait = window.innerHeight > window.innerWidth;
+        const maxDimension = Math.max(window.innerWidth, window.innerHeight);
+        const isMobileOrSmallTablet = isTouchDevice && maxDimension < 1024;
+
+        const orientationScreen = document.getElementById('orientation-screen');
+        if (isMobileOrSmallTablet && isPortrait) {
+            if (game) {
+                game.isPaused = true;
+            }
+            if (orientationScreen) orientationScreen.style.display = 'flex';
+        } else {
+            if (game) {
+                game.isPaused = false;
+            }
+            if (orientationScreen) orientationScreen.style.display = 'none';
+        }
+    }
+
+    window.addEventListener('resize', checkOrientation);
+    checkOrientation();
 });
 
 // --- Controls Carousel Scroll Handler ---

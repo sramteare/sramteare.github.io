@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Vehicle Showroom & Inspector</title>
     <style>
-        body {
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100vw;
+            height: 100dvh;
             background-color: #0b0f19;
             color: #f3f4f6;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -17,7 +19,7 @@
 
         #canvas-container {
             width: 100vw;
-            height: 100vh;
+            height: 100dvh;
             position: absolute;
             top: 0;
             left: 0;
@@ -35,8 +37,91 @@
             border-radius: 12px;
             padding: 24px;
             width: 320px;
+            max-height: calc(100dvh - 40px);
+            overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             z-index: 10;
+            
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+        }
+
+        #showroom-panel.collapsed {
+            transform: translateX(calc(-100% - 40px));
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Panel Close Button */
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 11;
+        }
+
+        .close-btn:hover {
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .close-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Floating Toggle Button */
+        .floating-toggle-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            z-index: 9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, background 0.2s, border-color 0.2s;
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .floating-toggle-btn.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .floating-toggle-btn:hover {
+            background: rgba(15, 23, 42, 0.9);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.03);
+        }
+
+        .floating-toggle-btn:active {
+            transform: scale(0.97);
         }
 
         h1 {
@@ -45,6 +130,7 @@
             font-weight: 700;
             letter-spacing: -0.5px;
             color: #ffffff;
+            padding-right: 24px;
         }
 
         .subtitle {
@@ -195,11 +281,59 @@
         }
 
         /* Responsive adjustments */
+        @media (max-width: 768px), (max-height: 600px) {
+            #help-overlay {
+                display: none;
+            }
+        }
+
         @media (max-width: 480px) {
             #showroom-panel {
-                width: calc(100vw - 70px);
+                width: calc(100vw - 30px);
                 left: 15px;
                 top: 15px;
+                max-height: calc(100dvh - 30px);
+                padding: 16px;
+            }
+            #showroom-panel.collapsed {
+                transform: translateX(calc(-100% - 30px));
+            }
+            .floating-toggle-btn {
+                top: 15px;
+                left: 15px;
+            }
+            h1 {
+                font-size: 18px;
+            }
+            .color-dot {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            #showroom-panel {
+                max-height: calc(100dvh - 30px);
+                top: 15px;
+                left: 15px;
+                padding: 16px;
+            }
+            #showroom-panel.collapsed {
+                transform: translateX(calc(-100% - 30px));
+            }
+            .floating-toggle-btn {
+                top: 15px;
+                left: 15px;
+                padding: 8px 14px;
+            }
+            .subtitle {
+                margin-bottom: 12px;
+            }
+            .control-group {
+                margin-bottom: 12px;
+            }
+            h1 {
+                font-size: 16px;
             }
         }
     </style>
@@ -208,7 +342,10 @@
 
 <div id="canvas-container"></div>
 
+<button id="open-panel-btn" class="floating-toggle-btn" aria-label="Open Customization Panel">🔧 Customize</button>
+
 <div id="showroom-panel">
+    <button id="close-panel-btn" class="close-btn" aria-label="Close Panel">&times;</button>
     <h1>3D VEHICLE INSPECTOR</h1>
     <div class="subtitle">Rotate, zoom, and inspect vehicle geometry</div>
 
@@ -229,11 +366,11 @@
     <div class="control-group">
         <div class="control-label">Paint Finish</div>
         <div class="color-palette">
-            <div class="color-dot active" style="background-color: #e74c3c;" data-color="0xe74c3c" title="Racing Red"></div>
-            <div class="color-dot" style="background-color: #3498db;" data-color="0x3498db" title="Electric Blue"></div>
-            <div class="color-dot" style="background-color: #2ecc71;" data-color="0x2ecc71" title="Hyper Green"></div>
-            <div class="color-dot" style="background-color: #f1c40f;" data-color="0xf1c40f" title="Formula Gold"></div>
-            <div class="color-dot" style="background-color: #9b59b6;" data-color="0x9b59b6" title="Midnight Purple"></div>
+            <div id="color-dot-red" class="color-dot active" style="background-color: #e74c3c;" data-color="0xe74c3c" title="Racing Red"></div>
+            <div id="color-dot-blue" class="color-dot" style="background-color: #3498db;" data-color="0x3498db" title="Electric Blue"></div>
+            <div id="color-dot-green" class="color-dot" style="background-color: #2ecc71;" data-color="0x2ecc71" title="Hyper Green"></div>
+            <div id="color-dot-gold" class="color-dot" style="background-color: #f1c40f;" data-color="0xf1c40f" title="Formula Gold"></div>
+            <div id="color-dot-purple" class="color-dot" style="background-color: #9b59b6;" data-color="0x9b59b6" title="Midnight Purple"></div>
         </div>
     </div>
 
@@ -272,6 +409,30 @@
 <script src="vehicle_models.js"></script>
 
 <script>
+    // -------------------------------------------------------------
+    // UI Panel Collapsible Logic
+    // -------------------------------------------------------------
+    const showroomPanel = document.getElementById('showroom-panel');
+    const openPanelBtn = document.getElementById('open-panel-btn');
+    const closePanelBtn = document.getElementById('close-panel-btn');
+
+    closePanelBtn.addEventListener('click', () => {
+        showroomPanel.classList.add('collapsed');
+        openPanelBtn.classList.add('visible');
+    });
+
+    openPanelBtn.addEventListener('click', () => {
+        showroomPanel.classList.remove('collapsed');
+        openPanelBtn.classList.remove('visible');
+    });
+
+    // Prevent interaction on panel and toggle button from affecting OrbitControls
+    [showroomPanel, openPanelBtn].forEach(element => {
+        element.addEventListener('pointerdown', (e) => e.stopPropagation());
+        element.addEventListener('mousedown', (e) => e.stopPropagation());
+        element.addEventListener('touchstart', (e) => e.stopPropagation());
+    });
+
     // -------------------------------------------------------------
     // 3D Scene Initialization
     // -------------------------------------------------------------

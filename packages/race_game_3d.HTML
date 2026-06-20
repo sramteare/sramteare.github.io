@@ -1811,8 +1811,8 @@
             if (e.key === "ArrowUp") { keys.ArrowUp = true; e.preventDefault(); }
             if (e.key === "ArrowDown") { keys.ArrowDown = true; e.preventDefault(); }
 
-            // Press any key during crash to skip animation and go directly to the launch screen showroom
-            if (isCrashed && crashTimer > 5) {
+            // Press any key during crash (after waiting 3 seconds/180 frames) to skip animation and go directly to the launch screen showroom
+            if (isCrashed && crashTimer > 180) {
                 isCrashed = false;
                 resetGame();
             }
