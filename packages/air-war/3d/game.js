@@ -1370,12 +1370,24 @@ class GameEngine {
         }
 
         // Update mobile dock button visibility
-        const mobileDockBtn = document.getElementById('btn-mobile-dock');
+        const mobileDockBtn = document.getElementById('btn-dock-mobile');
         if (mobileDockBtn) {
             if (dockPrompt && dockPrompt.style.display === 'block') {
                 mobileDockBtn.classList.remove('hidden');
             } else {
                 mobileDockBtn.classList.add('hidden');
+                keys.e = false; // Clear input if button is hidden while pressed
+            }
+        }
+
+        // Update mobile next wave button visibility
+        const mobileNextWaveBtn = document.getElementById('btn-launch-wave-mobile');
+        if (mobileNextWaveBtn) {
+            if (this.enemies.length === 0 && !this.waveActive && this.waveTimer > 90) {
+                mobileNextWaveBtn.classList.remove('hidden');
+            } else {
+                mobileNextWaveBtn.classList.add('hidden');
+                keys.g = false; // Clear input if button is hidden while pressed
             }
         }
 
@@ -2463,65 +2475,39 @@ function initMobileControls() {
         });
     }
 
-    // Action buttons touch listeners
-    const btnFire = document.getElementById('btn-mobile-fire');
-    const btnDash = document.getElementById('btn-mobile-dash');
-    const btnBrake = document.getElementById('btn-mobile-brake');
-    const btnDock = document.getElementById('btn-mobile-dock');
+    // Bind Action Buttons
+    const bindButton = (id, keyName) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
 
-    if (btnFire) {
-        btnFire.addEventListener('touchstart', (e) => {
-            keys[' '] = true;
+        btn.addEventListener('touchstart', (e) => {
+            keys[keyName] = true;
             e.preventDefault();
         }, { passive: false });
-        btnFire.addEventListener('touchend', (e) => {
-            keys[' '] = false;
-            e.preventDefault();
-        }, { passive: false });
-        btnFire.addEventListener('touchcancel', () => {
-            keys[' '] = false;
-        });
-    }
 
-    if (btnDash) {
-        btnDash.addEventListener('touchstart', (e) => {
-            keys.Shift = true;
-            e.preventDefault();
-        }, { passive: false });
-        btnDash.addEventListener('touchend', (e) => {
+        const endHandler = (e) => {
+            keys[keyName] = false;
+            if (e) e.preventDefault();
+        };
+
+        btn.addEventListener('touchend', endHandler, { passive: false });
+        btn.addEventListener('touchcancel', endHandler, { passive: false });
+    };
+
+    bindButton('btn-dash-mobile', 'Shift');
+    bindButton('btn-brake-mobile', 's');
+    bindButton('btn-dock-mobile', 'e');
+    bindButton('btn-launch-wave-mobile', 'g');
+
+    // Global fallback to clear keys when all screen touches end
+    const clearAllTouchesFallback = (e) => {
+        if (e.touches.length === 0) {
             keys.Shift = false;
-            e.preventDefault();
-        }, { passive: false });
-        btnDash.addEventListener('touchcancel', () => {
-            keys.Shift = false;
-        });
-    }
-
-    if (btnBrake) {
-        btnBrake.addEventListener('touchstart', (e) => {
-            keys.s = true;
-            e.preventDefault();
-        }, { passive: false });
-        btnBrake.addEventListener('touchend', (e) => {
             keys.s = false;
-            e.preventDefault();
-        }, { passive: false });
-        btnBrake.addEventListener('touchcancel', () => {
-            keys.s = false;
-        });
-    }
-
-    if (btnDock) {
-        btnDock.addEventListener('touchstart', (e) => {
-            keys.e = true;
-            e.preventDefault();
-        }, { passive: false });
-        btnDock.addEventListener('touchend', (e) => {
             keys.e = false;
-            e.preventDefault();
-        }, { passive: false });
-        btnDock.addEventListener('touchcancel', () => {
-            keys.e = false;
-        });
-    }
+            keys.g = false;
+        }
+    };
+    window.addEventListener('touchend', clearAllTouchesFallback, { passive: true });
+    window.addEventListener('touchcancel', clearAllTouchesFallback, { passive: true });
 }
