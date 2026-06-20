@@ -1842,8 +1842,8 @@ const VoidModels = (function () {
             wingSpikeR.position.set(5.0, -9, 0.5);
             swarmerGroup.add(wingSpikeR);
 
-            // Scale the group down so it feels like a small, agile scout unit relative to player ships
-            swarmerGroup.scale.set(0.65, 0.65, 0.65);
+            // Scale the group down so it reads as the small, agile scout enemy.
+            swarmerGroup.scale.set(0.56, 0.56, 0.56);
 
             group.add(swarmerGroup);
         } else if (type === 'bomber') {
@@ -1890,21 +1890,21 @@ const VoidModels = (function () {
 
             // Thorax (mid-front body)
             const thoraxGeo = new THREE.SphereGeometry(2.8, 8, 6);
-            thoraxGeo.scale(1.25, 1.6, 1.35); // wider and taller for a bulkier look
+            thoraxGeo.scale(1.32, 1.82, 1.55); // wider and taller for a bulkier look
             const thorax = new THREE.Mesh(thoraxGeo, shellMat);
             thorax.position.set(1.8, 0, 0.5);
             bodyGroup.add(thorax);
 
             // Abdomen Segment 1 (large center segment)
             const abd1Geo = new THREE.SphereGeometry(3.2, 8, 6);
-            abd1Geo.scale(1.35, 1.85, 1.55); // fatter center segment
+            abd1Geo.scale(1.42, 2.12, 1.78); // fatter center segment
             const abd1 = new THREE.Mesh(abd1Geo, shellMat);
-            abd1.position.set(-1.5, 0, 0.3);
+            abd1.position.set(-1.6, 0, 0.28);
             bodyGroup.add(abd1);
 
             // Abdomen Segment 2 (tapering rear segment)
             const abd2Geo = new THREE.SphereGeometry(2.6, 8, 6);
-            abd2Geo.scale(1.3, 1.55, 1.25); // beefier rear section
+            abd2Geo.scale(1.36, 1.82, 1.42); // beefier rear section
             const abd2 = new THREE.Mesh(abd2Geo, shellMat);
             abd2.position.set(-4.5, 0, 0.1);
             bodyGroup.add(abd2);
@@ -1917,11 +1917,11 @@ const VoidModels = (function () {
             bodyGroup.add(tail);
 
             // Organic underbelly tissue/muscle layer (rounded cylinder)
-            const underbellyGeo = new THREE.CylinderGeometry(1.8, 1.5, 7.5, 8);
+            const underbellyGeo = new THREE.CylinderGeometry(2.05, 1.75, 8.1, 8);
             underbellyGeo.rotateZ(Math.PI / 2); // align along X
-            underbellyGeo.scale(1.0, 1.55, 1.15); // more swollen underbelly profile
+            underbellyGeo.scale(1.0, 1.75, 1.3); // more swollen underbelly profile
             const underbelly = new THREE.Mesh(underbellyGeo, underbellyMat);
-            underbelly.position.set(-1.5, 0, -0.8);
+            underbelly.position.set(-1.7, 0, -0.95);
             bodyGroup.add(underbelly);
 
             // Head (curved snout/head and beak plates)
@@ -1960,12 +1960,12 @@ const VoidModels = (function () {
 
             // 3. Under-belly Heavy Bombard Mortar Cannon (Faceted Hard Shell Barrel)
             const cannonGroup = new THREE.Group();
-            cannonGroup.position.set(-0.5, 0, -1.6); // lowered slightly for bloated underbelly
+            cannonGroup.position.set(-0.55, 0, -1.85); // lowered slightly for bloated underbelly
             bomberGroup.add(cannonGroup);
             bomberGroup.reactorCore = cannonGroup; // Keep reference to reactorCore name to prevent errors in other loops if any
 
             // Outer cannon housing (octagonal cylinder pointing down-forward)
-            const barrelOuterGeo = new THREE.CylinderGeometry(2.0, 2.4, 4.2, 8);
+            const barrelOuterGeo = new THREE.CylinderGeometry(2.25, 2.65, 4.45, 8);
             barrelOuterGeo.rotateX(Math.PI / 2); // align initially
             const barrelOuter = new THREE.Mesh(barrelOuterGeo, underbellyMat);
             // Angle it 36 degrees forward and down
@@ -1973,7 +1973,7 @@ const VoidModels = (function () {
             cannonGroup.add(barrelOuter);
 
             // Muzzle ring/lip (cast iron nozzle look)
-            const muzzleGeo = new THREE.TorusGeometry(2.3, 0.42, 6, 8);
+            const muzzleGeo = new THREE.TorusGeometry(2.55, 0.48, 6, 8);
             muzzleGeo.rotateY(Math.PI / 2);
             const muzzle = new THREE.Mesh(muzzleGeo, nozzleMat);
             muzzle.position.set(0, 0, -2.1); // offset to end of barrel
@@ -1981,7 +1981,7 @@ const VoidModels = (function () {
             cannonGroup.add(muzzle);
 
             // Inside glowing plasma core (weapon charge)
-            const barrelInnerGeo = new THREE.CylinderGeometry(1.4, 1.4, 3.5, 8);
+            const barrelInnerGeo = new THREE.CylinderGeometry(1.55, 1.55, 3.7, 8);
             barrelInnerGeo.rotateX(Math.PI / 2);
             const barrelInner = new THREE.Mesh(barrelInnerGeo, glowMat);
             barrelInner.rotation.y = Math.PI / 5;
@@ -1999,10 +1999,10 @@ const VoidModels = (function () {
             fireGeo.translate(-2.0, 0, 0); // Offset pivot to base
 
             const enginesData = [
-                { y: 1.5,  z: 1.0,  scale: 0.85, xOffset: -7.5 },  // Upper Left
-                { y: -1.5, z: 1.0,  scale: 0.85, xOffset: -7.5 },  // Upper Right
-                { y: 1.1,  z: -0.6, scale: 0.8,  xOffset: -7.5 },  // Lower Left
-                { y: -1.1, z: -0.6, scale: 0.8,  xOffset: -7.5 }   // Lower Right
+                { y: 1.8,  z: 1.12, scale: 0.95, xOffset: -7.8 },  // Upper Left
+                { y: -1.8, z: 1.12, scale: 0.95, xOffset: -7.8 },  // Upper Right
+                { y: 1.35, z: -0.7,  scale: 0.9,  xOffset: -7.8 },  // Lower Left
+                { y: -1.35, z: -0.7, scale: 0.9,  xOffset: -7.8 }   // Lower Right
             ];
 
             const flames = [];
@@ -2076,7 +2076,7 @@ const VoidModels = (function () {
                 }
             };
 
-            bomberGroup.scale.set(0.9, 0.9, 0.9); // scale slightly down to balance sizing in game
+            bomberGroup.scale.set(1.5, 1.5, 1.5); // keep bomber visibly larger than swarmers without changing collision stats
 
             group.add(bomberGroup);
 
