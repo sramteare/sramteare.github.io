@@ -1025,111 +1025,117 @@ body {
     }
 }
 
-/* Adjust HUD layout slightly on mobile landscape so it doesn't overlap virtual stick & buttons */
-@media (max-width: 950px) and (orientation: landscape) {
-    #hud {
-        padding: 4px 10px;
-        grid-template-columns: 160px 1fr 160px;
-        grid-template-rows: auto auto 1fr;
-        grid-template-areas:
-            "player center score"
-            "weapon . radar"
-            ". . .";
-        gap: 2px 8px;
-    }
-    
-    .hud-panel {
-        padding: 0 !important;
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
-    
-    .panel-header {
-        font-size: 0.6rem;
-        margin-bottom: 1px;
-    }
-    
-    .bar-container {
-        height: 10px;
-        margin-bottom: 2px;
-    }
-    
-    .bar-label {
-        font-size: 0.5rem;
-        line-height: 8px;
-    }
-    
-    .wave-display {
-        font-size: 1rem;
-        margin-bottom: 0px;
-    }
-    
-    .station-bar-container {
-        height: 8px;
-    }
-    
-    .station-bar-container .bar-label {
-        font-size: 0.45rem;
-        line-height: 6px;
-    }
-    
-    .warning-ticker {
-        font-size: 0.6rem;
-        margin-top: 1px;
-    }
-    
-    .stat-row {
-        margin-bottom: 1px;
-    }
-    
-    .stat-label {
-        font-size: 0.65rem;
-    }
-    
-    .stat-value {
-        font-size: 1rem;
-    }
+/* Adjust HUD layout to use the compact HUD style when the .compact-hud class is present */
+.compact-hud #hud {
+    padding: 4px 10px;
+    grid-template-columns: 160px 1fr 160px;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+        "player center score"
+        "weapon . radar"
+        ". . .";
+    gap: 2px 8px;
+}
 
-    .weapon-panel {
-        grid-area: weapon;
-        margin-bottom: 0 !important;
-        align-self: start;
-        margin-top: 4px;
-    }
-    
-    #active-weapon {
-        font-size: 0.75rem;
-        margin-bottom: 2px;
-    }
-    
-    .dash-label {
-        font-size: 0.55rem;
-    }
-    
-    .dash-cooldown-wrapper {
-        width: 80px;
-        height: 3px;
-    }
+.compact-hud .hud-panel {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
 
-    .radar-panel {
-        grid-area: radar;
-        margin-bottom: 0 !important;
-        align-self: start;
-        padding: 0 !important;
-        margin-top: 4px;
-    }
-    
-    #minimap-canvas {
-        width: 74px !important;
-        height: 74px !important;
-        background: rgba(0, 0, 30, 0.4) !important;
-    }
-    
-    .radar-label {
-        display: none !important;
+.compact-hud .panel-header {
+    font-size: 0.6rem;
+    margin-bottom: 1px;
+}
+
+.compact-hud .bar-container {
+    height: 10px;
+    margin-bottom: 2px;
+}
+
+.compact-hud .bar-label {
+    font-size: 0.5rem;
+    line-height: 8px;
+}
+
+.compact-hud .wave-display {
+    font-size: 1rem;
+    margin-bottom: 0px;
+}
+
+.compact-hud .station-bar-container {
+    height: 8px;
+}
+
+.compact-hud .station-bar-container .bar-label {
+    font-size: 0.45rem;
+    line-height: 6px;
+}
+
+.compact-hud .warning-ticker {
+    font-size: 0.6rem;
+    margin-top: 1px;
+}
+
+.compact-hud .stat-row {
+    margin-bottom: 1px;
+}
+
+.compact-hud .stat-label {
+    font-size: 0.65rem;
+}
+
+.compact-hud .stat-value {
+    font-size: 1rem;
+}
+
+.compact-hud .weapon-panel {
+    grid-area: weapon;
+    margin-bottom: 0 !important;
+    align-self: start;
+    margin-top: 4px;
+}
+
+.compact-hud #active-weapon {
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+}
+
+.compact-hud .dash-label {
+    font-size: 0.55rem;
+}
+
+.compact-hud .dash-cooldown-wrapper {
+    width: 80px;
+    height: 3px;
+}
+
+.compact-hud .radar-panel {
+    grid-area: radar;
+    margin-bottom: 0 !important;
+    align-self: start;
+    padding: 0 !important;
+    margin-top: 4px;
+}
+
+.compact-hud #minimap-canvas {
+    width: 74px !important;
+    height: 74px !important;
+    background: rgba(0, 0, 30, 0.4) !important;
+}
+
+.compact-hud .radar-label {
+    display: none !important;
+}
+
+/* More spacious padding and gaps for larger screens */
+@media (min-width: 950px) and (min-height: 550px) {
+    .compact-hud #hud {
+        padding: 20px 24px;
+        gap: 8px 16px;
     }
 }
 

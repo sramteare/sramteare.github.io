@@ -1193,8 +1193,8 @@ body {
     }
 }
 
-/* Mobile HUD Layout Adjustments */
-.mobile-mode #hud {
+/* Compact HUD Layout Adjustments */
+.compact-hud #hud {
     padding: 4px 10px;
     grid-template-columns: 160px 1fr 160px;
     grid-template-rows: auto auto 1fr;
@@ -1205,7 +1205,7 @@ body {
     gap: 2px 8px;
 }
 
-.mobile-mode .hud-panel {
+.compact-hud .hud-panel {
     padding: 0 !important;
     background: transparent !important;
     border: none !important;
@@ -1214,74 +1214,74 @@ body {
     -webkit-backdrop-filter: none !important;
 }
 
-.mobile-mode .panel-header {
+.compact-hud .panel-header {
     font-size: 0.6rem;
     margin-bottom: 1px;
 }
 
-.mobile-mode .bar-container {
+.compact-hud .bar-container {
     height: 10px;
     margin-bottom: 2px;
 }
 
-.mobile-mode .bar-label {
+.compact-hud .bar-label {
     font-size: 0.5rem;
     line-height: 8px;
 }
 
-.mobile-mode .wave-display {
+.compact-hud .wave-display {
     font-size: 1rem;
     margin-bottom: 0px;
 }
 
-.mobile-mode .station-bar-container {
+.compact-hud .station-bar-container {
     height: 8px;
 }
 
-.mobile-mode .station-bar-container .bar-label {
+.compact-hud .station-bar-container .bar-label {
     font-size: 0.45rem;
     line-height: 6px;
 }
 
-.mobile-mode .warning-ticker {
+.compact-hud .warning-ticker {
     font-size: 0.6rem;
     margin-top: 1px;
 }
 
-.mobile-mode .stat-row {
+.compact-hud .stat-row {
     margin-bottom: 1px;
 }
 
-.mobile-mode .stat-label {
+.compact-hud .stat-label {
     font-size: 0.65rem;
 }
 
-.mobile-mode .stat-value {
+.compact-hud .stat-value {
     font-size: 1rem;
 }
 
-.mobile-mode .weapon-panel {
+.compact-hud .weapon-panel {
     grid-area: weapon;
     margin-bottom: 0 !important;
     align-self: start;
     margin-top: 4px;
 }
 
-.mobile-mode #active-weapon {
+.compact-hud #active-weapon {
     font-size: 0.75rem;
     margin-bottom: 2px;
 }
 
-.mobile-mode .dash-label {
+.compact-hud .dash-label {
     font-size: 0.55rem;
 }
 
-.mobile-mode .dash-cooldown-wrapper {
+.compact-hud .dash-cooldown-wrapper {
     width: 80px;
     height: 3px;
 }
 
-.mobile-mode .radar-panel {
+.compact-hud .radar-panel {
     grid-area: radar;
     margin-bottom: 0 !important;
     align-self: start;
@@ -1289,14 +1289,22 @@ body {
     margin-top: 4px;
 }
 
-.mobile-mode #minimap-canvas {
+.compact-hud #minimap-canvas {
     width: 74px !important;
     height: 74px !important;
     background: rgba(0, 0, 30, 0.4) !important;
 }
 
-.mobile-mode .radar-label {
+.compact-hud .radar-label {
     display: none !important;
+}
+
+/* More spacious padding and gaps for larger screens */
+@media (min-width: 950px) and (min-height: 550px) {
+    .compact-hud #hud {
+        padding: 20px 24px;
+        gap: 8px 16px;
+    }
 }
 
 /* Media Queries for Viewport Scaling & Hiding Keyboard Guide */
