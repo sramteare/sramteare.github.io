@@ -1574,8 +1574,8 @@ body {
 
     #start-screen .card-body {
         display: grid;
-        grid-template-columns: 1.2fr 1fr;
-        gap: 16px;
+        grid-template-columns: 1fr;
+        gap: 10px;
         overflow-y: auto !important; /* Fallback scroll */
         padding-right: 0;
         scrollbar-width: none;
@@ -1586,21 +1586,16 @@ body {
     }
 
     #start-screen .story-text {
-        font-size: 0.8rem;
-        line-height: 1.4;
-        margin-bottom: 10px;
-        text-align: left;
+        display: none !important;
     }
 
     #start-screen .controls-guide {
-        display: block !important; /* Force visible! */
-        margin-bottom: 0;
-        padding: 10px 15px;
-        height: 100%;
+        display: none !important;
     }
 
     #start-screen .ship-selector {
         margin: 0;
+        width: 100%;
     }
 
     #start-screen .ship-selector h3 {
@@ -1790,4 +1785,3 @@ body {
         display: block;
     }
 }
-
