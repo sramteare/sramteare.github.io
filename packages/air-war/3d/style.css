@@ -1060,118 +1060,234 @@ body {
 /* Right Actions */
 #mobile-actions {
     position: absolute;
-    bottom: 30px;
-    right: 30px;
+    bottom: 20px;
+    right: 25px;
     display: grid;
-    grid-template-areas: 
-        "brake dock"
-        "dash fire";
-    gap: 12px;
+    grid-template-columns: repeat(2, auto);
     align-items: center;
     justify-items: center;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.mobile-btn {
     pointer-events: auto;
-}
-
-.mobile-action-btn {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    color: #fff;
+    touch-action: none;
     font-family: var(--font-heading);
-    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
+    color: #fff;
     display: flex;
-    align-items: center;
     justify-content: center;
-    transition: all 0.1s ease;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+}
+
+.mobile-btn:active {
+    transform: scale(0.9);
+}
+
+/* Circular Buttons */
+#btn-dash-mobile {
+    grid-row: 3;
+    grid-column: 2;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    background: radial-gradient(circle, var(--neon-blue) 0%, #004d80 100%);
+    border: 2px solid var(--neon-blue);
+    box-shadow: 0 0 12px var(--neon-blue-glow), inset 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+#btn-dash-mobile:active {
+    background: radial-gradient(circle, #fff 0%, var(--neon-blue) 100%);
+    box-shadow: 0 0 20px var(--neon-blue), inset 0 0 10px #fff;
+}
+
+#btn-brake-mobile {
+    grid-row: 3;
+    grid-column: 1;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    background: radial-gradient(circle, var(--neon-orange) 0%, #804c00 100%);
+    border: 2px solid var(--neon-orange);
+    box-shadow: 0 0 10px var(--neon-orange-glow);
+}
+
+#btn-brake-mobile:active {
+    background: radial-gradient(circle, #fff 0%, var(--neon-orange) 100%);
+    box-shadow: 0 0 18px var(--neon-orange), inset 0 0 8px #fff;
+}
+
+/* Contextual Pill Buttons */
+#btn-dock-mobile {
+    grid-row: 2;
+    grid-column: 1 / span 2;
+    justify-self: stretch;
+    height: 38px;
+    padding: 0 20px;
+    border-radius: 19px;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
     background: rgba(5, 5, 20, 0.6);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    touch-action: manipulation;
+    border: 1.5px solid var(--neon-orange);
+    box-shadow: 0 0 12px var(--neon-orange-glow);
+    animation: pulseGlowOrange 1.5s infinite;
 }
 
-.mobile-action-btn:active {
-    transform: scale(0.88);
+#btn-launch-wave-mobile {
+    grid-row: 1;
+    grid-column: 1 / span 2;
+    justify-self: stretch;
+    height: 38px;
+    padding: 0 20px;
+    border-radius: 19px;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    background: rgba(5, 5, 20, 0.6);
+    border: 1.5px solid var(--neon-green);
+    box-shadow: 0 0 12px var(--neon-green-glow);
+    animation: pulseGlowGreen 1.5s infinite;
 }
 
-#btn-mobile-fire {
-    grid-area: fire;
-    width: 76px;
-    height: 76px;
-    font-size: 0.9rem;
+#btn-dock-mobile.hidden, #btn-launch-wave-mobile.hidden {
+    display: none !important;
 }
 
-#btn-mobile-dash { grid-area: dash; }
-#btn-mobile-brake { grid-area: brake; }
-#btn-mobile-dock { grid-area: dock; }
-
-/* Action Button Colors */
-.neon-blue-btn {
-    border-color: var(--neon-blue);
-    text-shadow: 0 0 5px var(--neon-blue);
-    box-shadow: 0 0 10px var(--neon-blue-glow),
-                inset 0 0 10px var(--neon-blue-glow);
-}
-.neon-blue-btn:active {
-    background: var(--neon-blue);
-    box-shadow: 0 0 20px var(--neon-blue);
+@keyframes pulseGlowOrange {
+    0%, 100% {
+        box-shadow: 0 0 8px var(--neon-orange-glow);
+        border-color: rgba(255, 159, 0, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 18px var(--neon-orange), 0 0 5px rgba(255, 159, 0, 0.3);
+        border-color: rgba(255, 159, 0, 1);
+    }
 }
 
-.neon-red-btn {
-    border-color: var(--neon-red);
-    text-shadow: 0 0 5px var(--neon-red);
-    box-shadow: 0 0 10px var(--neon-red-glow),
-                inset 0 0 10px var(--neon-red-glow);
-}
-.neon-red-btn:active {
-    background: var(--neon-red);
-    box-shadow: 0 0 20px var(--neon-red);
-}
-
-.neon-green-btn {
-    border-color: var(--neon-green);
-    text-shadow: 0 0 5px var(--neon-green);
-    box-shadow: 0 0 10px var(--neon-green-glow),
-                inset 0 0 10px var(--neon-green-glow);
-}
-.neon-green-btn:active {
-    background: var(--neon-green);
-    box-shadow: 0 0 20px var(--neon-green);
-}
-
-.neon-orange-btn {
-    border-color: var(--neon-orange);
-    text-shadow: 0 0 5px var(--neon-orange);
-    box-shadow: 0 0 10px var(--neon-orange-glow),
-                inset 0 0 10px var(--neon-orange-glow);
-}
-.neon-orange-btn:active {
-    background: var(--neon-orange);
-    box-shadow: 0 0 20px var(--neon-orange);
+@keyframes pulseGlowGreen {
+    0%, 100% {
+        box-shadow: 0 0 8px var(--neon-green-glow);
+        border-color: rgba(0, 255, 102, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 18px var(--neon-green), 0 0 5px rgba(0, 255, 102, 0.3);
+        border-color: rgba(0, 255, 102, 1);
+    }
 }
 
 /* Mobile HUD Layout Adjustments */
+.mobile-mode #hud {
+    padding: 4px 10px;
+    grid-template-columns: 160px 1fr 160px;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+        "player center score"
+        "weapon . radar"
+        ". . .";
+    gap: 2px 8px;
+}
+
+.mobile-mode .hud-panel {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.mobile-mode .panel-header {
+    font-size: 0.6rem;
+    margin-bottom: 1px;
+}
+
+.mobile-mode .bar-container {
+    height: 10px;
+    margin-bottom: 2px;
+}
+
+.mobile-mode .bar-label {
+    font-size: 0.5rem;
+    line-height: 8px;
+}
+
+.mobile-mode .wave-display {
+    font-size: 1rem;
+    margin-bottom: 0px;
+}
+
+.mobile-mode .station-bar-container {
+    height: 8px;
+}
+
+.mobile-mode .station-bar-container .bar-label {
+    font-size: 0.45rem;
+    line-height: 6px;
+}
+
+.mobile-mode .warning-ticker {
+    font-size: 0.6rem;
+    margin-top: 1px;
+}
+
+.mobile-mode .stat-row {
+    margin-bottom: 1px;
+}
+
+.mobile-mode .stat-label {
+    font-size: 0.65rem;
+}
+
+.mobile-mode .stat-value {
+    font-size: 1rem;
+}
+
 .mobile-mode .weapon-panel {
-    margin-bottom: 110px; /* Shift up above joystick */
+    grid-area: weapon;
+    margin-bottom: 0 !important;
+    align-self: start;
+    margin-top: 4px;
+}
+
+.mobile-mode #active-weapon {
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+}
+
+.mobile-mode .dash-label {
+    font-size: 0.55rem;
+}
+
+.mobile-mode .dash-cooldown-wrapper {
+    width: 80px;
+    height: 3px;
 }
 
 .mobile-mode .radar-panel {
-    margin-bottom: 110px; /* Shift up above action buttons */
-    padding: 6px;
+    grid-area: radar;
+    margin-bottom: 0 !important;
+    align-self: start;
+    padding: 0 !important;
+    margin-top: 4px;
 }
 
 .mobile-mode #minimap-canvas {
-    width: 100px;
-    height: 100px;
+    width: 74px !important;
+    height: 74px !important;
+    background: rgba(0, 0, 30, 0.4) !important;
 }
 
 .mobile-mode .radar-label {
-    font-size: 0.55rem;
-    margin-top: 2px;
+    display: none !important;
 }
 
 /* Media Queries for Viewport Scaling & Hiding Keyboard Guide */

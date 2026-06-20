@@ -1023,26 +1023,110 @@ body {
 }
 
 /* Adjust HUD layout slightly on mobile landscape so it doesn't overlap virtual stick & buttons */
-@media (max-width: 900px) and (orientation: landscape) {
+@media (max-width: 950px) and (orientation: landscape) {
     #hud {
-        padding: 8px 15px;
-        grid-template-columns: 210px 1fr 210px;
-        gap: 5px;
+        padding: 4px 10px;
+        grid-template-columns: 160px 1fr 160px;
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas:
+            "player center score"
+            "weapon . radar"
+            ". . .";
+        gap: 2px 8px;
     }
     
     .hud-panel {
-        background: rgba(3, 3, 15, 0.75); /* slightly more opaque to be legible */
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
     
-    /* Move bottom HUD elements slightly inward/upward if needed to avoid blocking control areas */
+    .panel-header {
+        font-size: 0.6rem;
+        margin-bottom: 1px;
+    }
+    
+    .bar-container {
+        height: 10px;
+        margin-bottom: 2px;
+    }
+    
+    .bar-label {
+        font-size: 0.5rem;
+        line-height: 8px;
+    }
+    
+    .wave-display {
+        font-size: 1rem;
+        margin-bottom: 0px;
+    }
+    
+    .station-bar-container {
+        height: 8px;
+    }
+    
+    .station-bar-container .bar-label {
+        font-size: 0.45rem;
+        line-height: 6px;
+    }
+    
+    .warning-ticker {
+        font-size: 0.6rem;
+        margin-top: 1px;
+    }
+    
+    .stat-row {
+        margin-bottom: 1px;
+    }
+    
+    .stat-label {
+        font-size: 0.65rem;
+    }
+    
+    .stat-value {
+        font-size: 1rem;
+    }
+
     .weapon-panel {
-        margin-bottom: 95px; /* Offset upward to sit above joystick */
-        z-index: 9;
+        grid-area: weapon;
+        margin-bottom: 0 !important;
+        align-self: start;
+        margin-top: 4px;
     }
     
+    #active-weapon {
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+    }
+    
+    .dash-label {
+        font-size: 0.55rem;
+    }
+    
+    .dash-cooldown-wrapper {
+        width: 80px;
+        height: 3px;
+    }
+
     .radar-panel {
-        margin-bottom: 95px; /* Offset upward to sit above action buttons */
-        z-index: 9;
+        grid-area: radar;
+        margin-bottom: 0 !important;
+        align-self: start;
+        padding: 0 !important;
+        margin-top: 4px;
+    }
+    
+    #minimap-canvas {
+        width: 74px !important;
+        height: 74px !important;
+        background: rgba(0, 0, 30, 0.4) !important;
+    }
+    
+    .radar-label {
+        display: none !important;
     }
 }
 
