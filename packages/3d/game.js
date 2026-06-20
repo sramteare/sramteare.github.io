@@ -2274,9 +2274,20 @@ window.addEventListener('load', () => {
         if (e.button === 0) mouse.isDown = false;
     });
 
+    // Start screen first interaction triggers immersive fullscreen mode
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        const triggerFullscreen = () => {
+            enterImmersiveMode();
+            startScreen.removeEventListener('click', triggerFullscreen);
+            startScreen.removeEventListener('touchstart', triggerFullscreen);
+        };
+        startScreen.addEventListener('click', triggerFullscreen);
+        startScreen.addEventListener('touchstart', triggerFullscreen);
+    }
+
     // Start Button
     document.getElementById('start-btn').addEventListener('click', () => {
-        enterImmersiveMode();
         game.start();
     });
 

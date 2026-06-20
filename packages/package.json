@@ -1,21 +1,8 @@
 {
-  "name": "car-race",
+  "name": "leaderboard",
   "version": "1.0.0",
-  "description": "2d/3d Car Race game project",
+  "description": "Shared leaderboard component for games",
+  "main": "leaderboard.js",
   "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "three": "^0.128.0"
-  },
-  "devDependencies": {
-    "jsdom": "^29.1.1",
-    "vite": "^6.4.1",
-    "vitest": "^4.1.9"
-  }
+  "type": "module"
 }
