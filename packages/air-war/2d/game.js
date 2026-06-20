@@ -43,6 +43,19 @@ window.addEventListener('keyup', (e) => {
     if (key in keys) keys[key] = false;
 });
 
+window.addEventListener('blur', () => {
+    for (let key in keys) {
+        keys[key] = false;
+    }
+    if (typeof game !== 'undefined' && game) {
+        game.joyActive = false;
+        game.joyX = 0;
+        game.joyY = 0;
+        const knob = document.getElementById('joystick-knob');
+        if (knob) knob.style.transform = 'translate(0px, 0px)';
+    }
+});
+
 // --- Mouse Management ---
 const mouse = {
     x: 0,
@@ -1021,6 +1034,12 @@ class GameEngine {
         // Visual Parallax Elements
         this.initStars();
         this.initResize();
+
+        // Mobile Controls
+        this.joyX = 0;
+        this.joyY = 0;
+        this.joyActive = false;
+        this.initTouchControls();
     }
 
     initStars() {
@@ -1055,6 +1074,228 @@ class GameEngine {
         
         this.ctx.resetTransform();
         this.ctx.scale(dpr, dpr);
+    }
+
+    initTouchControls() {
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const container = document.getElementById('game-container');
+        if (isTouchDevice && container) {
+            container.classList.add('touch-device');
+        }
+
+        const joystickContainer = document.getElementById('joystick-container');
+        const knob = document.getElementById('joystick-knob');
+        if (!joystickContainer || !knob) return;
+
+        let activeTouchId = null;
+        let joyCenterX = 0;
+        let joyCenterY = 0;
+        const maxRadius = 50; // max px knob can move from base center
+
+        joystickContainer.addEventListener('touchstart', (e) => {
+            if (activeTouchId !== null) return;
+            
+            const touch = e.changedTouches[0];
+            activeTouchId = touch.identifier;
+
+            const rect = joystickContainer.getBoundingClientRect();
+            joyCenterX = touch.clientX - rect.left;
+            joyCenterY = touch.clientY - rect.top;
+
+            this.joyActive = true;
+            this.joyX = 0;
+            this.joyY = 0;
+
+            knob.style.transform = 'translate(0px, 0px)';
+            e.preventDefault();
+        }, { passive: false });
+
+        joystickContainer.addEventListener('touchmove', (e) => {
+            if (activeTouchId === null) return;
+
+            let activeTouch = null;
+            for (let touch of e.touches) {
+                if (touch.identifier === activeTouchId) {
+                    activeTouch = touch;
+                    break;
+                }
+            }
+            if (!activeTouch) return;
+
+            const rect = joystickContainer.getBoundingClientRect();
+            const touchX = activeTouch.clientX - rect.left;
+            const touchY = activeTouch.clientY - rect.top;
+
+            let dx = touchX - joyCenterX;
+            let dy = touchY - joyCenterY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist > maxRadius) {
+                dx = (dx / dist) * maxRadius;
+                dy = (dy / dist) * maxRadius;
+            }
+
+            knob.style.transform = `translate(${dx}px, ${dy}px)`;
+
+            this.joyX = dx;
+            this.joyY = dy;
+
+            e.preventDefault();
+        }, { passive: false });
+
+        const resetJoystick = (e) => {
+            if (activeTouchId === null) return;
+            
+            let ended = false;
+            if (e) {
+                for (let touch of e.changedTouches) {
+                    if (touch.identifier === activeTouchId) {
+                        ended = true;
+                        break;
+                    }
+                }
+            } else {
+                ended = true;
+            }
+
+            if (ended) {
+                activeTouchId = null;
+                this.joyActive = false;
+                this.joyX = 0;
+                this.joyY = 0;
+                knob.style.transform = 'translate(0px, 0px)';
+                
+                // Clear controls immediately
+                keys.a = false;
+                keys.d = false;
+                keys.w = false;
+            }
+        };
+
+        joystickContainer.addEventListener('touchend', resetJoystick, { passive: true });
+        joystickContainer.addEventListener('touchcancel', resetJoystick, { passive: true });
+
+        // Bind Action Buttons
+        const bindButton = (id, keyName) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+
+            btn.addEventListener('touchstart', (e) => {
+                keys[keyName] = true;
+                e.preventDefault();
+            }, { passive: false });
+
+            const endHandler = (e) => {
+                keys[keyName] = false;
+                if (e) e.preventDefault();
+            };
+
+            btn.addEventListener('touchend', endHandler, { passive: false });
+            btn.addEventListener('touchcancel', endHandler, { passive: false });
+        };
+
+        bindButton('btn-dash-mobile', 'Shift');
+        bindButton('btn-brake-mobile', 's');
+        bindButton('btn-dock-mobile', 'e');
+        bindButton('btn-launch-wave-mobile', 'g');
+
+        // Global fallback to clear keys when all screen touches end
+        const clearAllTouchesFallback = (e) => {
+            if (e.touches.length === 0) {
+                keys.Shift = false;
+                keys.s = false;
+                keys.e = false;
+                keys.g = false;
+            }
+        };
+        window.addEventListener('touchend', clearAllTouchesFallback, { passive: true });
+        window.addEventListener('touchcancel', clearAllTouchesFallback, { passive: true });
+    }
+
+    updateJoystickInput() {
+        if (!this.joyActive) return;
+
+        const dist = Math.sqrt(this.joyX * this.joyX + this.joyY * this.joyY);
+        const maxRadius = 50;
+
+        if (dist > 5) {
+            const targetAngle = Math.atan2(this.joyY, this.joyX);
+            
+            if (this.player && !this.player.isDestroyed) {
+                let diff = targetAngle - this.player.angle;
+                diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+
+                // If diff is larger than tolerance, rotate
+                const tolerance = 0.08;
+                if (diff > tolerance) {
+                    keys.d = true;
+                    keys.a = false;
+                } else if (diff < -tolerance) {
+                    keys.a = true;
+                    keys.d = false;
+                } else {
+                    keys.a = false;
+                    keys.d = false;
+                }
+
+                // Thrust if dragged far enough
+                if (dist > maxRadius * 0.3) {
+                    keys.w = true;
+                    keys.s = false;
+                } else {
+                    keys.w = false;
+                    keys.s = false;
+                }
+            }
+        } else {
+            keys.a = false;
+            keys.d = false;
+            keys.w = false;
+        }
+    }
+
+    updateMobileControlsHUD() {
+        const mobileControls = document.getElementById('mobile-controls');
+        if (!mobileControls) return;
+
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (!isTouchDevice) {
+            mobileControls.classList.add('hidden');
+            return;
+        }
+
+        if (this.isPlaying && !this.isDocked && !this.isPaused && this.player && !this.player.isDestroyed) {
+            mobileControls.classList.remove('hidden');
+
+            // Update contextual buttons visibility
+            const btnDock = document.getElementById('btn-dock-mobile');
+            if (btnDock) {
+                const dockPrompt = document.getElementById('docking-prompt');
+                if (dockPrompt && dockPrompt.style.display === 'block') {
+                    btnDock.classList.remove('hidden');
+                } else {
+                    btnDock.classList.add('hidden');
+                    keys.e = false; // Clear input if button is hidden while pressed
+                }
+            }
+
+            const btnLaunchWave = document.getElementById('btn-launch-wave-mobile');
+            if (btnLaunchWave) {
+                if (this.enemies.length === 0 && !this.waveActive && this.waveTimer > 90) {
+                    btnLaunchWave.classList.remove('hidden');
+                } else {
+                    btnLaunchWave.classList.add('hidden');
+                    keys.g = false; // Clear input if button is hidden while pressed
+                }
+            }
+        } else {
+            mobileControls.classList.add('hidden');
+            // Reset all mobile keys when the panel is hidden to prevent stuck inputs
+            keys.Shift = false;
+            keys.s = false;
+            keys.e = false;
+            keys.g = false;
+        }
     }
 
     start() {
@@ -1109,6 +1350,7 @@ class GameEngine {
     gameOver() {
         this.isPlaying = false;
         this.isGameOver = true;
+        this.updateMobileControlsHUD();
         
         document.getElementById('hud').classList.add('hidden');
         document.getElementById('game-over-screen').classList.remove('hidden');
@@ -1270,6 +1512,8 @@ class GameEngine {
 
     // Central Update Logic
     update() {
+        this.updateMobileControlsHUD();
+        this.updateJoystickInput();
         if (!this.isPlaying || this.isPaused) return;
 
         // Check death animation timer
@@ -1576,6 +1820,7 @@ class GameEngine {
 
     dockShip() {
         this.isDocked = true;
+        this.updateMobileControlsHUD();
         keys.w = keys.s = keys.a = keys.d = false; // Reset controls
         
         // Zero velocities
@@ -1606,6 +1851,7 @@ class GameEngine {
 
     closeShopUI() {
         this.isDocked = false;
+        this.updateMobileControlsHUD();
         document.getElementById('shop-screen').classList.add('hidden');
         
         // Boost ship out of dock slightly to show launch

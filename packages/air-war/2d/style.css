@@ -71,7 +71,6 @@ body {
     opacity: 0.7;
 }
 
-/* General overlay style (Menus, Overlays) */
 .overlay {
     position: absolute;
     top: 0;
@@ -839,5 +838,328 @@ body {
     }
     90%, 100% {
         transform: rotate(0deg);
+    }
+}
+
+/* --- Virtual Mobile Controls Styling --- */
+#mobile-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 8;
+    pointer-events: none;
+}
+
+#mobile-controls.hidden {
+    display: none !important;
+}
+
+/* Joystick Styles */
+#joystick-container {
+    position: absolute;
+    bottom: 25px;
+    left: 30px;
+    width: 140px;
+    height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+    touch-action: none;
+}
+
+#joystick-base {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px dashed var(--neon-blue);
+    background: rgba(5, 15, 35, 0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 0 15px var(--neon-blue-glow), inset 0 0 10px rgba(0, 242, 255, 0.05);
+    position: relative;
+}
+
+#joystick-knob {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #00f2ff 0%, #005f9e 100%);
+    box-shadow: 0 0 12px var(--neon-blue), 0 0 4px #fff;
+    position: absolute;
+    left: 34px;
+    top: 34px;
+    pointer-events: none;
+    transition: transform 0.05s ease-out;
+}
+
+/* Action Buttons Styles */
+#mobile-action-buttons {
+    position: absolute;
+    bottom: 20px;
+    right: 25px;
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    align-items: center;
+    justify-items: center;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.mobile-btn {
+    pointer-events: auto;
+    touch-action: none;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+}
+
+.mobile-btn:active {
+    transform: scale(0.9);
+}
+
+/* Circular Buttons */
+#btn-dash-mobile {
+    grid-row: 3;
+    grid-column: 2;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    background: radial-gradient(circle, var(--neon-blue) 0%, #004d80 100%);
+    border: 2px solid var(--neon-blue);
+    box-shadow: 0 0 12px var(--neon-blue-glow), inset 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+#btn-dash-mobile:active {
+    background: radial-gradient(circle, #fff 0%, var(--neon-blue) 100%);
+    box-shadow: 0 0 20px var(--neon-blue), inset 0 0 10px #fff;
+}
+
+#btn-brake-mobile {
+    grid-row: 3;
+    grid-column: 1;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    background: radial-gradient(circle, var(--neon-orange) 0%, #804c00 100%);
+    border: 2px solid var(--neon-orange);
+    box-shadow: 0 0 10px var(--neon-orange-glow);
+}
+
+#btn-brake-mobile:active {
+    background: radial-gradient(circle, #fff 0%, var(--neon-orange) 100%);
+    box-shadow: 0 0 18px var(--neon-orange), inset 0 0 8px #fff;
+}
+
+/* Contextual Pill Buttons */
+#btn-dock-mobile {
+    grid-row: 2;
+    grid-column: 1 / span 2;
+    justify-self: stretch;
+    height: 38px;
+    padding: 0 20px;
+    border-radius: 19px;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    background: rgba(5, 5, 20, 0.6);
+    border: 1.5px solid var(--neon-orange);
+    box-shadow: 0 0 12px var(--neon-orange-glow);
+    animation: pulseGlowOrange 1.5s infinite;
+}
+
+#btn-launch-wave-mobile {
+    grid-row: 1;
+    grid-column: 1 / span 2;
+    justify-self: stretch;
+    height: 38px;
+    padding: 0 20px;
+    border-radius: 19px;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    background: rgba(5, 5, 20, 0.6);
+    border: 1.5px solid var(--neon-green);
+    box-shadow: 0 0 12px var(--neon-green-glow);
+    animation: pulseGlowGreen 1.5s infinite;
+}
+
+#btn-dock-mobile.hidden, #btn-launch-wave-mobile.hidden {
+    display: none !important;
+}
+
+@keyframes pulseGlowOrange {
+    0%, 100% {
+        box-shadow: 0 0 8px var(--neon-orange-glow);
+        border-color: rgba(255, 159, 0, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 18px var(--neon-orange), 0 0 5px rgba(255, 159, 0, 0.3);
+        border-color: rgba(255, 159, 0, 1);
+    }
+}
+
+@keyframes pulseGlowGreen {
+    0%, 100% {
+        box-shadow: 0 0 8px var(--neon-green-glow);
+        border-color: rgba(0, 255, 102, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 18px var(--neon-green), 0 0 5px rgba(0, 255, 102, 0.3);
+        border-color: rgba(0, 255, 102, 1);
+    }
+}
+
+/* Adjust HUD layout slightly on mobile landscape so it doesn't overlap virtual stick & buttons */
+@media (max-width: 900px) and (orientation: landscape) {
+    #hud {
+        padding: 8px 15px;
+        grid-template-columns: 210px 1fr 210px;
+        gap: 5px;
+    }
+    
+    .hud-panel {
+        background: rgba(3, 3, 15, 0.75); /* slightly more opaque to be legible */
+    }
+    
+    /* Move bottom HUD elements slightly inward/upward if needed to avoid blocking control areas */
+    .weapon-panel {
+        margin-bottom: 95px; /* Offset upward to sit above joystick */
+        z-index: 9;
+    }
+    
+    .radar-panel {
+        margin-bottom: 95px; /* Offset upward to sit above action buttons */
+        z-index: 9;
+    }
+}
+
+/* When landscape and touch controls are active, we hide the docking prompt text inside HUD panel */
+.touch-device #docking-prompt {
+    display: none !important; /* Managed via tactile DOCK button */
+}
+
+/* --- Adaptive Grid Layouts for Menus in Landscape Mobile --- */
+@media (max-height: 540px) and (orientation: landscape) {
+    #start-screen .glass-card {
+        max-width: 860px;
+        width: 96%;
+        padding: 15px 25px;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        grid-template-rows: auto auto 1fr auto;
+        gap: 8px 24px;
+        text-align: left;
+    }
+    
+    #start-screen .game-title {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+    
+    #start-screen .subtitle {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+    
+    #start-screen .story-text {
+        grid-column: 1;
+        grid-row: 3;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        margin-bottom: 0;
+    }
+    
+    #start-screen .controls-guide {
+        grid-column: 2;
+        grid-row: 1 / span 3;
+        margin-bottom: 0;
+        padding: 10px 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+    }
+    
+    #start-screen .controls-grid {
+        font-size: 0.75rem;
+        gap: 3px 10px;
+        grid-template-columns: 75px 1fr;
+    }
+    
+    #start-screen .settings-option {
+        grid-column: 1;
+        grid-row: 4;
+        margin: 0;
+        justify-content: flex-start;
+        font-size: 0.8rem;
+    }
+    
+    #start-screen .glow-btn {
+        grid-column: 2;
+        grid-row: 4;
+        padding: 8px 20px;
+        font-size: 0.95rem;
+        width: 100%;
+    }
+
+    #game-over-screen .glass-card {
+        max-width: 650px;
+        width: 95%;
+        padding: 15px 25px;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        grid-template-rows: auto auto 1fr;
+        gap: 10px 20px;
+        text-align: left;
+    }
+
+    #game-over-screen .game-title {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: 2.2rem;
+        margin-bottom: 0;
+    }
+
+    #game-over-screen .subtitle {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+
+    #game-over-screen .stats-box {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        margin: 0;
+        width: 100%;
+        padding: 12px 15px;
+    }
+
+    #game-over-screen .glow-btn {
+        grid-column: 1 / span 2;
+        grid-row: 3;
+        padding: 8px 20px;
+        font-size: 0.95rem;
+        width: 100%;
     }
 }

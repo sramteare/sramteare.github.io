@@ -89,6 +89,12 @@ body {
     visibility: visible;
     overflow-y: auto;
     padding: 30px 10px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+}
+
+.overlay::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
 }
 
 .overlay.hidden {
@@ -1414,6 +1420,163 @@ body {
     }
     90%, 100% {
         transform: rotate(0deg);
+    }
+}
+
+/* --- Adaptive Grid Layouts for Menus in Landscape Mobile --- */
+@media (max-height: 540px) and (orientation: landscape) {
+    #start-screen .glass-card {
+        max-width: 900px;
+        width: 96%;
+        padding: 12px 20px;
+        gap: 8px;
+        max-height: 96vh;
+    }
+
+    #start-screen .card-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: baseline;
+        width: 100%;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 4px;
+        margin-bottom: 4px;
+    }
+
+    #start-screen .game-title {
+        font-size: 1.8rem;
+        margin-bottom: 0;
+    }
+
+    #start-screen .subtitle {
+        display: inline-block !important; /* Keep subtitle visible in landscape grid */
+        font-size: 0.8rem;
+        margin-bottom: 0;
+        margin-left: 15px;
+    }
+
+    #start-screen .card-body {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 16px;
+        overflow-y: auto !important; /* Fallback scroll */
+        padding-right: 0;
+        scrollbar-width: none;
+    }
+
+    #start-screen .card-body::-webkit-scrollbar {
+        display: none;
+    }
+
+    #start-screen .story-text {
+        font-size: 0.8rem;
+        line-height: 1.4;
+        margin-bottom: 10px;
+        text-align: left;
+    }
+
+    #start-screen .controls-guide {
+        display: block !important; /* Force visible! */
+        margin-bottom: 0;
+        padding: 10px 15px;
+        height: 100%;
+    }
+
+    #start-screen .ship-selector {
+        margin: 0;
+    }
+
+    #start-screen .ship-selector h3 {
+        display: block !important; /* Keep visible */
+        font-size: 0.75rem;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+    }
+
+    #start-screen .ship-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    #start-screen .ship-card {
+        padding: 6px;
+    }
+
+    #start-screen .ship-name {
+        font-size: 0.8rem;
+    }
+
+    #start-screen .ship-subtitle {
+        font-size: 0.6rem;
+        margin-bottom: 0;
+    }
+
+    #start-screen .ship-stats {
+        display: none !important; /* Hide stats bars to save height */
+    }
+
+    #start-screen .card-footer {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-top: 4px;
+        padding-top: 4px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    #start-screen .settings-option {
+        margin: 0;
+        font-size: 0.75rem;
+    }
+
+    #start-screen .glow-btn {
+        padding: 8px 30px;
+        font-size: 0.95rem;
+    }
+
+    /* Game Over card adaptive layout */
+    #game-over-screen .glass-card {
+        max-width: 650px;
+        width: 95%;
+        padding: 15px 25px;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        grid-template-rows: auto auto 1fr;
+        gap: 10px 20px;
+        text-align: left;
+    }
+
+    #game-over-screen .game-title {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: 2.2rem;
+        margin-bottom: 0;
+    }
+
+    #game-over-screen .subtitle {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+
+    #game-over-screen .stats-box {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        margin: 0;
+        width: 100%;
+        padding: 12px 15px;
+    }
+
+    #game-over-screen .glow-btn {
+        grid-column: 1 / span 2;
+        grid-row: 3;
+        padding: 8px 20px;
+        font-size: 0.95rem;
+        width: 100%;
     }
 }
 
