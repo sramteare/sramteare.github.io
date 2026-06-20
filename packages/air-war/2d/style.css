@@ -1246,4 +1246,99 @@ body {
         font-size: 0.95rem;
         width: 100%;
     }
+
+    /* Upgrade Shop screen adaptive grid layout */
+    #shop-screen .glass-card {
+        max-width: 920px;
+        width: 96%;
+        padding: 8px 16px;
+        max-height: 98vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 4px;
+        overflow: hidden;
+    }
+
+    #shop-screen .menu-title {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: 1.15rem;
+        margin: 0;
+        letter-spacing: 2px;
+        align-self: center;
+    }
+
+    #shop-screen .shop-currency {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+        font-size: 0.9rem;
+        margin: 0;
+        align-self: center;
+    }
+
+    #shop-screen .shop-grid {
+        grid-column: 1 / span 2;
+        grid-row: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    #shop-screen .shop-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 6px;
+    }
+
+    #shop-screen .shop-section h3 {
+        grid-column: 1 / span 2;
+        grid-row: 1;
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+        padding-bottom: 2px;
+        letter-spacing: 1px;
+    }
+
+    #shop-screen .shop-item {
+        margin-bottom: 0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+    }
+
+    #shop-screen .item-name {
+        font-size: 0.75rem;
+    }
+
+    #shop-screen .item-desc {
+        font-size: 0.65rem;
+        line-height: 1.15;
+    }
+
+    #shop-screen .upgrade-btn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        border-radius: 3px;
+    }
+
+    #shop-screen .shop-footer {
+        grid-column: 1 / span 2;
+        grid-row: 3;
+        justify-self: center;
+        width: 100%;
+        margin-top: 4px;
+    }
+
+    #shop-screen #resume-btn {
+        padding: 6px 20px;
+        font-size: 0.85rem;
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+        display: block;
+    }
 }
