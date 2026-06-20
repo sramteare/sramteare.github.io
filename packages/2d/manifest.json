@@ -1,0 +1,9 @@
+{
+  "name": "Void Drifter",
+  "short_name": "Drifter",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#03030f",
+  "theme_color": "#03030f"
+}

@@ -2182,6 +2182,32 @@ class GameEngine {
     }
 }
 
+async function enterImmersiveMode() {
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const maxDimension = Math.max(window.innerWidth, window.innerHeight);
+    const isMobileOrSmallTablet = isTouchDevice && maxDimension < 1024;
+    if (!isMobileOrSmallTablet) return;
+
+    const root = document.documentElement;
+    const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
+
+    try {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && requestFullscreen) {
+            await requestFullscreen.call(root);
+        }
+    } catch (err) {
+        // Some mobile browsers only allow fullscreen from installed PWAs.
+    }
+
+    try {
+        if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock('landscape');
+        }
+    } catch (err) {
+        // Orientation lock is best-effort and varies by browser.
+    }
+}
+
 // --- Setup Click listeners on Window ---
 let game;
 window.addEventListener('load', () => {
@@ -2204,6 +2230,7 @@ window.addEventListener('load', () => {
 
     // Start Button
     document.getElementById('start-btn').addEventListener('click', () => {
+        enterImmersiveMode();
         game.start();
     });
 
@@ -2214,6 +2241,7 @@ window.addEventListener('load', () => {
 
     // Game Over Restart Button
     document.getElementById('restart-btn').addEventListener('click', () => {
+        enterImmersiveMode();
         game.start();
     });
 
