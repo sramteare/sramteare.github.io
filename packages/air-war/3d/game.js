@@ -2404,10 +2404,11 @@ function initMobileControls() {
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     if (!isTouchDevice) return;
 
-    // Add mobile-mode class to the container
+    // Add compact-hud and mobile-mode classes to the container
     const container = document.getElementById('game-container');
     if (container) {
         container.classList.add('mobile-mode');
+        container.classList.add('compact-hud');
     }
 
     // Show mobile controls
