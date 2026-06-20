@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nitro Racer - Game Launcher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: rgba(31, 40, 51, 0.45);
+            --border-color: rgba(102, 252, 241, 0.15);
+            --primary-glow: #66fcf1;
+            --secondary-glow: #45f3ff;
+            --text-color: #c5c6c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient background */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(102, 252, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(69, 243, 255, 0.06) 0%, transparent 40%);
+            animation: drift 25s infinite alternate ease-in-out;
+            z-index: 1;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(-10%, -10%) rotate(0deg); }
+            100% { transform: translate(10%, 10%) rotate(10deg); }
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: 60px 60px;
+            background-image: 
+                linear-gradient(to right, rgba(102, 252, 241, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(102, 252, 241, 0.02) 1px, transparent 1px);
+            z-index: 2;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 950px;
+            padding: 20px;
+        }
+
+        .launcher-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 30px;
+            text-align: center;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(102, 252, 241, 0.05);
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeUp {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .logo-section h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-shadow: 
+                0 0 10px rgba(102, 252, 241, 0.3),
+                0 0 20px rgba(102, 252, 241, 0.15);
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .logo-section .subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--primary-glow);
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        .description {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 35px;
+            color: rgba(197, 198, 199, 0.75);
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .engine-card {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(11, 12, 16, 0.6);
+            border-radius: 12px;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .engine-card:hover {
+            transform: translateY(-5px);
+            background: rgba(31, 40, 51, 0.6);
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 20px rgba(102, 252, 241, 0.15);
+        }
+
+        .engine-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(102, 252, 241, 0.2);
+        }
+
+        .engine-desc {
+            font-size: 0.9rem;
+            color: rgba(197, 198, 199, 0.6);
+            margin-bottom: 25px;
+            min-height: 50px;
+        }
+
+        .launch-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            width: 100%;
+            transition: all 0.2s ease;
+            text-align: center;
+            border: 1px solid var(--primary-glow);
+            background: transparent;
+            color: var(--primary-glow);
+        }
+
+        .engine-card:hover .launch-btn {
+            background: var(--primary-glow);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .footer-logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            color: rgba(102, 252, 241, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    
+    <div class="container">
+        <div class="launcher-card">
+            <div class="logo-section">
+                <h1>NITRO RACER</h1>
+                <p class="subtitle">Next Gen Speed Protocol</p>
+            </div>
+            
+            <p class="description">
+                Experience high-octane racing. Choose between retro flat 2D coordinate layouts, realistic 3D mechanics rendering through Three.js, or explore the vehicle models lab.
+            </p>
+            
+            <div class="selection-grid">
+                <!-- 3D Engine Option -->
+                <a href="race_game_3d.HTML" class="engine-card">
+                    <div>
+                        <div class="engine-title">ADVANCED 3D</div>
+                        <div class="engine-desc">Three.js WebGL simulation. Procedural asphalt, low-poly environments, dynamic shadows, and nitro speed boost.</div>
+                    </div>
+                    <div class="launch-btn">START RACE</div>
+                </a>
+
+                
+                <!-- 2D Engine Option -->
+                <a href="race_game.HTML" class="engine-card">
+                    <div>
+                        <div class="engine-title">RETRO 2D</div>
+                        <div class="engine-desc">Classic 2D speed racing. Nostalgic arcade track layouts, quick reaction hurdles, and pure retro physics.</div>
+                    </div>
+                    <div class="launch-btn">LAUNCH RETRO</div>
+                </a>
+                
+                <!-- Vehicle Lab Option -->
+                <a href="car_viewer.HTML" class="engine-card">
+                    <div>
+                        <div class="engine-title">VEHICLE LAB</div>
+                        <div class="engine-desc">Interactive vehicle customizer. Load, rotate, and inspect low-poly car and truck meshes.</div>
+                    </div>
+                    <div class="launch-btn">OPEN LAB</div>
+                </a>
+            </div>
+            
+            <div class="footer-logo">
+                ENGINE STATE ACTIVE // SPEED PROTOCOL STABLE
+            </div>
+        </div>
+    </div>
+</body>
+</html>

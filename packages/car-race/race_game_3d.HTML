@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Level Up Nitro Racer 3D</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
         html,
         body {
@@ -28,28 +31,170 @@
             z-index: 1;
         }
 
-        /* Main UI */
-        #ui-overlay {
+        /* Side Overlay Dashboard (Left Side) */
+        #ui-side-overlay {
             position: absolute;
             top: 20px;
             left: 20px;
-            font-size: 20px;
-            font-weight: bold;
+            width: 220px;
             z-index: 10;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(10, 15, 30, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .hud-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .hud-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .hud-value-container {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .hud-value-large {
+            font-size: 32px;
+            font-weight: 900;
+            color: #ffffff;
+            font-family: 'Orbitron', 'Courier New', monospace;
+            line-height: 1;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .hud-unit {
+            font-size: 14px;
+            font-weight: 700;
+            color: #f1c40f;
+            text-transform: uppercase;
+        }
+
+        .hud-value-medium {
+            font-size: 18px;
+            font-weight: 700;
+            color: #cbd5e1;
+            font-family: 'Orbitron', 'Courier New', monospace;
+        }
+
+        /* Score Overlay (Top Right Corner) */
+        #ui-score-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 180px;
+            z-index: 10;
+            background: rgba(10, 15, 30, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 15px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .score-main {
+            font-size: 28px;
+            font-weight: 900;
+            color: #f1c40f;
+            font-family: 'Orbitron', 'Courier New', monospace;
+            line-height: 1;
+            text-shadow: 0 0 12px rgba(241, 196, 15, 0.4);
+        }
+
+        .score-best {
+            font-size: 16px;
+            font-weight: 700;
+            color: #cbd5e1;
+            font-family: 'Orbitron', 'Courier New', monospace;
+        }
+
+        /* Progress Container & Bar (Top Center) */
+        #progress-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            height: 14px;
+            background: rgba(15, 23, 42, 0.65);
             backdrop-filter: blur(8px);
-            padding: 15px 25px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            z-index: 10;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(243, 156, 18, 0.6), rgba(241, 196, 15, 0.6));
+            border-radius: 8px;
+            transition: width 0.1s linear;
+        }
+
+        /* Racer Markers on Progress Bar */
+        .racer-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 900;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+            transition: left 0.1s linear;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            user-select: none;
+            z-index: 11;
+        }
+
+        #marker-player {
+            width: 24px;
+            height: 24px;
+            z-index: 15;
+            box-shadow: 0 0 10px #ffffff, 0 2px 6px rgba(0, 0, 0, 0.6);
+            font-size: 13px;
+        }
+
+        /* Nitro Bar overrides */
+        #nitro-bar {
+            background: linear-gradient(90deg, #ff5e00, #ffbb00) !important;
+            box-shadow: 0 0 8px rgba(255, 94, 0, 0.6);
         }
 
         #nitro-label {
-            font-size: 24px;
+            font-size: 1.2rem;
             color: #f39c12;
             font-weight: bold;
             visibility: hidden;
             animation: pulse 0.3s infinite;
-            margin-top: 10px;
             text-shadow: 0 0 10px rgba(243, 156, 18, 0.6);
         }
 
@@ -88,14 +233,35 @@
         }
 
         .overlay-card {
-            background: rgba(15, 23, 42, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px 60px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 30px;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            max-width: 500px;
+            max-width: 420px;
+            width: 90%;
             margin: auto 0;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-sizing: border-box;
+        }
+
+        .overlay-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .overlay-left-col,
+        .overlay-right-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .overlay-title {
@@ -464,23 +630,75 @@
 
         /* Responsive UI Overlay scaling */
         @media (max-width: 768px) {
-            #ui-overlay {
-                top: 10px;
+            #ui-side-overlay {
+                top: 30px;
                 left: 10px;
-                font-size: 14px;
-                padding: 10px 15px;
+                width: 115px;
+                padding: 6px 8px;
                 border-radius: 8px;
+                gap: 4px;
             }
 
-            #nitro-label {
+            #ui-side-overlay .hud-section {
+                gap: 0px;
+                margin-top: 0 !important;
+            }
+
+            #ui-side-overlay .hud-section:last-child div {
+                margin-top: 2px !important;
+            }
+
+            .hud-value-large {
                 font-size: 16px;
-                margin-top: 5px;
+            }
+
+            .hud-value-medium {
+                font-size: 11px;
+            }
+
+            .hud-label {
+                font-size: 8px;
+                letter-spacing: 0.5px;
+            }
+
+            .hud-unit {
+                font-size: 9px;
+            }
+
+            #ui-score-overlay {
+                top: 30px;
+                right: 10px;
+                width: 100px;
+                padding: 6px 8px;
+                border-radius: 8px;
+                gap: 4px;
+            }
+
+            .score-main {
+                font-size: 16px;
+            }
+
+            .score-best {
+                font-size: 11px;
             }
 
             #progress-container {
                 top: 10px;
-                width: 150px;
-                height: 8px;
+                width: 160px;
+                height: 10px;
+            }
+
+            .racer-marker {
+                width: 14px;
+                height: 14px;
+                font-size: 8px;
+                border-width: 1px;
+            }
+
+            #marker-player {
+                width: 16px;
+                height: 16px;
+                font-size: 9px;
             }
 
             #countdown-overlay {
@@ -547,18 +765,56 @@
             }
 
             .overlay-card {
-                padding: 15px 25px;
-                max-width: 300px;
+                padding: 15px 20px;
+                max-width: 680px;
+                width: 95%;
+            }
+
+            .overlay-content-wrapper {
+                flex-direction: row;
+                gap: 20px;
+                align-items: stretch;
+            }
+
+            .overlay-left-col {
+                flex: 1.1;
+                border-right: 1px solid rgba(255, 255, 255, 0.15);
+                padding-right: 20px;
+                justify-content: center;
+            }
+
+            .overlay-right-col {
+                flex: 1.3;
+                justify-content: center;
             }
 
             .overlay-title {
                 font-size: 22px;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
 
             .overlay-text {
                 font-size: 13px;
-                margin-bottom: 8px;
+                margin-bottom: 4px;
+            }
+
+            /* Reposition overlays in landscape to sit below the progress bar and keep vertical stack */
+            #ui-side-overlay {
+                top: 30px;
+                left: 10px;
+                width: 185px;
+                padding: 6px 8px;
+                border-radius: 8px;
+                gap: 4px;
+            }
+
+            #ui-score-overlay {
+                top: 30px;
+                right: 10px;
+                width: 100px;
+                padding: 6px 8px;
+                border-radius: 8px;
+                gap: 4px;
             }
         }
 
@@ -573,18 +829,46 @@
 
 <body>
 
-    <div id="ui-overlay">
-        <div>POS: <span id="pos-label" style="color: #f1c40f;">4/4</span></div>
-        <div>SPEED: <span id="speed-label">0</span> MPH</div>
-        <div>DISTANCE: <span id="distance-label">0m / 600m</span></div>
-        <div>TIME: <span id="time-label">0.0s</span></div>
-        <div>SCORE: <span id="score-label">0</span></div>
-        <div>BEST: <span id="hud-high-score-3d">0</span></div>
-        <div id="nitro-label">🔥 NITRO! 🔥</div>
-        <div style="font-size: 14px; margin-top: 10px; color: #a1a1aa; display: flex; align-items: center; gap: 8px;">
-            <span>NITRO:</span>
+    <!-- Side overlay dashboard for speed, distance, time, and nitro -->
+    <div id="ui-side-overlay">
+        <!-- Hidden element for safety to prevent JS script crashes -->
+        <span id="pos-label" style="display: none;">4 / 4</span>
+
+        <!-- Speed Section -->
+        <div class="hud-section">
+            <div class="hud-label">Speed</div>
+            <div class="hud-value-container">
+                <span id="speed-label" class="hud-value-large">0</span>
+                <span class="hud-unit">MPH</span>
+            </div>
+        </div>
+
+        <!-- Distance Section -->
+        <div class="hud-section">
+            <div class="hud-label">Distance</div>
+            <div class="hud-value-container">
+                <span id="distance-label" class="hud-value-medium">0m / 600m</span>
+            </div>
+        </div>
+
+        <!-- Time Section -->
+        <div class="hud-section">
+            <div class="hud-label">Time</div>
+            <div class="hud-value-container">
+                <span id="time-label" class="hud-value-medium">0.0s</span>
+            </div>
+        </div>
+
+        <!-- Nitro Section -->
+        <div class="hud-section" style="margin-top: 5px;">
+            <div class="hud-label" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Nitro</span>
+                <span id="nitro-label"
+                    style="color: #ff9f43; font-weight: 900; animation: pulse 0.3s infinite; visibility: hidden;">🔥
+                    NITRO! 🔥</span>
+            </div>
             <div
-                style="width: 100px; height: 10px; background: rgba(0,0,0,0.4); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15);">
+                style="width: 100%; height: 10px; background: rgba(0,0,0,0.5); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); margin-top: 4px;">
                 <div id="nitro-bar"
                     style="width: 100%; height: 100%; background: linear-gradient(90deg, #e67e22, #f39c12); transition: width 0.05s linear;">
                 </div>
@@ -592,11 +876,27 @@
         </div>
     </div>
 
-    <div id="progress-container"
-        style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 300px; height: 12px; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); z-index: 10; overflow: hidden;">
-        <div id="progress-bar"
-            style="width: 0%; height: 100%; background: linear-gradient(90deg, #f39c12, #f1c40f); transition: width 0.1s linear;">
+    <!-- Score and Best Score on Top Right -->
+    <div id="ui-score-overlay">
+        <div class="hud-section">
+            <div class="hud-label">Score</div>
+            <span id="score-label" class="score-main">0</span>
         </div>
+        <div class="hud-section" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+            <div class="hud-label">Personal Best</div>
+            <span id="hud-high-score-3d" class="score-best">0</span>
+        </div>
+    </div>
+
+    <!-- Progress Bar with dynamic markers -->
+    <div id="progress-container">
+        <div id="progress-bar" style="width: 0%;"></div>
+
+        <!-- Dynamic racer markers -->
+        <div id="marker-opp0" class="racer-marker" style="left: 0%; background-color: #00ffff;">3</div>
+        <div id="marker-opp1" class="racer-marker" style="left: 0%; background-color: #9b59b6;">2</div>
+        <div id="marker-opp2" class="racer-marker" style="left: 0%; background-color: #e67e22;">1</div>
+        <div id="marker-player" class="racer-marker" style="left: 0%; background-color: #e74c3c;">4</div>
     </div>
 
     <div id="countdown-overlay"
@@ -673,89 +973,101 @@
     </div>
 
     <div id="game-over-overlay">
-        <div class="overlay-card" style="padding: 20px; box-sizing: border-box; max-width: 320px; width: 90%;">
-            <div class="overlay-title" style="color: #e74c3c; font-size: 28px;">GAME OVER</div>
-            <div class="overlay-text" style="font-size: 15px; margin-top: 5px;">Distance: <span
-                    id="final-distance-3d">0</span>m</div>
-            <div class="overlay-text" style="font-size: 15px; margin-top: 2px;">Time: <span
-                    id="final-time-3d">0.0</span>s</div>
-            <div class="overlay-text" style="font-size: 18px; margin-top: 4px; font-weight: bold;">Score: <span
-                    id="final-score-3d">0</span></div>
-            <div class="overlay-text" style="font-size: 14px; color: #f1c40f; margin-top: 2px;">Best: <span
-                    id="overlay-best-3d">0</span></div>
+        <div class="overlay-card">
+            <div class="overlay-content-wrapper">
+                <div class="overlay-left-col">
+                    <div class="overlay-title" style="color: #e74c3c; font-size: 28px;">GAME OVER</div>
+                    <div class="overlay-text" style="font-size: 15px; margin-top: 5px;">Distance: <span
+                            id="final-distance-3d">0</span>m</div>
+                    <div class="overlay-text" style="font-size: 15px; margin-top: 2px;">Time: <span
+                            id="final-time-3d">0.0</span>s</div>
+                    <div class="overlay-text" style="font-size: 18px; margin-top: 4px; font-weight: bold;">Score: <span
+                            id="final-score-3d">0</span></div>
+                    <div class="overlay-text" style="font-size: 14px; color: #f1c40f; margin-top: 2px;">Best: <span
+                            id="overlay-best-3d">0</span></div>
+                    <button onclick="resetGame()"
+                        style="margin-top: 15px; padding: 10px 24px; font-size: 15px; width: 100%;">Try Again</button>
+                </div>
+                <div class="overlay-right-col">
+                    <!-- Leaderboard Input -->
+                    <div id="leaderboard-input-go-3d"
+                        style="display: none; margin-top: 0; text-align: center; width: 100%;">
+                        <div id="leaderboard-heading-go-3d"
+                            style="font-size: 13px; color: #f1c40f; margin-bottom: 4px; font-weight: bold;">🎉 NEW HIGH
+                            SCORE! 🎉</div>
+                        <div style="display: flex; gap: 5px; justify-content: center; width: 100%;">
+                            <input type="text" id="player-name-go-3d" placeholder="ENTER NAME" maxlength="6"
+                                style="padding: 6px; font-size: 13px; border: 2px solid #2ecc71; border-radius: 4px; background: #2c3e50; color: white; font-family: inherit; text-align: center; width: 120px; text-transform: uppercase;"
+                                onkeydown="if(event.key === 'Enter') submitScore3D('player-name-go-3d', 'leaderboard-input-go-3d', 'leaderboard-records-go-3d')">
+                            <button
+                                onclick="submitScore3D('player-name-go-3d', 'leaderboard-input-go-3d', 'leaderboard-records-go-3d')"
+                                style="padding: 6px 12px; font-size: 13px; margin-top: 0; box-shadow: none;">Submit</button>
+                        </div>
+                    </div>
 
-            <!-- Leaderboard Input -->
-            <div id="leaderboard-input-go-3d" style="display: none; margin-top: 10px; text-align: center; width: 100%;">
-                <div id="leaderboard-heading-go-3d"
-                    style="font-size: 13px; color: #f1c40f; margin-bottom: 4px; font-weight: bold;">🎉 NEW HIGH SCORE!
-                    🎉</div>
-                <div style="display: flex; gap: 5px; justify-content: center; width: 100%;">
-                    <input type="text" id="player-name-go-3d" placeholder="ENTER NAME" maxlength="6"
-                        style="padding: 6px; font-size: 13px; border: 2px solid #2ecc71; border-radius: 4px; background: #2c3e50; color: white; font-family: inherit; text-align: center; width: 120px; text-transform: uppercase;"
-                        onkeydown="if(event.key === 'Enter') submitScore3D('player-name-go-3d', 'leaderboard-input-go-3d', 'leaderboard-records-go-3d')">
-                    <button
-                        onclick="submitScore3D('player-name-go-3d', 'leaderboard-input-go-3d', 'leaderboard-records-go-3d')"
-                        style="padding: 6px 12px; font-size: 13px; margin-top: 0; box-shadow: none;">Submit</button>
+                    <!-- Leaderboard List -->
+                    <div id="leaderboard-list-go-3d"
+                        style="margin-top: 10px; width: 100%; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; box-sizing: border-box;">
+                        <div
+                            style="font-size: 13px; color: #f1c40f; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">
+                            TOP 10 LEADERBOARD</div>
+                        <div id="leaderboard-records-go-3d"
+                            style="font-size: 12px; line-height: 1.4; text-align: left; max-height: 100px; overflow-y: auto;">
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Leaderboard List -->
-            <div id="leaderboard-list-go-3d"
-                style="margin-top: 10px; width: 100%; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; box-sizing: border-box;">
-                <div
-                    style="font-size: 13px; color: #f1c40f; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">
-                    TOP 10 LEADERBOARD</div>
-                <div id="leaderboard-records-go-3d"
-                    style="font-size: 12px; line-height: 1.4; text-align: left; max-height: 100px; overflow-y: auto;">
-                </div>
-            </div>
-
-            <button onclick="resetGame()" style="margin-top: 12px; padding: 8px 20px; font-size: 14px;">Try
-                Again</button>
         </div>
     </div>
 
     <div id="victory-overlay">
-        <div class="overlay-card" style="padding: 20px; box-sizing: border-box; max-width: 320px; width: 90%;">
-            <div class="overlay-title" id="victory-title" style="color: #f1c40f; font-size: 26px;">🏁 YOU WIN! 🏁</div>
-            <div class="overlay-text" id="victory-standings" style="font-size: 13px; color: #bdc3c7; line-height: 1.3;">
-                You crossed the finish line!</div>
-            <div class="overlay-text" style="font-size: 15px; margin-top: 5px; text-align: center;">Time: <span
-                    id="final-time-vic-3d">0.0</span>s</div>
-            <div class="overlay-text" style="font-size: 18px; margin-top: 4px; font-weight: bold; text-align: center;">
-                Score: <span id="final-score-vic-3d">0</span></div>
-            <div class="overlay-text" style="font-size: 14px; color: #f1c40f; margin-top: 5px; text-align: center;">
-                Best: <span id="overlay-best-vic-3d">0</span></div>
+        <div class="overlay-card">
+            <div class="overlay-content-wrapper">
+                <div class="overlay-left-col">
+                    <div class="overlay-title" id="victory-title" style="color: #f1c40f; font-size: 26px;">🏁 YOU WIN!
+                        🏁</div>
+                    <div class="overlay-text" id="victory-standings"
+                        style="font-size: 13px; color: #bdc3c7; line-height: 1.3;">You crossed the finish line!</div>
+                    <div class="overlay-text" style="font-size: 15px; margin-top: 5px; text-align: center;">Time: <span
+                            id="final-time-vic-3d">0.0</span>s</div>
+                    <div class="overlay-text"
+                        style="font-size: 18px; margin-top: 4px; font-weight: bold; text-align: center;">Score: <span
+                            id="final-score-vic-3d">0</span></div>
+                    <div class="overlay-text"
+                        style="font-size: 14px; color: #f1c40f; margin-top: 5px; text-align: center;">Best: <span
+                            id="overlay-best-vic-3d">0</span></div>
+                    <button onclick="resetGame()"
+                        style="margin-top: 15px; padding: 10px 24px; font-size: 15px; width: 100%;">Play Again</button>
+                </div>
+                <div class="overlay-right-col">
+                    <!-- Leaderboard Input -->
+                    <div id="leaderboard-input-vic-3d"
+                        style="display: none; margin-top: 0; text-align: center; width: 100%;">
+                        <div id="leaderboard-heading-vic-3d"
+                            style="font-size: 13px; color: #f1c40f; margin-bottom: 4px; font-weight: bold;">🎉 NEW HIGH
+                            SCORE! 🎉</div>
+                        <div style="display: flex; gap: 5px; justify-content: center; width: 100%;">
+                            <input type="text" id="player-name-vic-3d" placeholder="ENTER NAME" maxlength="6"
+                                style="padding: 6px; font-size: 13px; border: 2px solid #2ecc71; border-radius: 4px; background: #2c3e50; color: white; font-family: inherit; text-align: center; width: 120px; text-transform: uppercase;"
+                                onkeydown="if(event.key === 'Enter') submitScore3D('player-name-vic-3d', 'leaderboard-input-vic-3d', 'leaderboard-records-vic-3d')">
+                            <button
+                                onclick="submitScore3D('player-name-vic-3d', 'leaderboard-input-vic-3d', 'leaderboard-records-vic-3d')"
+                                style="padding: 6px 12px; font-size: 13px; margin-top: 0; box-shadow: none;">Submit</button>
+                        </div>
+                    </div>
 
-            <!-- Leaderboard Input -->
-            <div id="leaderboard-input-vic-3d"
-                style="display: none; margin-top: 10px; text-align: center; width: 100%;">
-                <div id="leaderboard-heading-vic-3d"
-                    style="font-size: 13px; color: #f1c40f; margin-bottom: 4px; font-weight: bold;">🎉 NEW HIGH SCORE!
-                    🎉</div>
-                <div style="display: flex; gap: 5px; justify-content: center; width: 100%;">
-                    <input type="text" id="player-name-vic-3d" placeholder="ENTER NAME" maxlength="6"
-                        style="padding: 6px; font-size: 13px; border: 2px solid #2ecc71; border-radius: 4px; background: #2c3e50; color: white; font-family: inherit; text-align: center; width: 120px; text-transform: uppercase;"
-                        onkeydown="if(event.key === 'Enter') submitScore3D('player-name-vic-3d', 'leaderboard-input-vic-3d', 'leaderboard-records-vic-3d')">
-                    <button
-                        onclick="submitScore3D('player-name-vic-3d', 'leaderboard-input-vic-3d', 'leaderboard-records-vic-3d')"
-                        style="padding: 6px 12px; font-size: 13px; margin-top: 0; box-shadow: none;">Submit</button>
+                    <!-- Leaderboard List -->
+                    <div id="leaderboard-list-vic-3d"
+                        style="margin-top: 10px; width: 100%; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; box-sizing: border-box;">
+                        <div
+                            style="font-size: 13px; color: #f1c40f; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">
+                            TOP 10 LEADERBOARD</div>
+                        <div id="leaderboard-records-vic-3d"
+                            style="font-size: 12px; line-height: 1.4; text-align: left; max-height: 100px; overflow-y: auto;">
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Leaderboard List -->
-            <div id="leaderboard-list-vic-3d"
-                style="margin-top: 10px; width: 100%; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; box-sizing: border-box;">
-                <div
-                    style="font-size: 13px; color: #f1c40f; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">
-                    TOP 10 LEADERBOARD</div>
-                <div id="leaderboard-records-vic-3d"
-                    style="font-size: 12px; line-height: 1.4; text-align: left; max-height: 100px; overflow-y: auto;">
-                </div>
-            </div>
-
-            <button onclick="resetGame()" style="margin-top: 12px; padding: 8px 20px; font-size: 14px;">Play
-                Again</button>
         </div>
     </div>
 
@@ -1650,6 +1962,18 @@
                 scene.add(opp.mesh);
             });
 
+            // Initialize marker colors based on chosen vehicle colors
+            const playerMarker = document.getElementById('marker-player');
+            if (playerMarker) {
+                playerMarker.style.backgroundColor = '#' + VEHICLE_COLORS[selectedVehicleType].toString(16).padStart(6, '0');
+            }
+            opponents.forEach((opp, idx) => {
+                const marker = document.getElementById(`marker-opp${idx}`);
+                if (marker) {
+                    marker.style.backgroundColor = '#' + opp.color.toString(16).padStart(6, '0');
+                }
+            });
+
             clearParticles();
             createRoadEnvironment();
             checkOrientation();
@@ -2466,6 +2790,35 @@
             document.getElementById('score-label').innerText = getCalculatedScore3D();
             document.getElementById('progress-bar').style.width = Math.min(100, (playerDist / RACE_DISTANCE) * 100) + "%";
 
+            // Calculate and update ranks and positions for progress bar markers
+            const racers = [
+                { id: 'player', dist: playerDist, markerId: 'marker-player' },
+                ...opponents.map((opp, idx) => ({ id: 'opp' + idx, dist: opp.dist, markerId: `marker-opp${idx}` }))
+            ];
+
+            // Sort by distance descending. If both finished, sort by finishRank ascending.
+            racers.sort((a, b) => {
+                const aFinished = a.dist >= RACE_DISTANCE;
+                const bFinished = b.dist >= RACE_DISTANCE;
+                if (aFinished && bFinished) {
+                    const aRank = a.id === 'player' ? playerFinishRank : opponents[parseInt(a.id.slice(3))].finishRank;
+                    const bRank = b.id === 'player' ? playerFinishRank : opponents[parseInt(b.id.slice(3))].finishRank;
+                    return aRank - bRank;
+                }
+                return b.dist - a.dist;
+            });
+
+            // Update each marker
+            racers.forEach((racer, index) => {
+                const rank = index + 1;
+                const leftPercent = Math.min(100, Math.max(0, (racer.dist / RACE_DISTANCE) * 100));
+                const marker = document.getElementById(racer.markerId);
+                if (marker) {
+                    marker.style.left = `${leftPercent.toFixed(4)}%`;
+                    marker.innerText = rank;
+                }
+            });
+
             renderer.render(scene, camera);
             requestAnimationFrame(gameLoop);
         }
@@ -2578,6 +2931,14 @@
 
             document.getElementById('launch-screen').style.display = 'flex';
             document.getElementById('launch-screen').style.opacity = 1;
+
+            // Reset progress markers
+            ['marker-player', 'marker-opp0', 'marker-opp1', 'marker-opp2'].forEach(id => {
+                const marker = document.getElementById(id);
+                if (marker) {
+                    marker.style.left = '0%';
+                }
+            });
 
             isPlaying = false;
             document.body.classList.remove('game-active');
