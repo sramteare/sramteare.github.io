@@ -67,7 +67,19 @@ const mouse = {
 
 // --- Particles Class ---
 class Particle {
-    constructor(x, y, vx, vy, color, size, life, friction = 0.98) {
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.vx = 0;
+        this.vy = 0;
+        this.color = '';
+        this.size = 0;
+        this.maxLife = 0;
+        this.life = 0;
+        this.friction = 0.98;
+    }
+
+    reset(x, y, vx, vy, color, size, life, friction = 0.98) {
         this.x = x;
         this.y = y;
         this.vx = vx;
@@ -164,15 +176,18 @@ class ScrapCrystal {
         // Magnetic attraction to player
         const dx = player.x - this.x;
         const dy = player.y - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const distSq = dx * dx + dy * dy;
+        const magnetRangeSq = magnetRange * magnetRange;
         
-        if (dist < magnetRange) {
+        if (distSq < magnetRangeSq) {
+            const dist = Math.sqrt(distSq);
             const force = (magnetRange - dist) / magnetRange * 0.45;
             this.vx += (dx / dist) * force;
             this.vy += (dy / dist) * force;
             // Cap magnet velocity
-            const magV = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-            if (magV > 10) {
+            const magVSq = this.vx * this.vx + this.vy * this.vy;
+            if (magVSq > 100) {
+                const magV = Math.sqrt(magVSq);
                 this.vx = (this.vx / magV) * 10;
                 this.vy = (this.vy / magV) * 10;
             }
@@ -266,12 +281,12 @@ class PlayerShip {
             
             // Spawn dash phantom particles
             if (Math.random() < 0.6) {
-                game.particles.push(new Particle(
+                game.spawnParticle(
                     this.x + (Math.random() - 0.5) * 10,
                     this.y + (Math.random() - 0.5) * 10,
                     -this.vx * 0.2, -this.vy * 0.2,
-                    'rgba(0, 242, 255, 0.4)', 12, 15
-                ));
+                    '#00f2ff', 12, 15
+                );
             }
 
             // World clamping during dash
@@ -318,11 +333,11 @@ class PlayerShip {
             for (let i = 0; i < 20; i++) {
                 const pAngle = Math.random() * Math.PI * 2;
                 const pSpeed = Math.random() * 6 + 2;
-                game.particles.push(new Particle(
+                game.spawnParticle(
                     this.x, this.y,
                     Math.cos(pAngle) * pSpeed, Math.sin(pAngle) * pSpeed,
                     '#00f2ff', Math.random() * 4 + 2, 25
-                ));
+                );
             }
             
             this.x += this.vx;
@@ -342,14 +357,14 @@ class PlayerShip {
                 const exhaustSpeed = Math.random() * 3 + 2;
                 const exhaustX = this.x - Math.cos(this.angle) * 15;
                 const exhaustY = this.y - Math.sin(this.angle) * 15;
-                game.particles.push(new Particle(
+                game.spawnParticle(
                     exhaustX, exhaustY,
                     this.vx * 0.5 + Math.cos(exhaustAngle) * exhaustSpeed,
                     this.vy * 0.5 + Math.sin(exhaustAngle) * exhaustSpeed,
                     Math.random() < 0.3 ? '#ff8400' : '#00f2ff',
                     Math.random() * 3 + 1.5,
                     Math.random() * 15 + 10
-                ));
+                );
             }
         } else if (keys.s || keys.ArrowDown) {
             // Decelerate / Reverse thrust
@@ -399,13 +414,13 @@ class PlayerShip {
             // Shield hit ripple particles
             for (let i = 0; i < 6; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                game.particles.push(new Particle(
+                game.spawnParticle(
                     this.x + Math.cos(angle) * this.radius,
                     this.y + Math.sin(angle) * this.radius,
                     this.vx + Math.cos(angle) * 2,
                     this.vy + Math.sin(angle) * 2,
                     '#00f2ff', 2.5, 12
-                ));
+                );
             }
 
             if (this.shield < 0) {
@@ -420,11 +435,11 @@ class PlayerShip {
             // Spark armor particles
             for (let i = 0; i < 6; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                game.particles.push(new Particle(
+                game.spawnParticle(
                     this.x, this.y,
                     (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 6,
                     '#ff3b3b', 2, 20
-                ));
+                );
             }
         }
 
@@ -548,14 +563,14 @@ class SpaceStation {
         } else if (enemies.length > 0) {
             // Find target closest to station
             let target = null;
-            let minDist = this.turretRange;
+            let minDistSq = this.turretRange * this.turretRange;
             
             for (let enemy of enemies) {
                 const dx = enemy.x - this.x;
                 const dy = enemy.y - this.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < minDist) {
-                    minDist = dist;
+                const distSq = dx * dx + dy * dy;
+                if (distSq < minDistSq) {
+                    minDistSq = distSq;
                     target = enemy;
                 }
             }
@@ -590,12 +605,12 @@ class SpaceStation {
             // Shield spark particles
             for (let i = 0; i < 8; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                game.particles.push(new Particle(
+                game.spawnParticle(
                     this.x + Math.cos(angle) * this.radius,
                     this.y + Math.sin(angle) * this.radius,
                     Math.cos(angle) * 3, Math.sin(angle) * 3,
                     '#00f2ff', 3, 15
-                ));
+                );
             }
 
             if (this.shield < 0) {
@@ -609,12 +624,12 @@ class SpaceStation {
             
             // Metal debris sparks
             for (let i = 0; i < 10; i++) {
-                game.particles.push(new Particle(
+                game.spawnParticle(
                     this.x + (Math.random() - 0.5) * 50,
                     this.y + (Math.random() - 0.5) * 50,
                     (Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8,
                     '#ff8800', Math.random() * 3 + 2, 35
-                ));
+                );
             }
         }
 
@@ -803,38 +818,39 @@ class Enemy {
         // AI Pathfinding: Target the player or space station (whichever is closer)
         const dxPlayer = player.x - this.x;
         const dyPlayer = player.y - this.y;
-        const distPlayer = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
-
+        const distPlayerSq = dxPlayer * dxPlayer + dyPlayer * dyPlayer;
+ 
         const dxStation = station.x - this.x;
         const dyStation = station.y - this.y;
-        const distStation = Math.sqrt(dxStation * dxStation + dyStation * dyStation);
-
+        const distStationSq = dxStation * dxStation + dyStation * dyStation;
+ 
         // Default: Target the closest
         let targetX = player.x;
         let targetY = player.y;
-        let targetDist = distPlayer;
         let targetDx = dxPlayer;
         let targetDy = dyPlayer;
+        let isTargetingStation = false;
         
         // Behemoths ALWAYS target the station to breach it (unless station is disabled)
-        if (!game.disableStation && (this.type === 'behemoth' || distStation < distPlayer * 0.7)) {
+        if (!game.disableStation && (this.type === 'behemoth' || distStationSq < distPlayerSq * 0.49)) { // 0.7 squared is 0.49
             targetX = station.x;
             targetY = station.y;
-            targetDist = distStation;
             targetDx = dxStation;
             targetDy = dyStation;
+            isTargetingStation = true;
         }
-
+ 
         // Steer direction
         this.angle = Math.atan2(targetDy, targetDx);
-
+ 
         if (this.type === 'bomber') {
+            const targetDistSq = isTargetingStation ? distStationSq : distPlayerSq;
             // Bomber behavior: Maintain distance, orbit slightly, and shoot
-            if (targetDist > 260) {
+            if (targetDistSq > 67600) { // 260 * 260
                 // Move closer
                 this.vx = Math.cos(this.angle) * this.speed;
                 this.vy = Math.sin(this.angle) * this.speed;
-            } else if (targetDist < 200) {
+            } else if (targetDistSq < 40000) { // 200 * 200
                 // Back away
                 this.vx = -Math.cos(this.angle) * this.speed * 0.8;
                 this.vy = -Math.sin(this.angle) * this.speed * 0.8;
@@ -843,11 +859,11 @@ class Enemy {
                 this.vx = -Math.sin(this.angle) * this.speed * 0.5;
                 this.vy = Math.cos(this.angle) * this.speed * 0.5;
             }
-
+ 
             // Firing protocol
             if (this.fireCooldown > 0) {
                 this.fireCooldown--;
-            } else if (targetDist < 450) {
+            } else if (targetDistSq < 202500) { // 450 * 450
                 // Fire plasma bullet
                 game.bullets.push(new Bullet(this.x, this.y, this.angle, 6, 15, false, '#00ff66'));
                 this.fireCooldown = this.fireCooldownMax;
@@ -858,7 +874,7 @@ class Enemy {
             this.vx = Math.cos(this.angle) * this.speed;
             this.vy = Math.sin(this.angle) * this.speed;
         }
-
+ 
         // Move
         this.x += this.vx;
         this.y += this.vy;
@@ -869,11 +885,11 @@ class Enemy {
         
         // Spawn damage spark particles
         for (let i = 0; i < 4; i++) {
-            game.particles.push(new Particle(
+            game.spawnParticle(
                 this.x, this.y,
                 (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5,
                 this.color, Math.random() * 2 + 1.5, 12
-            ));
+            );
         }
 
         if (this.hp <= 0) {
@@ -898,11 +914,11 @@ class Enemy {
         for (let i = 0; i < particleCount; i++) {
             const pAngle = Math.random() * Math.PI * 2;
             const pSpeed = Math.random() * 8 + 2;
-            game.particles.push(new Particle(
+            game.spawnParticle(
                 this.x, this.y,
                 Math.cos(pAngle) * pSpeed, Math.sin(pAngle) * pSpeed,
                 this.color, Math.random() * 4 + 1.5, Math.random() * 30 + 15
-            ));
+            );
         }
 
         // Spawn Scrap crystals
@@ -1000,6 +1016,32 @@ class Enemy {
 
 // --- Main Game Director Class ---
 class GameEngine {
+    getPixelRatio() {
+        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isMobile) {
+            return 1.25; // Standard definition for mobile/performance
+        }
+        return Math.min(window.devicePixelRatio || 1, 2.0); // Cap at 2x retina
+    }
+
+    spawnParticle(x, y, vx, vy, color, size, life, friction = 0.98) {
+        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isMobile) {
+            // Drop 50% of particles on mobile to improve performance
+            if (Math.random() > 0.5) return;
+        }
+
+        let p;
+        if (this.particlePool && this.particlePool.length > 0) {
+            p = this.particlePool.pop();
+            p.reset(x, y, vx, vy, color, size, life, friction);
+        } else {
+            p = new Particle();
+            p.reset(x, y, vx, vy, color, size, life, friction);
+        }
+        this.particles.push(p);
+    }
+
     constructor() {
         this.canvas = document.getElementById('game-canvas');
         this.ctx = this.canvas.getContext('2d');
@@ -1010,6 +1052,7 @@ class GameEngine {
         this.enemies = [];
         this.bullets = [];
         this.particles = [];
+        this.particlePool = []; // Pool to recycle particles
         this.scrap = [];
         this.stars = [];
 
@@ -1063,7 +1106,7 @@ class GameEngine {
 
     resizeCanvas() {
         // High-DPI responsive canvas sizing
-        const dpr = window.devicePixelRatio || 1;
+        const dpr = this.getPixelRatio();
         const width = window.innerWidth;
         const height = window.innerHeight;
         
@@ -1310,6 +1353,7 @@ class GameEngine {
         this.enemies = [];
         this.bullets = [];
         this.particles = [];
+        this.particlePool = []; // Empty pool on restart
         this.scrap = [];
         this.wave = 0;
         this.score = 0;
@@ -1386,22 +1430,22 @@ class GameEngine {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 8 + 3;
             const color = Math.random() < 0.6 ? '#00f2ff' : Math.random() < 0.3 ? '#ff9f00' : '#ffffff';
-            this.particles.push(new Particle(
+            this.spawnParticle(
                 this.player.x, this.player.y,
                 Math.cos(angle) * speed, Math.sin(angle) * speed,
                 color, Math.random() * 5 + 2, Math.random() * 50 + 20
-            ));
+            );
         }
 
         // Spawn fireballs expanding outwards
         for (let i = 0; i < 15; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 4 + 1;
-            this.particles.push(new Particle(
+            this.spawnParticle(
                 this.player.x, this.player.y,
                 Math.cos(angle) * speed, Math.sin(angle) * speed,
                 '#ff3b3b', Math.random() * 10 + 5, Math.random() * 35 + 15
-            ));
+            );
         }
     }
 
@@ -1427,11 +1471,11 @@ class GameEngine {
                     for (let i = 0; i < 20; i++) {
                         const angle = Math.random() * Math.PI * 2;
                         const speed = Math.random() * 5 + 1;
-                        this.particles.push(new Particle(
+                        this.spawnParticle(
                             this.station.x + ox, this.station.y + oy,
                             Math.cos(angle) * speed, Math.sin(angle) * speed,
                             '#ff8800', Math.random() * 7 + 3, Math.random() * 40 + 15
-                        ));
+                        );
                     }
                 }
             }, j * 250);
@@ -1569,8 +1613,8 @@ class GameEngine {
                 for (let enemy of this.enemies) {
                     const dx = enemy.x - this.player.x;
                     const dy = enemy.y - this.player.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 600) {
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < 360000) { // 600 * 600
                         shouldAutoFire = true;
                         break;
                     }
@@ -1600,23 +1644,27 @@ class GameEngine {
             if (!this.waveActive && !this.disableStation) {
                 const dxStation = this.station.x - s.x;
                 const dyStation = this.station.y - s.y;
-                const distStation = Math.sqrt(dxStation * dxStation + dyStation * dyStation);
+                const distStationSq = dxStation * dxStation + dyStation * dyStation;
                 const stationCollectRange = 600; // 600px collection radius
+                const stationCollectRangeSq = stationCollectRange * stationCollectRange;
 
-                if (distStation < stationCollectRange) {
+                if (distStationSq < stationCollectRangeSq) {
+                    const distStation = Math.sqrt(distStationSq);
                     const force = (stationCollectRange - distStation) / stationCollectRange * 0.45;
                     s.vx += (dxStation / distStation) * force;
                     s.vy += (dyStation / distStation) * force;
                     
-                    const sv = Math.sqrt(s.vx * s.vx + s.vy * s.vy);
-                    if (sv > 12) {
+                    const svSq = s.vx * s.vx + s.vy * s.vy;
+                    if (svSq > 144) { // 12 * 12
+                        const sv = Math.sqrt(svSq);
                         s.vx = (s.vx / sv) * 12;
                         s.vy = (s.vy / sv) * 12;
                     }
                 }
 
                 // Station hit check
-                if (distStation < this.station.radius + s.radius) {
+                const stationCollideRange = this.station.radius + s.radius;
+                if (distStationSq < stationCollideRange * stationCollideRange) {
                     this.player.scrap += s.value;
                     this.score += 50;
                     if (typeof sounds !== 'undefined') sounds.upgrade();
@@ -1624,11 +1672,11 @@ class GameEngine {
                     // Blue tractor beam sparks
                     for (let j = 0; j < 6; j++) {
                         const pAngle = Math.random() * Math.PI * 2;
-                        game.particles.push(new Particle(
+                        this.spawnParticle(
                             s.x, s.y,
                             Math.cos(pAngle) * 3, Math.sin(pAngle) * 3,
                             '#00f2ff', 2, 12
-                        ));
+                        );
                     }
 
                     this.scrap.splice(i, 1);
@@ -1640,9 +1688,10 @@ class GameEngine {
             // Magnet / Hit Player check
             const dx = s.x - this.player.x;
             const dy = s.y - this.player.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const distSq = dx * dx + dy * dy;
+            const collideRange = this.player.radius + s.radius;
             
-            if (dist < this.player.radius + s.radius) {
+            if (distSq < collideRange * collideRange) {
                 // Collect scrap
                 this.player.scrap += s.value;
                 this.score += 50; // Bonus score
@@ -1650,11 +1699,11 @@ class GameEngine {
                 
                 // Collection feedback particles
                 for (let j = 0; j < 4; j++) {
-                    game.particles.push(new Particle(
+                    this.spawnParticle(
                         s.x, s.y,
                         (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4,
                         '#ff9f00', 2.5, 10
-                    ));
+                    );
                 }
                 
                 this.scrap.splice(i, 1);
@@ -1672,9 +1721,10 @@ class GameEngine {
                 // Ship-Enemy Collision Check
                 const dx = enemy.x - this.player.x;
                 const dy = enemy.y - this.player.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
+                const distSq = dx * dx + dy * dy;
+                const collideRange = enemy.radius + this.player.radius;
                 
-                if (dist < enemy.radius + this.player.radius) {
+                if (distSq < collideRange * collideRange) {
                     this.player.damage(enemy.collisionDmg);
                     enemy.damage(999); // Instantly vaporize Swarmer on impact
                     this.enemies.splice(i, 1);
@@ -1686,9 +1736,10 @@ class GameEngine {
                 if (!this.disableStation) {
                     const dxS = enemy.x - this.station.x;
                     const dyS = enemy.y - this.station.y;
-                    const distS = Math.sqrt(dxS * dxS + dyS * dyS);
+                    const distSSq = dxS * dxS + dyS * dyS;
+                    const collideRangeS = enemy.radius + this.station.radius;
                     
-                    if (distS < enemy.radius + this.station.radius) {
+                    if (distSSq < collideRangeS * collideRangeS) {
                         this.station.damage(enemy.collisionDmg);
                         enemy.damage(999);
                         this.enemies.splice(i, 1);
@@ -1707,6 +1758,7 @@ class GameEngine {
             p.update();
             if (p.life <= 0) {
                 this.particles.splice(i, 1);
+                this.particlePool.push(p); // Recycle dead particle to the pool
             }
         }
 
@@ -1765,9 +1817,10 @@ class GameEngine {
                     const enemy = this.enemies[eIndex];
                     const dx = b.x - enemy.x;
                     const dy = b.y - enemy.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const distSq = dx * dx + dy * dy;
+                    const collideRange = enemy.radius + b.radius;
                     
-                    if (dist < enemy.radius + b.radius) {
+                    if (distSq < collideRange * collideRange) {
                         // Enemy Hit
                         const isDead = enemy.damage(b.damage);
                         this.bullets.splice(bIndex, 1);
@@ -1783,9 +1836,10 @@ class GameEngine {
                 // Enemy Bullet vs Player ship
                 const dxP = b.x - this.player.x;
                 const dyP = b.y - this.player.y;
-                const distP = Math.sqrt(dxP * dxP + dyP * dyP);
+                const distPSq = dxP * dxP + dyP * dyP;
+                const collideRangeP = this.player.radius + b.radius;
                 
-                if (distP < this.player.radius + b.radius) {
+                if (distPSq < collideRangeP * collideRangeP) {
                     this.player.damage(b.damage);
                     this.bullets.splice(bIndex, 1);
                     continue;
@@ -1795,9 +1849,10 @@ class GameEngine {
                 if (!this.disableStation) {
                     const dxS = b.x - this.station.x;
                     const dyS = b.y - this.station.y;
-                    const distS = Math.sqrt(dxS * dxS + dyS * dyS);
+                    const distSSq = dxS * dxS + dyS * dyS;
+                    const collideRangeS = this.station.radius + b.radius;
                     
-                    if (distS < this.station.radius + b.radius) {
+                    if (distSSq < collideRangeS * collideRangeS) {
                         this.station.damage(b.damage);
                         this.bullets.splice(bIndex, 1);
                     }

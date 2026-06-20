@@ -5,6 +5,25 @@
 const VoidModels = (function () {
     'use strict';
 
+    // Caches to share geometries and materials across 3D model instances,
+    // avoiding expensive instantiation/GC overhead, especially during enemy waves.
+    const geometryCache = {};
+    const materialCache = {};
+
+    function getCachedGeometry(key, creatorFunc) {
+        if (!geometryCache[key]) {
+            geometryCache[key] = creatorFunc();
+        }
+        return geometryCache[key];
+    }
+
+    function getCachedMaterial(key, creatorFunc) {
+        if (!materialCache[key]) {
+            materialCache[key] = creatorFunc();
+        }
+        return materialCache[key];
+    }
+
     function createShieldMesh(radius, color, detail = 2) {
         const group = new THREE.Group();
 
@@ -1623,40 +1642,38 @@ const VoidModels = (function () {
         const group = new THREE.Group();
 
         if (type === 'swarmer') {
-            const swarmerGroup = new THREE.Group();
-
-            // Materials (Evil Dark & Crimson Red Theme)
-            const hullMat = new THREE.MeshStandardMaterial({
+            const swarmerGroup = new THREE.Group();            // Materials (Evil Dark & Crimson Red Theme) - Cached
+            const hullMat = getCachedMaterial('swarmer_hull', () => new THREE.MeshStandardMaterial({
                 color: '#151518', // Deep space-obsidian grey
                 roughness: 0.35,
                 metalness: 0.85,
                 emissive: '#440003' // Menacing dark crimson under-glow
-            });
+            }));
 
-            const panelMat = new THREE.MeshStandardMaterial({
+            const panelMat = getCachedMaterial('swarmer_panel', () => new THREE.MeshStandardMaterial({
                 color: '#2c0c0f', // Dark blood red layered panels
                 roughness: 0.45,
                 metalness: 0.75,
                 emissive: '#180002'
-            });
+            }));
 
-            const nozzleMat = new THREE.MeshStandardMaterial({
+            const nozzleMat = getCachedMaterial('swarmer_nozzle', () => new THREE.MeshStandardMaterial({
                 color: '#0d0e10', // Pitch black metallic iron thruster housings
                 roughness: 0.3,
                 metalness: 0.95
-            });
+            }));
 
-            const glowMat = new THREE.MeshBasicMaterial({ color: '#ff0033' }); // Laser crimson glow
+            const glowMat = getCachedMaterial('swarmer_glow', () => new THREE.MeshBasicMaterial({ color: '#ff0033' })); // Laser crimson glow
             
-            // Fiery thruster flame layer materials
-            const coreFlameMat = new THREE.MeshBasicMaterial({ color: '#ffffff' }); // White hot core
-            const midFlameMat = new THREE.MeshBasicMaterial({ color: '#ff6600', transparent: true, opacity: 0.85 }); // Mid orange flame
-            const glowFlameMat = new THREE.MeshBasicMaterial({
+            // Fiery thruster flame layer materials - Cached
+            const coreFlameMat = getCachedMaterial('swarmer_core_flame', () => new THREE.MeshBasicMaterial({ color: '#ffffff' })); // White hot core
+            const midFlameMat = getCachedMaterial('swarmer_mid_flame', () => new THREE.MeshBasicMaterial({ color: '#ff6600', transparent: true, opacity: 0.85 })); // Mid orange flame
+            const glowFlameMat = getCachedMaterial('swarmer_glow_flame', () => new THREE.MeshBasicMaterial({
                 color: '#ff0033', // Deep crimson red outer glow
                 transparent: true,
                 opacity: 0.45,
                 blending: THREE.AdditiveBlending
-            });
+            }));
 
             // 1. Crescent Wing Shape (Elliptical design, thick in middle, tapering to sharp tips)
             const shape = new THREE.Shape();
@@ -1688,8 +1705,11 @@ const VoidModels = (function () {
                 bevelSize: 0.6,
                 bevelThickness: 1.2
             };
-            const wingGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            wingGeo.center(); // Center around origin (0,0,0) (shifts vertices by -5 on X)
+            const wingGeo = getCachedGeometry('swarmer_wing', () => {
+                const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+                geo.center(); // Center around origin (0,0,0) (shifts vertices by -5 on X)
+                return geo;
+            });
             
             const mainWing = new THREE.Mesh(wingGeo, hullMat);
             swarmerGroup.add(mainWing);
@@ -1698,29 +1718,35 @@ const VoidModels = (function () {
             const cockpitGroup = new THREE.Group();
             
             // Cockpit base
-            const cockpitBaseGeo = new THREE.BoxGeometry(5.0, 3.5, 2.0);
+            const cockpitBaseGeo = getCachedGeometry('swarmer_cockpit_base', () => new THREE.BoxGeometry(5.0, 3.5, 2.0));
             const cockpitBase = new THREE.Mesh(cockpitBaseGeo, panelMat);
             cockpitBase.position.set(1.0, 0, 0.8);
             cockpitGroup.add(cockpitBase);
 
             // Slanted canopy/armor hood on top
-            const canopyGeo = new THREE.ConeGeometry(1.6, 4.0, 4);
-            canopyGeo.rotateZ(-Math.PI / 2); // Point forward (+X)
-            canopyGeo.scale(1, 0.7, 1.4); // Flatten vertically
+            const canopyGeo = getCachedGeometry('swarmer_canopy', () => {
+                const geo = new THREE.ConeGeometry(1.6, 4.0, 4);
+                geo.rotateZ(-Math.PI / 2); // Point forward (+X)
+                geo.scale(1, 0.7, 1.4); // Flatten vertically
+                return geo;
+            });
             const canopy = new THREE.Mesh(canopyGeo, hullMat);
             canopy.position.set(2.0, 0, 1.3);
             cockpitGroup.add(canopy);
 
             // Menacing Forehead Crest / Fin (character horn)
-            const crestGeo = new THREE.ConeGeometry(0.4, 4.5, 3);
-            crestGeo.rotateX(Math.PI / 2); // Vertical fin
-            crestGeo.rotateZ(Math.PI / 6); // Slant backward
+            const crestGeo = getCachedGeometry('swarmer_crest', () => {
+                const geo = new THREE.ConeGeometry(0.4, 4.5, 3);
+                geo.rotateX(Math.PI / 2); // Vertical fin
+                geo.rotateZ(Math.PI / 6); // Slant backward
+                return geo;
+            });
             const crest = new THREE.Mesh(crestGeo, hullMat);
             crest.position.set(1.2, 0, 2.3);
             cockpitGroup.add(crest);
 
             // Menacing Dual Slit Eyes (Crimson glow)
-            const eyeGeo = new THREE.BoxGeometry(0.4, 1.1, 0.4);
+            const eyeGeo = getCachedGeometry('swarmer_eye', () => new THREE.BoxGeometry(0.4, 1.1, 0.4));
             
             const leftEye = new THREE.Mesh(eyeGeo, glowMat);
             leftEye.position.set(3.4, 0.7, 1.2);
@@ -1735,8 +1761,11 @@ const VoidModels = (function () {
             cockpitGroup.add(rightEye);
 
             // Mechanical gun barrels sticking out forward
-            const gunGeo = new THREE.CylinderGeometry(0.18, 0.18, 2.8, 6);
-            gunGeo.rotateZ(Math.PI / 2); // Length along X
+            const gunGeo = getCachedGeometry('swarmer_gun', () => {
+                const geo = new THREE.CylinderGeometry(0.18, 0.18, 2.8, 6);
+                geo.rotateZ(Math.PI / 2); // Length along X
+                return geo;
+            });
             
             const leftGun = new THREE.Mesh(gunGeo, nozzleMat);
             leftGun.position.set(3.8, 1.2, 0);
@@ -1747,8 +1776,11 @@ const VoidModels = (function () {
             cockpitGroup.add(rightGun);
 
             // Robotic Mandibles / Fangs (Curved pincers on the mouth)
-            const fangGeo = new THREE.ConeGeometry(0.35, 3.2, 4);
-            fangGeo.rotateZ(Math.PI / 2); // Point forward
+            const fangGeo = getCachedGeometry('swarmer_fang', () => {
+                const geo = new THREE.ConeGeometry(0.35, 3.2, 4);
+                geo.rotateZ(Math.PI / 2); // Point forward
+                return geo;
+            });
             
             const leftFang = new THREE.Mesh(fangGeo, nozzleMat);
             leftFang.position.set(4.0, 1.6, 0.1);
@@ -1763,11 +1795,17 @@ const VoidModels = (function () {
             swarmerGroup.add(cockpitGroup);
 
             // 3. Engine Nozzles and Flame Plumes (Distributed along the outer curve)
-            const nozzleGeo = new THREE.CylinderGeometry(0.8, 1.2, 2.2, 6);
-            nozzleGeo.rotateZ(Math.PI / 2); // Length along X
+            const nozzleGeo = getCachedGeometry('swarmer_nozzle_geo', () => {
+                const geo = new THREE.CylinderGeometry(0.8, 1.2, 2.2, 6);
+                geo.rotateZ(Math.PI / 2); // Length along X
+                return geo;
+            });
             
-            const fireGeo = new THREE.ConeGeometry(0.8, 4.0, 6);
-            fireGeo.rotateZ(-Math.PI / 2); // Point backward along -X
+            const fireGeo = getCachedGeometry('swarmer_fire_geo', () => {
+                const geo = new THREE.ConeGeometry(0.8, 4.0, 6);
+                geo.rotateZ(-Math.PI / 2); // Point backward along -X
+                return geo;
+            });
 
             const thrusters = [
                 { x: -6.0, y: 0, scale: 1.2, flameOffset: -2.5 },   // Center
@@ -1803,7 +1841,7 @@ const VoidModels = (function () {
             });
 
             // 4. Panel Plating for Wing Detail (Symmetric)
-            const plateGeo = new THREE.BoxGeometry(4.0, 2.2, 0.6);
+            const plateGeo = getCachedGeometry('swarmer_plate', () => new THREE.BoxGeometry(4.0, 2.2, 0.6));
             
             // Mid-wing plates
             const plateMidL = new THREE.Mesh(plateGeo, panelMat);
@@ -1830,8 +1868,11 @@ const VoidModels = (function () {
             swarmerGroup.add(plateOuterR);
 
             // Forward mechanical spikes/antennae on the wings
-            const spikeGeo = new THREE.CylinderGeometry(0.15, 0.3, 5, 4);
-            spikeGeo.rotateZ(Math.PI / 2); // Length along X
+            const spikeGeo = getCachedGeometry('swarmer_spike', () => {
+                const geo = new THREE.CylinderGeometry(0.15, 0.3, 5, 4);
+                geo.rotateZ(Math.PI / 2); // Length along X
+                return geo;
+            });
             
             const wingSpikeL = new THREE.Mesh(spikeGeo, nozzleMat);
             wingSpikeL.position.set(5.0, 9, 0.5);
@@ -1845,114 +1886,137 @@ const VoidModels = (function () {
             // Scale the group down so it reads as the small, agile scout enemy.
             swarmerGroup.scale.set(0.56, 0.56, 0.56);
 
-            group.add(swarmerGroup);
-        } else if (type === 'bomber') {
+            group.add(swarmerGroup)        } else if (type === 'bomber') {
             const bomberGroup = new THREE.Group();
 
-            // Materials (Hive Weaver - Faceted Hard-Shell Theme)
-            const shellMat = new THREE.MeshStandardMaterial({
+            // Materials (Hive Weaver - Faceted Hard-Shell Theme) - Cached
+            const shellMat = getCachedMaterial('bomber_shell', () => new THREE.MeshStandardMaterial({
                 color: '#e58e26', // Warm polished golden-amber bronze
                 roughness: 0.25,
                 metalness: 0.9,
                 emissive: '#4d1e02', // Warm orange emissive underglow
                 flatShading: true // Faceted flat shading for armored plates
-            });
+            }));
 
-            const underbellyMat = new THREE.MeshStandardMaterial({
+            const underbellyMat = getCachedMaterial('bomber_underbelly', () => new THREE.MeshStandardMaterial({
                 color: '#151718', // Deep space-charcoal
                 roughness: 0.45,
                 metalness: 0.7,
                 flatShading: true
-            });
+            }));
 
-            const nozzleMat = new THREE.MeshStandardMaterial({
+            const nozzleMat = getCachedMaterial('bomber_nozzle_mat', () => new THREE.MeshStandardMaterial({
                 color: '#0e0f10', // Cast iron engine housings
                 roughness: 0.35,
                 metalness: 0.95
-            });
+            }));
 
-            const glowMat = new THREE.MeshBasicMaterial({ color: '#ff7700' }); // Intense glowing orange
-            const eyeMat = new THREE.MeshBasicMaterial({ color: '#ff1100' }); // Glowing crimson red
+            const glowMat = getCachedMaterial('bomber_glow', () => new THREE.MeshBasicMaterial({ color: '#ff7700' })); // Intense glowing orange
+            const eyeMat = getCachedMaterial('bomber_eye', () => new THREE.MeshBasicMaterial({ color: '#ff1100' })); // Glowing crimson red
             
-            // Volumetric orange/red engine flame layers
-            const coreFlameMat = new THREE.MeshBasicMaterial({ color: '#ffffff' }); // White-hot core
-            const midFlameMat = new THREE.MeshBasicMaterial({ color: '#ff6600', transparent: true, opacity: 0.85 }); // Bright orange flame
-            const glowFlameMat = new THREE.MeshBasicMaterial({
+            // Volumetric orange/red engine flame layers - Cached
+            const coreFlameMat = getCachedMaterial('bomber_core_flame', () => new THREE.MeshBasicMaterial({ color: '#ffffff' })); // White-hot core
+            const midFlameMat = getCachedMaterial('bomber_mid_flame', () => new THREE.MeshBasicMaterial({ color: '#ff6600', transparent: true, opacity: 0.85 })); // Bright orange flame
+            const glowFlameMat = getCachedMaterial('bomber_glow_flame', () => new THREE.MeshBasicMaterial({
                 color: '#e63b00', // Deep red-orange outer glow
                 transparent: true,
                 opacity: 0.45,
                 blending: THREE.AdditiveBlending
-            });
+            }));
 
             // 1. Segmented Thorax & Abdomen Body (Faceted/Low-Poly Hard Shells)
             const bodyGroup = new THREE.Group();
             bomberGroup.add(bodyGroup);
 
             // Thorax (mid-front body)
-            const thoraxGeo = new THREE.SphereGeometry(2.8, 8, 6);
-            thoraxGeo.scale(1.32, 1.82, 1.55); // wider and taller for a bulkier look
+            const thoraxGeo = getCachedGeometry('bomber_thorax', () => {
+                const geo = new THREE.SphereGeometry(2.8, 8, 6);
+                geo.scale(1.32, 1.82, 1.55); // wider and taller for a bulkier look
+                return geo;
+            });
             const thorax = new THREE.Mesh(thoraxGeo, shellMat);
             thorax.position.set(1.8, 0, 0.5);
             bodyGroup.add(thorax);
 
             // Abdomen Segment 1 (large center segment)
-            const abd1Geo = new THREE.SphereGeometry(3.2, 8, 6);
-            abd1Geo.scale(1.42, 2.12, 1.78); // fatter center segment
+            const abd1Geo = getCachedGeometry('bomber_abd1', () => {
+                const geo = new THREE.SphereGeometry(3.2, 8, 6);
+                geo.scale(1.42, 2.12, 1.78); // fatter center segment
+                return geo;
+            });
             const abd1 = new THREE.Mesh(abd1Geo, shellMat);
             abd1.position.set(-1.6, 0, 0.28);
             bodyGroup.add(abd1);
 
             // Abdomen Segment 2 (tapering rear segment)
-            const abd2Geo = new THREE.SphereGeometry(2.6, 8, 6);
-            abd2Geo.scale(1.36, 1.82, 1.42); // beefier rear section
+            const abd2Geo = getCachedGeometry('bomber_abd2', () => {
+                const geo = new THREE.SphereGeometry(2.6, 8, 6);
+                geo.scale(1.36, 1.82, 1.42); // beefier rear section
+                return geo;
+            });
             const abd2 = new THREE.Mesh(abd2Geo, shellMat);
             abd2.position.set(-4.5, 0, 0.1);
             bodyGroup.add(abd2);
 
             // Tapered Tail spike
-            const tailGeo = new THREE.ConeGeometry(1.2, 3.5, 8);
-            tailGeo.rotateZ(Math.PI / 2); // Point backward (-X)
+            const tailGeo = getCachedGeometry('bomber_tail', () => {
+                const geo = new THREE.ConeGeometry(1.2, 3.5, 8);
+                geo.rotateZ(Math.PI / 2); // Point backward (-X)
+                return geo;
+            });
             const tail = new THREE.Mesh(tailGeo, shellMat);
             tail.position.set(-6.8, 0, -0.2);
             bodyGroup.add(tail);
 
             // Organic underbelly tissue/muscle layer (rounded cylinder)
-            const underbellyGeo = new THREE.CylinderGeometry(2.05, 1.75, 8.1, 8);
-            underbellyGeo.rotateZ(Math.PI / 2); // align along X
-            underbellyGeo.scale(1.0, 1.75, 1.3); // more swollen underbelly profile
+            const underbellyGeo = getCachedGeometry('bomber_underbelly_geo', () => {
+                const geo = new THREE.CylinderGeometry(2.05, 1.75, 8.1, 8);
+                geo.rotateZ(Math.PI / 2); // align along X
+                geo.scale(1.0, 1.75, 1.3); // more swollen underbelly profile
+                return geo;
+            });
             const underbelly = new THREE.Mesh(underbellyGeo, underbellyMat);
             underbelly.position.set(-1.7, 0, -0.95);
             bodyGroup.add(underbelly);
 
             // Head (curved snout/head and beak plates)
-            const headBaseGeo = new THREE.CylinderGeometry(1.5, 1.8, 2.0, 8);
-            headBaseGeo.rotateZ(Math.PI / 2);
+            const headBaseGeo = getCachedGeometry('bomber_head_base', () => {
+                const geo = new THREE.CylinderGeometry(1.5, 1.8, 2.0, 8);
+                geo.rotateZ(Math.PI / 2);
+                return geo;
+            });
             const headBase = new THREE.Mesh(headBaseGeo, underbellyMat);
             headBase.position.set(3.5, 0, 0.3);
             bodyGroup.add(headBase);
 
-            const headSnoutGeo = new THREE.SphereGeometry(1.6, 8, 6);
-            headSnoutGeo.scale(1.1, 1.3, 1.05);
+            const headSnoutGeo = getCachedGeometry('bomber_head_snout', () => {
+                const geo = new THREE.SphereGeometry(1.6, 8, 6);
+                geo.scale(1.1, 1.3, 1.05);
+                return geo;
+            });
             const headSnout = new THREE.Mesh(headSnoutGeo, shellMat);
             headSnout.position.set(5.0, 0, 0.1);
             bodyGroup.add(headSnout);
 
             // Sleek spaceship cockpit visor (replacing the organic bug eyes/mouth pincer face)
-            const canopyGeo = new THREE.SphereGeometry(1.1, 24, 24);
-            canopyGeo.scale(1.3, 1.25, 0.75); // wider and taller visor band to match head shape
+            const canopyGeo = getCachedGeometry('bomber_canopy', () => {
+                const geo = new THREE.SphereGeometry(1.1, 24, 24);
+                geo.scale(1.3, 1.25, 0.75); // wider and taller visor band to match head shape
+                return geo;
+            });
             const canopy = new THREE.Mesh(canopyGeo, glowMat); // glowing orange horizontal visor band
             canopy.position.set(5.7, 0, 0.2);
             bodyGroup.add(canopy);
 
             // Armored brow/shield plating over visor
-            const browGeo = new THREE.BoxGeometry(0.6, 2.8, 0.45); // widened to match visor
+            const browGeo = getCachedGeometry('bomber_brow', () => new THREE.BoxGeometry(0.6, 2.8, 0.45)); // widened to match visor
             const brow = new THREE.Mesh(browGeo, shellMat);
             brow.position.set(5.5, 0, 0.6);
             brow.rotation.y = 0.25; // slants forward/down
             bodyGroup.add(brow);
 
             // Lower chin visor shield
-            const chinGeo = new THREE.BoxGeometry(0.5, 2.3, 0.45); // widened to match visor
+            const chinGeo = getCachedGeometry('bomber_chin', () => new THREE.BoxGeometry(0.5, 2.3, 0.45)); // widened to match visor
             const chin = new THREE.Mesh(chinGeo, shellMat);
             chin.position.set(5.5, 0, -0.2);
             chin.rotation.y = -0.25; // slants forward/up
@@ -1965,38 +2029,51 @@ const VoidModels = (function () {
             bomberGroup.reactorCore = cannonGroup; // Keep reference to reactorCore name to prevent errors in other loops if any
 
             // Outer cannon housing (octagonal cylinder pointing down-forward)
-            const barrelOuterGeo = new THREE.CylinderGeometry(2.25, 2.65, 4.45, 8);
-            barrelOuterGeo.rotateX(Math.PI / 2); // align initially
+            const barrelOuterGeo = getCachedGeometry('bomber_barrel_outer', () => {
+                const geo = new THREE.CylinderGeometry(2.25, 2.65, 4.45, 8);
+                geo.rotateX(Math.PI / 2); // align initially
+                return geo;
+            });
             const barrelOuter = new THREE.Mesh(barrelOuterGeo, underbellyMat);
             // Angle it 36 degrees forward and down
             barrelOuter.rotation.y = Math.PI / 5;
             cannonGroup.add(barrelOuter);
 
             // Muzzle ring/lip (cast iron nozzle look)
-            const muzzleGeo = new THREE.TorusGeometry(2.55, 0.48, 6, 8);
-            muzzleGeo.rotateY(Math.PI / 2);
+            const muzzleGeo = getCachedGeometry('bomber_muzzle', () => {
+                const geo = new THREE.TorusGeometry(2.55, 0.48, 6, 8);
+                geo.rotateY(Math.PI / 2);
+                return geo;
+            });
             const muzzle = new THREE.Mesh(muzzleGeo, nozzleMat);
             muzzle.position.set(0, 0, -2.1); // offset to end of barrel
             muzzle.rotation.y = Math.PI / 5;
             cannonGroup.add(muzzle);
 
             // Inside glowing plasma core (weapon charge)
-            const barrelInnerGeo = new THREE.CylinderGeometry(1.55, 1.55, 3.7, 8);
-            barrelInnerGeo.rotateX(Math.PI / 2);
+            const barrelInnerGeo = getCachedGeometry('bomber_barrel_inner', () => {
+                const geo = new THREE.CylinderGeometry(1.55, 1.55, 3.7, 8);
+                geo.rotateX(Math.PI / 2);
+                return geo;
+            });
             const barrelInner = new THREE.Mesh(barrelInnerGeo, glowMat);
             barrelInner.rotation.y = Math.PI / 5;
             cannonGroup.add(barrelInner);
             bomberGroup.cannonCore = barrelInner; // Reference for pulsing scale
 
-
-
             // 7. Quad Engine Nozzles & Volumetric Flame Cones
-            const nozzleGeo = new THREE.CylinderGeometry(0.5, 0.8, 1.8, 8);
-            nozzleGeo.rotateZ(Math.PI / 2); // align along X
+            const nozzleGeo = getCachedGeometry('bomber_nozzle_geo', () => {
+                const geo = new THREE.CylinderGeometry(0.5, 0.8, 1.8, 8);
+                geo.rotateZ(Math.PI / 2); // align along X
+                return geo;
+            });
 
-            const fireGeo = new THREE.ConeGeometry(0.55, 4.0, 6);
-            fireGeo.rotateZ(-Math.PI / 2); // Point backward along -X
-            fireGeo.translate(-2.0, 0, 0); // Offset pivot to base
+            const fireGeo = getCachedGeometry('bomber_fire_geo', () => {
+                const geo = new THREE.ConeGeometry(0.55, 4.0, 6);
+                geo.rotateZ(-Math.PI / 2); // Point backward along -X
+                geo.translate(-2.0, 0, 0); // Offset pivot to base
+                return geo;
+            });
 
             const enginesData = [
                 { y: 1.8,  z: 1.12, scale: 0.95, xOffset: -7.8 },  // Upper Left
@@ -2013,10 +2090,14 @@ const VoidModels = (function () {
                 nozzle.scale.set(eng.scale, eng.scale, eng.scale);
                 bomberGroup.add(nozzle);
 
-                const ringGeo = new THREE.TorusGeometry(0.45 * eng.scale, 0.12 * eng.scale, 6, 8);
-                ringGeo.rotateY(Math.PI / 2);
+                const ringGeo = getCachedGeometry('bomber_ring_geo', () => {
+                    const geo = new THREE.TorusGeometry(0.45, 0.12, 6, 8);
+                    geo.rotateY(Math.PI / 2);
+                    return geo;
+                });
                 const ring = new THREE.Mesh(ringGeo, glowMat);
                 ring.position.set(eng.xOffset - 1.0, eng.y, eng.z);
+                ring.scale.set(eng.scale, eng.scale, eng.scale);
                 bomberGroup.add(ring);
 
                 const coreFlame = new THREE.Mesh(fireGeo, coreFlameMat);
@@ -2083,44 +2164,44 @@ const VoidModels = (function () {
         } else if (type === 'behemoth') {
             const behemothGroup = new THREE.Group();
 
-            // Materials (Void Leviathan - Biomechanical Horror Theme)
-            const hullMat = new THREE.MeshStandardMaterial({
+            // Materials (Void Leviathan - Biomechanical Horror Theme) - Cached
+            const hullMat = getCachedMaterial('behemoth_hull', () => new THREE.MeshStandardMaterial({
                 color: '#150c22', // Deep space-obsidian/indigo
                 roughness: 0.75,
                 metalness: 0.45,
                 emissive: '#2b053d' // Menacing dark purple under-glow
-            });
+            }));
 
-            const fleshMat = new THREE.MeshStandardMaterial({
+            const fleshMat = getCachedMaterial('behemoth_flesh', () => new THREE.MeshStandardMaterial({
                 color: '#3b0764', // Dark purple/magenta organic flesh
                 roughness: 0.6,
                 metalness: 0.3
-            });
+            }));
 
-            const boneMat = new THREE.MeshStandardMaterial({
+            const boneMat = getCachedMaterial('behemoth_bone', () => new THREE.MeshStandardMaterial({
                 color: '#cbd5e1', // Ivory/bone teeth
                 roughness: 0.8,
                 metalness: 0.1
-            });
+            }));
 
-            const glowMat = new THREE.MeshBasicMaterial({ color: '#d946ef' }); // Glowing violet/magenta
+            const glowMat = getCachedMaterial('behemoth_glow', () => new THREE.MeshBasicMaterial({ color: '#d946ef' })); // Glowing violet/magenta
 
-            const coreMat = new THREE.MeshBasicMaterial({
+            const coreMat = getCachedMaterial('behemoth_core_mat', () => new THREE.MeshBasicMaterial({
                 color: '#bf00ff', // Violet core glow
                 transparent: true,
                 opacity: 0.55,
                 blending: THREE.AdditiveBlending
-            });
+            }));
             
-            // Volumetric purple/magenta engine flame layers
-            const coreFlameMat = new THREE.MeshBasicMaterial({ color: '#ffffff' }); // White-hot core
-            const midFlameMat = new THREE.MeshBasicMaterial({ color: '#d946ef', transparent: true, opacity: 0.85 }); // Magenta mid-flame
-            const glowFlameMat = new THREE.MeshBasicMaterial({
+            // Volumetric purple/magenta engine flame layers - Cached
+            const coreFlameMat = getCachedMaterial('behemoth_core_flame', () => new THREE.MeshBasicMaterial({ color: '#ffffff' })); // White-hot core
+            const midFlameMat = getCachedMaterial('behemoth_mid_flame', () => new THREE.MeshBasicMaterial({ color: '#d946ef', transparent: true, opacity: 0.85 })); // Magenta mid-flame
+            const glowFlameMat = getCachedMaterial('behemoth_glow_flame', () => new THREE.MeshBasicMaterial({
                 color: '#701a75', // Deep purple-magenta outer glow
                 transparent: true,
                 opacity: 0.45,
                 blending: THREE.AdditiveBlending
-            });
+            }));
 
             // 1. Skeletal Ribcage (Tapered circular rings along the longitudinal X-axis)
             const ribsData = [
@@ -2135,9 +2216,12 @@ const VoidModels = (function () {
             ];
 
             const ribs = [];
-            ribsData.forEach(data => {
-                const ribGeo = new THREE.TorusGeometry(data.radius, data.tube, 8, 24);
-                ribGeo.rotateY(Math.PI / 2); // align perpendicular to X-axis
+            ribsData.forEach((data, index) => {
+                const ribGeo = getCachedGeometry('behemoth_rib_' + index, () => {
+                    const geo = new THREE.TorusGeometry(data.radius, data.tube, 8, 24);
+                    geo.rotateY(Math.PI / 2); // align perpendicular to X-axis
+                    return geo;
+                });
                 const ribMesh = new THREE.Mesh(ribGeo, hullMat);
                 ribMesh.position.set(data.x, 0, 0);
                 ribMesh.scale.set(1.0, data.scaleY, data.scaleZ);
@@ -2147,8 +2231,11 @@ const VoidModels = (function () {
             });
 
             // 2. Spinal Column Spine & Spikes (connecting ribs along the top/bottom)
-            const spineGeo = new THREE.CylinderGeometry(0.8, 0.8, 28, 8);
-            spineGeo.rotateZ(Math.PI / 2); // align along X
+            const spineGeo = getCachedGeometry('behemoth_spine', () => {
+                const geo = new THREE.CylinderGeometry(0.8, 0.8, 28, 8);
+                geo.rotateZ(Math.PI / 2); // align along X
+                return geo;
+            });
             const topSpine = new THREE.Mesh(spineGeo, hullMat);
             topSpine.position.set(-2, 0, 9.5);
             behemothGroup.add(topSpine);
@@ -2161,9 +2248,12 @@ const VoidModels = (function () {
             for (let xOffset = -14; xOffset <= 10; xOffset += 4) {
                 const distFromCenter = Math.abs(xOffset + 2) / 12; // 0 to 1
                 const spikeHeight = 3.5 * (1.0 - distFromCenter * 0.4) + 0.5;
-                const spikeGeo = new THREE.ConeGeometry(0.7, spikeHeight, 4);
-                spikeGeo.rotateX(Math.PI / 2); // point outward (+Z)
-                spikeGeo.rotateZ(0.25 * (xOffset / 12)); // angle outward/backward
+                const spikeGeo = getCachedGeometry('behemoth_spine_spike_' + xOffset, () => {
+                    const geo = new THREE.ConeGeometry(0.7, spikeHeight, 4);
+                    geo.rotateX(Math.PI / 2); // point outward (+Z)
+                    geo.rotateZ(0.25 * (xOffset / 12)); // angle outward/backward
+                    return geo;
+                });
                 
                 const spike = new THREE.Mesh(spikeGeo, hullMat);
                 spike.position.set(xOffset, 0, 10.0 + (1.0 - distFromCenter) * 1.5);
@@ -2171,31 +2261,42 @@ const VoidModels = (function () {
             }
 
             // 3. Jaws & Teeth (Menacing open mouth at the front)
-            const upperJawBase = new THREE.Mesh(new THREE.BoxGeometry(6, 7.5, 6.5), hullMat);
+            const upperJawBaseGeo = getCachedGeometry('behemoth_upper_jaw_base', () => new THREE.BoxGeometry(6, 7.5, 6.5));
+            const upperJawBase = new THREE.Mesh(upperJawBaseGeo, hullMat);
             upperJawBase.position.set(14.5, 0, 3.5);
             behemothGroup.add(upperJawBase);
 
-            const upperJawTipGeo = new THREE.ConeGeometry(3.5, 6.0, 4);
-            upperJawTipGeo.rotateZ(-Math.PI / 2); // Point forward (+X)
-            upperJawTipGeo.scale(1, 1.0, 1.1); // rounder aspect ratio
+            const upperJawTipGeo = getCachedGeometry('behemoth_upper_jaw_tip', () => {
+                const geo = new THREE.ConeGeometry(3.5, 6.0, 4);
+                geo.rotateZ(-Math.PI / 2); // Point forward (+X)
+                geo.scale(1, 1.0, 1.1); // rounder aspect ratio
+                return geo;
+            });
             const upperJawTip = new THREE.Mesh(upperJawTipGeo, hullMat);
             upperJawTip.position.set(18.5, 0, 2.0);
             behemothGroup.add(upperJawTip);
 
-            const lowerJawBase = new THREE.Mesh(new THREE.BoxGeometry(6, 7.0, 5.5), hullMat);
+            const lowerJawBaseGeo = getCachedGeometry('behemoth_lower_jaw_base', () => new THREE.BoxGeometry(6, 7.0, 5.5));
+            const lowerJawBase = new THREE.Mesh(lowerJawBaseGeo, hullMat);
             lowerJawBase.position.set(14.5, 0, -3.5);
             behemothGroup.add(lowerJawBase);
 
-            const lowerJawTipGeo = new THREE.ConeGeometry(3.0, 6.0, 4);
-            lowerJawTipGeo.rotateZ(-Math.PI / 2); // Point forward
-            lowerJawTipGeo.scale(1, 0.9, 0.9); // rounder aspect ratio
+            const lowerJawTipGeo = getCachedGeometry('behemoth_lower_jaw_tip', () => {
+                const geo = new THREE.ConeGeometry(3.0, 6.0, 4);
+                geo.rotateZ(-Math.PI / 2); // Point forward
+                geo.scale(1, 0.9, 0.9); // rounder aspect ratio
+                return geo;
+            });
             const lowerJawTip = new THREE.Mesh(lowerJawTipGeo, hullMat);
             lowerJawTip.position.set(18.5, 0, -2.0);
             behemothGroup.add(lowerJawTip);
 
             // Add teeth inside the jaws
-            const toothGeo = new THREE.ConeGeometry(0.35, 1.8, 4);
-            toothGeo.rotateX(Math.PI); // Point down
+            const toothGeo = getCachedGeometry('behemoth_tooth', () => {
+                const geo = new THREE.ConeGeometry(0.35, 1.8, 4);
+                geo.rotateX(Math.PI); // Point down
+                return geo;
+            });
 
             const addTooth = (x, y, z, rotX, rotY, rotZ) => {
                 const tooth = new THREE.Mesh(toothGeo, boneMat);
@@ -2214,7 +2315,7 @@ const VoidModels = (function () {
             }
 
             // Lower teeth (pointing up)
-            const lowerToothGeo = new THREE.ConeGeometry(0.3, 1.6, 4); // points up by default
+            const lowerToothGeo = getCachedGeometry('behemoth_lower_tooth', () => new THREE.ConeGeometry(0.3, 1.6, 4)); // points up by default
             const addLowerTooth = (x, y, z, rotX, rotY, rotZ) => {
                 const tooth = new THREE.Mesh(lowerToothGeo, boneMat);
                 tooth.position.set(x, y, z);
@@ -2245,8 +2346,8 @@ const VoidModels = (function () {
             ];
 
             const eyes = [];
-            eyesData.forEach(data => {
-                const eyeGeo = new THREE.SphereGeometry(data.r, 8, 8);
+            eyesData.forEach((data, index) => {
+                const eyeGeo = getCachedGeometry('behemoth_eye_' + data.r, () => new THREE.SphereGeometry(data.r, 8, 8));
                 const eyeMesh = new THREE.Mesh(eyeGeo, glowMat);
                 eyeMesh.position.set(data.x, data.y, data.z);
                 behemothGroup.add(eyeMesh);
@@ -2254,9 +2355,12 @@ const VoidModels = (function () {
             });
 
             // 5. Front Mandibles/Pincers & Face Details
-            const pincerGeo = new THREE.ConeGeometry(0.55, 3.5, 5);
-            pincerGeo.rotateZ(-Math.PI / 2); // point forward
-            pincerGeo.rotateY(0.4); // curve inward
+            const pincerGeo = getCachedGeometry('behemoth_pincer', () => {
+                const geo = new THREE.ConeGeometry(0.55, 3.5, 5);
+                geo.rotateZ(-Math.PI / 2); // point forward
+                geo.rotateY(0.4); // curve inward
+                return geo;
+            });
             
             const leftPincer = new THREE.Mesh(pincerGeo, hullMat);
             leftPincer.position.set(13.0, 5.0, -1.0);
@@ -2269,16 +2373,22 @@ const VoidModels = (function () {
             behemothGroup.add(rightPincer);
 
             // Forehead Spiked Crest / Crown Horns
-            const crestGeo = new THREE.ConeGeometry(0.8, 3.5, 4);
-            crestGeo.rotateX(Math.PI / 2); // vertical fin orientation
-            crestGeo.rotateZ(Math.PI / 6); // tilt backward
+            const crestGeo = getCachedGeometry('behemoth_crest', () => {
+                const geo = new THREE.ConeGeometry(0.8, 3.5, 4);
+                geo.rotateX(Math.PI / 2); // vertical fin orientation
+                geo.rotateZ(Math.PI / 6); // tilt backward
+                return geo;
+            });
             const horn = new THREE.Mesh(crestGeo, hullMat);
             horn.position.set(16.5, 0, 5.8);
             behemothGroup.add(horn);
 
-            const leftHornGeo = new THREE.ConeGeometry(0.5, 2.8, 4);
-            leftHornGeo.rotateX(Math.PI / 2);
-            leftHornGeo.rotateZ(Math.PI / 4); // tilt outward and backward
+            const leftHornGeo = getCachedGeometry('behemoth_horn', () => {
+                const geo = new THREE.ConeGeometry(0.5, 2.8, 4);
+                geo.rotateX(Math.PI / 2);
+                geo.rotateZ(Math.PI / 4); // tilt outward and backward
+                return geo;
+            });
             const leftHorn = new THREE.Mesh(leftHornGeo, hullMat);
             leftHorn.position.set(15.0, 1.8, 5.4);
             behemothGroup.add(leftHorn);
@@ -2289,7 +2399,7 @@ const VoidModels = (function () {
             behemothGroup.add(rightHorn);
 
             // Hooded Brow Plates (Angry brows slanting over the eyes)
-            const browGeo = new THREE.BoxGeometry(3.5, 0.8, 0.8);
+            const browGeo = getCachedGeometry('behemoth_brow', () => new THREE.BoxGeometry(3.5, 0.8, 0.8));
             
             const leftBrow = new THREE.Mesh(browGeo, hullMat);
             leftBrow.position.set(17.8, 1.9, 3.9);
@@ -2302,8 +2412,11 @@ const VoidModels = (function () {
             behemothGroup.add(rightBrow);
 
             // Saber Fangs (Long curved front teeth protruding from upper jaw tip)
-            const fangGeo = new THREE.ConeGeometry(0.4, 2.8, 4);
-            fangGeo.rotateZ(Math.PI / 10); // tilt slightly back
+            const fangGeo = getCachedGeometry('behemoth_fang', () => {
+                const geo = new THREE.ConeGeometry(0.4, 2.8, 4);
+                geo.rotateZ(Math.PI / 10); // tilt slightly back
+                return geo;
+            });
             
             const leftFang = new THREE.Mesh(fangGeo, boneMat);
             leftFang.position.set(19.2, 1.3, 0.8);
@@ -2316,7 +2429,7 @@ const VoidModels = (function () {
             behemothGroup.add(rightFang);
 
             // Throat Cannon (Glowing plasma weapon core inside the mouth cavity)
-            const throatGeo = new THREE.SphereGeometry(1.6, 12, 12);
+            const throatGeo = getCachedGeometry('behemoth_throat', () => new THREE.SphereGeometry(1.6, 12, 12));
             const throatCannon = new THREE.Mesh(throatGeo, coreMat);
             throatCannon.position.set(13.2, 0, 0.0);
             behemothGroup.add(throatCannon);
@@ -2326,27 +2439,27 @@ const VoidModels = (function () {
             const coreGroup = new THREE.Group();
             coreGroup.position.set(0, 0, 0);
 
-            const coreOrbGeo = new THREE.SphereGeometry(4.8, 16, 16);
+            const coreOrbGeo = getCachedGeometry('behemoth_core_orb', () => new THREE.SphereGeometry(4.8, 16, 16));
             const coreOrb = new THREE.Mesh(coreOrbGeo, coreFlameMat); // White core center
             coreGroup.add(coreOrb);
 
             // Volumetric core glow shroud
-            const coreGlowGeo = new THREE.SphereGeometry(5.8, 16, 16);
+            const coreGlowGeo = getCachedGeometry('behemoth_core_glow', () => new THREE.SphereGeometry(5.8, 16, 16));
             const coreGlow = new THREE.Mesh(coreGlowGeo, coreMat);
             coreGroup.add(coreGlow);
 
             // Nested Swirling Vortex Rings
-            const ring1Geo = new THREE.TorusGeometry(7.0, 0.4, 6, 24);
+            const ring1Geo = getCachedGeometry('behemoth_ring1', () => new THREE.TorusGeometry(7.0, 0.4, 6, 24));
             const ring1 = new THREE.Mesh(ring1Geo, glowMat);
             ring1.rotation.set(Math.PI / 4, Math.PI / 6, 0);
             coreGroup.add(ring1);
 
-            const ring2Geo = new THREE.TorusGeometry(6.4, 0.35, 6, 24);
+            const ring2Geo = getCachedGeometry('behemoth_ring2', () => new THREE.TorusGeometry(6.4, 0.35, 6, 24));
             const ring2 = new THREE.Mesh(ring2Geo, coreMat);
             ring2.rotation.set(-Math.PI / 3, 0, Math.PI / 4);
             coreGroup.add(ring2);
 
-            const ring3Geo = new THREE.TorusGeometry(5.8, 0.3, 6, 24);
+            const ring3Geo = getCachedGeometry('behemoth_ring3', () => new THREE.TorusGeometry(5.8, 0.3, 6, 24));
             const ring3 = new THREE.Mesh(ring3Geo, glowMat);
             ring3.rotation.set(0, -Math.PI / 6, -Math.PI / 3);
             coreGroup.add(ring3);
@@ -2369,17 +2482,26 @@ const VoidModels = (function () {
                 { y: -3.5, z: -3.5, offset: Math.PI * 1.5 }
             ];
 
-            const segmentGeo = new THREE.CylinderGeometry(0.5, 0.35, 4.5, 6);
-            segmentGeo.rotateZ(Math.PI / 2); // align along X
-            segmentGeo.translate(-2.25, 0, 0); // pivot at base
+            const segmentGeo = getCachedGeometry('behemoth_tentacle_s1', () => {
+                const geo = new THREE.CylinderGeometry(0.5, 0.35, 4.5, 6);
+                geo.rotateZ(Math.PI / 2); // align along X
+                geo.translate(-2.25, 0, 0); // pivot at base
+                return geo;
+            });
 
-            const segment2Geo = new THREE.CylinderGeometry(0.35, 0.2, 4.0, 6);
-            segment2Geo.rotateZ(Math.PI / 2);
-            segment2Geo.translate(-2.0, 0, 0);
+            const segment2Geo = getCachedGeometry('behemoth_tentacle_s2', () => {
+                const geo = new THREE.CylinderGeometry(0.35, 0.2, 4.0, 6);
+                geo.rotateZ(Math.PI / 2);
+                geo.translate(-2.0, 0, 0);
+                return geo;
+            });
 
-            const segment3Geo = new THREE.CylinderGeometry(0.2, 0.05, 3.5, 6);
-            segment3Geo.rotateZ(Math.PI / 2);
-            segment3Geo.translate(-1.75, 0, 0);
+            const segment3Geo = getCachedGeometry('behemoth_tentacle_s3', () => {
+                const geo = new THREE.CylinderGeometry(0.2, 0.05, 3.5, 6);
+                geo.rotateZ(Math.PI / 2);
+                geo.translate(-1.75, 0, 0);
+                return geo;
+            });
 
             tentacleBases.forEach((base, tIndex) => {
                 const s1 = new THREE.Mesh(segmentGeo, hullMat);
@@ -2404,13 +2526,19 @@ const VoidModels = (function () {
             behemothGroup.tentacles = tentacles;
 
             // 8. Biomechanical Exhaust Vents & Violet Flames
-            const nozzleGeo = new THREE.CylinderGeometry(1.2, 0.6, 3.5, 8);
-            nozzleGeo.rotateZ(Math.PI / 2); // align along X
-            nozzleGeo.translate(-1.75, 0, 0); // pivot at base
+            const nozzleGeo = getCachedGeometry('behemoth_nozzle_geo', () => {
+                const geo = new THREE.CylinderGeometry(1.2, 0.6, 3.5, 8);
+                geo.rotateZ(Math.PI / 2); // align along X
+                geo.translate(-1.75, 0, 0); // pivot at base
+                return geo;
+            });
 
-            const fireGeo = new THREE.ConeGeometry(0.8, 5.0, 6);
-            fireGeo.rotateZ(-Math.PI / 2); // point backward along -X
-            fireGeo.translate(-2.5, 0, 0); // offset pivot
+            const fireGeo = getCachedGeometry('behemoth_fire_geo', () => {
+                const geo = new THREE.ConeGeometry(0.8, 5.0, 6);
+                geo.rotateZ(-Math.PI / 2); // point backward along -X
+                geo.translate(-2.5, 0, 0); // offset pivot
+                return geo;
+            });
 
             const ventsData = [
                 { y: 5.5,  z: 0.0,  rotY: 0.2,  rotZ: 0.3 },   // Left side
@@ -2429,8 +2557,11 @@ const VoidModels = (function () {
                 const nozzle = new THREE.Mesh(nozzleGeo, hullMat);
                 ventGroup.add(nozzle);
 
-                const lipGeo = new THREE.TorusGeometry(0.7, 0.15, 6, 8);
-                lipGeo.rotateY(Math.PI / 2);
+                const lipGeo = getCachedGeometry('behemoth_vent_lip', () => {
+                    const geo = new THREE.TorusGeometry(0.7, 0.15, 6, 8);
+                    geo.rotateY(Math.PI / 2);
+                    return geo;
+                });
                 const lip = new THREE.Mesh(lipGeo, glowMat);
                 lip.position.set(-3.5, 0, 0);
                 ventGroup.add(lip);
@@ -2461,7 +2592,7 @@ const VoidModels = (function () {
             behemothGroup.flames = flames;
 
             // 9. Side Scythe Fins (Adding organic profile extension)
-            const finGeo = new THREE.BoxGeometry(8.0, 1.2, 3.5);
+            const finGeo = getCachedGeometry('behemoth_fin', () => new THREE.BoxGeometry(8.0, 1.2, 3.5));
             
             const leftFin = new THREE.Mesh(finGeo, hullMat);
             leftFin.position.set(2, 8.5, 2.0);
@@ -2478,17 +2609,20 @@ const VoidModels = (function () {
             warpGroup.position.set(19.0, 0, 0); // situated at the front tip of the jaws
 
             // Translucent warp cone (rushing displacement field)
-            const warpConeGeo = new THREE.ConeGeometry(3.5, 6.0, 8, 1, true); // open-ended cone
-            warpConeGeo.rotateZ(-Math.PI / 2); // point forward (+X)
-            warpConeGeo.translate(3.0, 0, 0); // shift pivot to base
+            const warpConeGeo = getCachedGeometry('behemoth_warp_cone', () => {
+                const geo = new THREE.ConeGeometry(3.5, 6.0, 8, 1, true); // open-ended cone
+                geo.rotateZ(-Math.PI / 2); // point forward (+X)
+                geo.translate(3.0, 0, 0); // shift pivot to base
+                return geo;
+            });
             
-            const warpCone = new THREE.Mesh(warpConeGeo, new THREE.MeshBasicMaterial({
+            const warpCone = new THREE.Mesh(warpConeGeo, getCachedMaterial('behemoth_warp_cone_mat', () => new THREE.MeshBasicMaterial({
                 color: '#c084fc', // Bright neon lavender/violet
                 transparent: true,
                 opacity: 0.3,
                 blending: THREE.AdditiveBlending,
                 side: THREE.DoubleSide
-            }));
+            })));
             warpGroup.add(warpCone);
 
             // Three concentric warp projector rings scaling down towards the front tip
@@ -2499,9 +2633,12 @@ const VoidModels = (function () {
                 { x: 4.0, radius: 1.2, tube: 0.1 }
             ];
 
-            warpRingsData.forEach(data => {
-                const ringGeo = new THREE.TorusGeometry(data.radius, data.tube, 6, 16);
-                ringGeo.rotateY(Math.PI / 2); // perpendicular to X-axis
+            warpRingsData.forEach((data, index) => {
+                const ringGeo = getCachedGeometry('behemoth_warp_ring_' + index, () => {
+                    const geo = new THREE.TorusGeometry(data.radius, data.tube, 6, 16);
+                    geo.rotateY(Math.PI / 2); // perpendicular to X-axis
+                    return geo;
+                });
                 const ring = new THREE.Mesh(ringGeo, glowMat);
                 ring.position.set(data.x, 0, 0);
                 warpGroup.add(ring);
