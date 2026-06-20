@@ -2161,8 +2161,8 @@ function initShipSelectionPreviews() {
             card.insertBefore(container, card.firstChild);
         }
 
-        const width = 120;
-        const height = 80;
+        const width = 138;
+        const height = 96;
         
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
         renderer.setSize(width, height, false);
